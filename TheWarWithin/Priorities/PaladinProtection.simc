@@ -1,6 +1,3 @@
-## https://github.com/simulationcraft/simc/blob/thewarwithin/ActionPriorityLists/paladin_protection.simc
-## Up to date with SimC: March 13 2025 - a8d374d
-
 ## actions.precombat+=/rite_of_sanctification
 ## actions.precombat+=/rite_of_adjuration
 actions.precombat+=/devotion_aura,line_cd=4,if=buff.devotion_aura.down
@@ -31,85 +28,30 @@ actions.cooldowns+=/bastion_of_light,if=(buff.avenging_wrath.up|cooldown.avengin
 ## actions.cooldowns+=/invoke_external_buff,name=power_infusion,if=buff.avenging_wrath.up
 actions.cooldowns+=/fireblood,if=buff.avenging_wrath.remains>8
 
-actions.mitigation=/cleanse_toxins
-actions.mitigation=/intercession,if=health.pct>70
-actions.mitigation+=/shield_of_the_righteous,if=buff.shield_of_the_righteous.down
-actions.mitigation+=/ardent_defender,if=time<5&time>0&buff.divine_shield.down&buff.ardent_defender.down&buff.guardian_of_ancient_kings.down
-actions.mitigation+=/word_of_glory,if=health.pct<wog_health&(holy_power.deficit=0|buff.divine_purpose.up|buff.shining_light_free.up)&time>8
-## actions.mitigation+=/divine_shield,if=talent.final_stand.enabled&tanking&incoming_damage_5s>ds_damage&!(buff.ardent_defender.up|buff.guardian_of_ancient_kings.up|buff.divine_shield.up|buff.potion.up)
-## actions.mitigation+=/guardian_of_ancient_kings,if=tanking&incoming_damage_5s>goak_damage&!(buff.ardent_defender.up|buff.guardian_of_ancient_kings.up|buff.divine_shield.up|buff.potion.up)
-## actions.mitigation+=/sentinel,if=defensive_sentinel&tanking&incoming_damage_5s>goak_damage&!(buff.ardent_defender.up|buff.guardian_of_ancient_kings.up|buff.divine_shield.up|buff.potion.up)
-## actions.mitigation+=/ardent_defender,if=tanking&incoming_damage_5s>ad_damage&!(buff.ardent_defender.up|buff.guardian_of_ancient_kings.up|buff.divine_shield.up|buff.potion.up)
-actions.mitigation+=/lay_on_hands,if=health.pct<loh_health
-
-actions.trinkets+=/use_item,name=tome_of_lights_devotion,if=buff.inner_resilience.up
-actions.trinkets+=/use_items,slots=trinket1,if=(variable.trinket_sync_slot=1&(buff.avenging_wrath.up|fight_remains<=40)|(variable.trinket_sync_slot=2&(!trinket.2.cooldown.ready|!buff.avenging_wrath.up))|!variable.trinket_sync_slot)
-actions.trinkets+=/use_items,slots=trinket2,if=(variable.trinket_sync_slot=2&(buff.avenging_wrath.up|fight_remains<=40)|(variable.trinket_sync_slot=1&(!trinket.1.cooldown.ready|!buff.avenging_wrath.up))|!variable.trinket_sync_slot)
-
-actions.st+=/shield_of_the_righteous,if=buff.shield_of_the_righteous.down|holy_power>3
-actions.st+=/judgment,cycle_targets=1,if=charges>=2|full_recharge_time<=gcd.max
-actions.st+=/hammer_of_light,if=(buff.hammer_of_light_free.remains<2|buff.shake_the_heavens.remains<1|!buff.shake_the_heavens.up|cooldown.eye_of_tyr.remains<1.5)&(fight_remains>10|solo)
-actions.st+=/eye_of_tyr,if=(hpg_to_2dawn=5|!talent.of_dusk_and_dawn.enabled)&talent.lights_guidance.enabled
-actions.st+=/eye_of_tyr,if=(hpg_to_2dawn=1|buff.blessing_of_dawn.stack>0)&talent.lights_guidance.enabled
-actions.st+=/shield_of_the_righteous,if=(!talent.righteous_protector.enabled|cooldown.righteous_protector_icd.remains=0)&!buff.hammer_of_light_ready.up
-# during luck of the draw(TWW2 4P)spam sotr as much as possible without wasting icd where possible
-actions.st+=/shield_of_the_righteous,if=!buff.hammer_of_light_ready.up&(buff.luck_of_the_draw.up&((holy_power+judgment_holy_power>=5)|(!talent.righteous_protector.enabled|cooldown.righteous_protector_icd.remains=0)))
-# outside of luck of the draw, pool holy power as much as possible to be able to enter luck of the draw windows with more holy power
-actions.st+=/shield_of_the_righteous,if=!buff.hammer_of_light_ready.up&set_bonus.thewarwithin_season_2_4pc&((holy_power+judgment_holy_power>5)|(holy_power+judgment_holy_power>=5&cooldown.righteous_protector_icd.remains=0))
-actions.st+=/shield_of_the_righteous,if=!set_bonus.thewarwithin_season_2_4pc&(!talent.righteous_protector.enabled|cooldown.righteous_protector_icd.remains=0)&!buff.hammer_of_light_ready.up
-actions.st+=/judgment,cycle_targets=1,if=spell_targets.shield_of_the_righteous>3&buff.bulwark_of_righteous_fury.stack>=3&holy_power<3
-actions.st+=/avengers_shield,if=!buff.bulwark_of_righteous_fury.up&talent.bulwark_of_righteous_fury.enabled&spell_targets.shield_of_the_righteous>=3&fight_remains>10
-actions.st+=/hammer_of_the_righteous,if=buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<3&!buff.avenging_wrath.up
-actions.st+=/blessed_hammer,if=buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<3&!buff.avenging_wrath.up
-actions.st+=/crusader_strike,if=buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<2&!buff.avenging_wrath.up
-## redundant line: actions.st+=/judgment,cycle_targets=1,if=charges>=2|full_recharge_time<=gcd.max
-actions.st+=/consecration,if=buff.divine_guidance.stack=5
-actions.st+=/holy_armaments,if=next_armament=sacred_weapon&(!buff.sacred_weapon.up|(buff.sacred_weapon.remains<6&!buff.avenging_wrath.up&cooldown.avenging_wrath.remains<=30))
-actions.st+=/consecration,if=!consecration.up&!moving
-actions.st+=/hammer_of_wrath
-actions.st+=/avengers_shield,if=talent.refining_fire.enabled&fight_remains>10
-actions.st+=/judgment,cycle_targets=1,if=buff.avenging_wrath.up&talent.hammer_and_anvil.enabled
-actions.st+=/holy_armaments,if=next_armament=holy_bulwark&charges=2
-actions.st+=/judgment,cycle_targets=1
-actions.st+=/avengers_shield,if=!buff.shake_the_heavens.up&talent.shake_the_heavens.enabled&time>10
-actions.st+=/hammer_of_the_righteous,if=(buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<3)|buff.shake_the_heavens.up
-actions.st+=/blessed_hammer,if=(buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<3)|buff.shake_the_heavens.up
-actions.st+=/crusader_strike,if=(buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<2)|buff.shake_the_heavens.up
-actions.st+=/avengers_shield,if=!talent.lights_guidance.enabled&fight_remains>10
-actions.st+=/eye_of_tyr,if=time>8&(talent.inmost_light.enabled&raid_event.adds.in>=45|spell_targets.shield_of_the_righteous>=3)&!talent.lights_deliverance.enabled
-actions.st+=/holy_armaments,if=next_armament=holy_bulwark
-actions.st+=/blessed_hammer
-actions.st+=/hammer_of_the_righteous
-actions.st+=/crusader_strike
-actions.st+=/word_of_glory,if=buff.shining_light_free.up&(talent.blessed_assurance.enabled|(talent.lights_guidance.enabled&cooldown.hammerfall_icd.remains=0))
-actions.st+=/avengers_shield,if=fight_remains>10
-actions.st+=/eye_of_tyr,if=time>8&!talent.lights_deliverance.enabled
-actions.st+=/word_of_glory,if=buff.shining_light_free.up
-actions.st+=/arcane_torrent,if=holy_power<5
-actions.st+=/consecration
-
-
 actions.aoe+=/shield_of_the_righteous,if=buff.shield_of_the_righteous.down|holy_power>3
 actions.aoe+=/avengers_shield,if=time<10&fight_remains>10
 actions.aoe+=/judgment,cycle_targets=1,if=charges>=2|full_recharge_time<=gcd.max
-actions.aoe+=/hammer_of_light,if=time>5&(buff.hammer_of_light_free.remains<2|buff.shake_the_heavens.remains<1|!buff.shake_the_heavens.up|cooldown.eye_of_tyr.remains<1.5)&(fight_remains>10|solo)
-actions.aoe+=/eye_of_tyr,if=time>8&(hpg_to_2dawn=5|!talent.of_dusk_and_dawn.enabled)&talent.lights_guidance.enabled
-actions.aoe+=/eye_of_tyr,if=time>8&(hpg_to_2dawn=1|buff.blessing_of_dawn.stack>0)&talent.lights_guidance.enabled
-actions.aoe+=/shield_of_the_righteous,if=(!talent.righteous_protector.enabled|cooldown.righteous_protector_icd.remains=0)&!buff.hammer_of_light_ready.up
+actions.aoe+=/hammer_of_light,if=time>5&(buff.blessing_of_dawn.up|fight_remains<2)&(debuff.judgment.up|buff.hammer_of_light_ready.remains<2|buff.hammer_of_light_ready.stack>1|buff.hammer_of_light_free.up|(cooldown.eye_of_tyr.remains<3))
+actions.aoe+=/eye_of_tyr,if=time>8&talent.lights_guidance.enabled
 # during luck of the draw(TWW2 4P)spam sotr as much as possible without wasting icd where possible
 actions.aoe+=/shield_of_the_righteous,if=!buff.hammer_of_light_ready.up&(buff.luck_of_the_draw.up&((holy_power+judgment_holy_power>=5)|(!talent.righteous_protector.enabled|cooldown.righteous_protector_icd.remains=0)))
 # outside of luck of the draw, pool holy power as much as possible to be able to enter luck of the draw windows with more holy power
 actions.aoe+=/shield_of_the_righteous,if=!buff.hammer_of_light_ready.up&set_bonus.thewarwithin_season_2_4pc&((holy_power+judgment_holy_power>5)|(holy_power+judgment_holy_power>=5&cooldown.righteous_protector_icd.remains=0))
 actions.aoe+=/shield_of_the_righteous,if=!set_bonus.thewarwithin_season_2_4pc&(!talent.righteous_protector.enabled|cooldown.righteous_protector_icd.remains=0)&!buff.hammer_of_light_ready.up
+actions.aoe+=/shield_of_the_righteous,if=holy_power=5&(!buff.blessing_of_dawn.up|!talent.lights_guidance.enabled)
 actions.aoe+=/judgment,cycle_targets=1,if=spell_targets.shield_of_the_righteous>3&buff.bulwark_of_righteous_fury.stack>=3&holy_power<3
-actions.aoe+=/avengers_shield,if=(talent.tyrs_enforcer.enabled&debuff.tyrs_enforcer.down|buff.barricade_of_faith.down|buff.moment_of_glory.up)&fight_remains>10
+# Lightsmith wants to not waste any masterwork stacks on holy bulwark, if it overflows its 50/50 it spawns a lesser weapon, rather than 0% chance
+actions.aoe+=/holy_armaments,if=next_armament=sacred_weapon
+# Lightsmith with 4pc spams blessed hammer if it can, trying to trigger the 2pc effect as much as possible
+actions.aoe+=/blessed_hammer,if=set_bonus.tww3>=2&talent.hammer_and_anvil.enabled
+actions.aoe+=/avengers_shield,if=!buff.bulwark_of_righteous_fury.up&talent.bulwark_of_righteous_fury.enabled&spell_targets.shield_of_the_righteous>=3
 actions.aoe+=/hammer_of_the_righteous,if=buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<3&!buff.avenging_wrath.up
-actions.aoe+=/blessed_hammer,if=buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<3&!buff.avenging_wrath.up
+actions.aoe+=/blessed_hammer,if=buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<3
 actions.aoe+=/crusader_strike,if=buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<2&!buff.avenging_wrath.up
-## redundant line: actions.aoe+=/judgment,cycle_targets=1,if=charges>=2|full_recharge_time<=gcd.max
 actions.aoe+=/consecration,if=buff.divine_guidance.stack=5
-actions.aoe+=/holy_armaments,if=next_armament=sacred_weapon&(!buff.sacred_weapon.up|(buff.sacred_weapon.remains<6&!buff.avenging_wrath.up&cooldown.avenging_wrath.remains<=30))
+actions.aoe+=/holy_armaments,line_cd=5
 actions.aoe+=/consecration,if=!consecration.up&!moving
+actions.aoe+=/blessed_hammer,if=set_bonus.tww3>=2
 actions.aoe+=/hammer_of_wrath
 actions.aoe+=/judgment,cycle_targets=1,if=buff.avenging_wrath.up&talent.hammer_and_anvil.enabled
 actions.aoe+=/holy_armaments,if=next_armament=holy_bulwark&charges=2
@@ -128,4 +70,61 @@ actions.aoe+=/word_of_glory,if=buff.shining_light_free.up
 actions.aoe+=/arcane_torrent,if=holy_power<5
 actions.aoe+=/consecration
 
+actions.trinkets+=/use_item,name=tome_of_lights_devotion,if=buff.inner_resilience.up
+actions.trinkets+=/use_item,name=unyielding_netherprism,if=buff.avenging_wrath.remains>15
+actions.trinkets+=/use_items,slots=trinket1,if=(variable.trinket_sync_slot=1&(buff.avenging_wrath.up|fight_remains<=40)|(variable.trinket_sync_slot=2&(!trinket.2.cooldown.ready|!buff.avenging_wrath.up))|!variable.trinket_sync_slot)
+actions.trinkets+=/use_items,slots=trinket2,if=(variable.trinket_sync_slot=2&(buff.avenging_wrath.up|fight_remains<=40)|(variable.trinket_sync_slot=1&(!trinket.1.cooldown.ready|!buff.avenging_wrath.up))|!variable.trinket_sync_slot)
+
+actions.st+=/shield_of_the_righteous,if=buff.shield_of_the_righteous.down|holy_power>3
+actions.st+=/avengers_shield,if=fight_remains>10
+actions.st+=/judgment,cycle_targets=1,if=charges>=2|full_recharge_time<=gcd.max
+actions.st+=/hammer_of_light,if=(buff.blessing_of_dawn.up|fight_remains<2)&(debuff.judgment.up|buff.hammer_of_light_ready.remains<2|buff.hammer_of_light_ready.stack>1|buff.hammer_of_light_free.up|(cooldown.eye_of_tyr.remains<3))
+actions.st+=/eye_of_tyr,if=talent.lights_guidance.enabled
+# during luck of the draw(TWW2 4P)spam sotr as much as possible without wasting icd where possible
+actions.st+=/shield_of_the_righteous,if=!buff.hammer_of_light_ready.up&(buff.luck_of_the_draw.up&((holy_power+judgment_holy_power>=5)|(!talent.righteous_protector.enabled|cooldown.righteous_protector_icd.remains=0)))
+# outside of luck of the draw, pool holy power as much as possible to be able to enter luck of the draw windows with more holy power
+actions.st+=/shield_of_the_righteous,if=!buff.hammer_of_light_ready.up&set_bonus.thewarwithin_season_2_4pc&((holy_power+judgment_holy_power>5)|(holy_power+judgment_holy_power>=5&cooldown.righteous_protector_icd.remains=0))
+actions.st+=/shield_of_the_righteous,if=!set_bonus.thewarwithin_season_2_4pc&(!talent.righteous_protector.enabled|cooldown.righteous_protector_icd.remains=0)&!buff.hammer_of_light_ready.up
+actions.st+=/shield_of_the_righteous,if=holy_power=5&(!buff.blessing_of_dawn.up|!talent.lights_guidance.enabled)
+actions.st+=/judgment,cycle_targets=1,if=spell_targets.shield_of_the_righteous>3&buff.bulwark_of_righteous_fury.stack>=3&holy_power<3
+# Lightsmith wants to not waste any masterwork stacks on holy bulwark, if it overflows its 50/50 it spawns a lesser weapon, rather than 0% chance
+actions.st+=/holy_armaments,if=next_armament=sacred_weapon&set_bonus.tww3>=2
+# Lightsmith with 4pc spams blessed hammer if it can, trying to trigger the 2pc effect as much as possible
+actions.st+=/blessed_hammer,if=set_bonus.tww3>=2&talent.hammer_and_anvil.enabled
+actions.st+=/avengers_shield,if=!buff.bulwark_of_righteous_fury.up&talent.bulwark_of_righteous_fury.enabled&spell_targets.shield_of_the_righteous>=3
+actions.st+=/hammer_of_the_righteous,if=buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<3&!buff.avenging_wrath.up
+actions.st+=/blessed_hammer,if=buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<3
+actions.st+=/crusader_strike,if=buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<2&!buff.avenging_wrath.up
+actions.st+=/consecration,if=buff.divine_guidance.stack=5
+actions.st+=/holy_armaments
+actions.st+=/consecration,if=!consecration.up&!moving
+actions.st+=/hammer_of_wrath
+actions.st+=/judgment,cycle_targets=1,if=buff.avenging_wrath.up&talent.hammer_and_anvil.enabled
+actions.st+=/holy_armaments,if=next_armament=holy_bulwark&charges=2
+actions.st+=/judgment,cycle_targets=1
+actions.st+=/hammer_of_the_righteous,if=(buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<3)|buff.shake_the_heavens.up
+actions.st+=/blessed_hammer,if=(buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<3)|buff.shake_the_heavens.up
+actions.st+=/crusader_strike,if=(buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<2)|buff.shake_the_heavens.up
+actions.st+=/eye_of_tyr,if=time>8&(talent.inmost_light.enabled&raid_event.adds.in>=45|spell_targets.shield_of_the_righteous>=3)&!talent.lights_deliverance.enabled
+actions.st+=/holy_armaments,if=next_armament=holy_bulwark
+actions.st+=/blessed_hammer
+actions.st+=/hammer_of_the_righteous
+actions.st+=/crusader_strike
+actions.st+=/word_of_glory,if=buff.shining_light_free.up&(talent.blessed_assurance.enabled|(talent.lights_guidance.enabled&cooldown.hammerfall_icd.remains=0))
+actions.st+=/eye_of_tyr,if=time>8&!talent.lights_deliverance.enabled
+actions.st+=/word_of_glory,if=buff.shining_light_free.up
+actions.st+=/arcane_torrent,if=holy_power<5
+actions.st+=/consecration
+
+
+actions.mitigation=/cleanse_toxins
+actions.mitigation=/intercession,if=health.pct>70
+actions.mitigation+=/shield_of_the_righteous,if=buff.shield_of_the_righteous.down
+actions.mitigation+=/ardent_defender,if=time<5&time>0&buff.divine_shield.down&buff.ardent_defender.down&buff.guardian_of_ancient_kings.down
+actions.mitigation+=/word_of_glory,if=health.pct<wog_health&(holy_power.deficit=0|buff.divine_purpose.up|buff.shining_light_free.up)&time>8
+## actions.mitigation+=/divine_shield,if=talent.final_stand.enabled&tanking&incoming_damage_5s>ds_damage&!(buff.ardent_defender.up|buff.guardian_of_ancient_kings.up|buff.divine_shield.up|buff.potion.up)
+## actions.mitigation+=/guardian_of_ancient_kings,if=tanking&incoming_damage_5s>goak_damage&!(buff.ardent_defender.up|buff.guardian_of_ancient_kings.up|buff.divine_shield.up|buff.potion.up)
+## actions.mitigation+=/sentinel,if=defensive_sentinel&tanking&incoming_damage_5s>goak_damage&!(buff.ardent_defender.up|buff.guardian_of_ancient_kings.up|buff.divine_shield.up|buff.potion.up)
+## actions.mitigation+=/ardent_defender,if=tanking&incoming_damage_5s>ad_damage&!(buff.ardent_defender.up|buff.guardian_of_ancient_kings.up|buff.divine_shield.up|buff.potion.up)
+actions.mitigation+=/lay_on_hands,if=health.pct<loh_health
 

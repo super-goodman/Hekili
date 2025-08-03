@@ -813,8 +813,6 @@ hekili_autocast:SetScript("OnUpdate", function()
                             action.target = "target"
                         end
 
-                        local errorCast_state = errorCast(name)
-                        
                         if Hekili.DB.profile.toggles.officialAuto.value and action.terrain then
                             local next_id_ = C_AssistedCombat.GetNextCastSpell()
                             local next_id = FindBaseSpellByID(next_id_)
@@ -823,6 +821,7 @@ hekili_autocast:SetScript("OnUpdate", function()
                                 return
                             end
                         end
+                        local errorCast_state = errorCast(name)
                         if errorCast_state == false then
                             local terrain = Hekili.DB.profile.specs[ Hekili.State.spec.id ].abilities[action.actionName].toggle_terrain
                             if terrain == "default" or not terrain then
