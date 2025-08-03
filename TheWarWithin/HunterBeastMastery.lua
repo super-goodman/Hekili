@@ -2108,7 +2108,7 @@ spec:RegisterAbilities( {
 
     howl_of_the_pack_leader = {
         cast = 0,
-        cooldown = function() return 30 - ( 5 * talent.better_together.rank ) end,
+        cooldown = 30,
         gcd = "off",
         hidden = true,
     },
