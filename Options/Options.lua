@@ -6690,14 +6690,14 @@ break end
                                                         if check ~= nil then
                                                             v[ key ] = color .. i .. ".|r " .. action .. " - " .. "|cFFFFD100" .. desc .. "|r"
                                                         else
-                                                            v[ key ] = color .. "-" .. ".|r " .. action .. " - " .. "|cFFFFD100" .. desc .. "|r"
+                                                            v[ key ] = color  .. "|r " .. action .. " - " .. "|cFFFFD100" .. desc .. "|r"
                                                         end
                                                        
                                                     else
                                                         if check ~= nil then
                                                             v[ key ] = color .. i .. ".|r " .. action
                                                         else
-                                                            v[ key ] = color .. "-" .. ".|r " .. action
+                                                            v[ key ] = color  .. "|r " .. action
                                                         end
                                                     end
 
