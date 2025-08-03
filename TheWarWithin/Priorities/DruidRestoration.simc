@@ -1,65 +1,73 @@
-## https://github.com/simulationcraft/simc/blob/thewarwithin/ActionPriorityLists/default/druid_restoration.simc
-## Up to date with SimC: March 8 2025 - ccb7c79
+actions.precombat+=/mark_of_the_wild,if=buff.mark_of_the_wild.down
+actions.precombat+=/natures_cure
+actions.precombat+=/rejuvenation,if=find.lowest_hp.pct<=90
+actions.precombat+=/wild_growth,enable_moving=true,moving=0,if=find.hurt_num.count>2
 
-# Snapshot raid buffed stats before combat begins and pre-potting is done.
-actions.precombat+=/mark_of_the_wild
-actions.precombat+=/symbiotic_relationship,if=down&active_allies>1
-actions.precombat+=/prowl,if=talent.rake.enabled
-actions.precombat+=/cat_form,if=talent.rake.enabled1
+actions.default+=/skull_bash,if=target.distance<10
+actions.default+=/soothe
+actions.default+=/natures_cure
+actions.default+=/overgrowth,if=find.lowest_hp.pct<35
+actions.default+=/ironbark,if=find.lowest_hp.pct<65
+actions.default+=/renewal,if=health.pct<60
+actions.default+=/barkskin,if=health.pct<65
+actions.default+=/lifebloom,if=find.health.pct<=100&find.health.pct>40&active_hot.lifebloom<2
+actions.default+=/use_items,enabled=0
+actions.default+=/berserking
 
-actions+=/skull_bash
-actions+=/berserking
-actions+=/natures_vigil,if=!buff.prowl.up&!buff.shadowmeld.up
-actions+=/call_action_list,name=healing,strict=1,if=settings.healing_mode&buff.prowl.down
-actions+=/heart_of_the_wild,if=!buff.prowl.up&!buff.shadowmeld.up
-actions+=/use_items,if=!buff.prowl.up&!buff.shadowmeld.up
-actions+=/potion,if=!buff.prowl.up&!buff.shadowmeld.up
-actions+=/run_action_list,name=cat,strict=1,if=talent.rake.enabled|buff.cat_form.up
-actions+=/cat_form,if=talent.rake.enabled
-actions+=/convoke_the_spirits,if=(buff.heart_of_the_wild.up|cooldown.heart_of_the_wild.remains>60-30*talent.cenarius_guidance.enabled|!talent.heart_of_the_wild.enabled)
-actions+=/sunfire,cycle_targets=1,if=refreshable&target.time_to_die>5&talent.improved_sunfire.enabled
-actions+=/moonfire,cycle_targets=1,if=refreshable&time_to_die>12
-actions+=/starsurge,if=active_enemies<8
-actions+=/sunfire,cycle_targets=1,if=refreshable&target.time_to_die>7&active_enemies<7
-actions+=/starfire,if=spell_targets.starfire>1|buff.heart_of_the_wild.up
-actions+=/wrath
+actions.default+=/adaptive_swarm,if=talent.adaptive_swarm.enabled
+actions.default+=/lifebloom,if=talent.undergrowth.enabled&buff.cat_form.down&find.lowest_hp.role!=find.tank.token&active_hot.lifebloom<2&find.health.pct>40
+actions.default+=/efflorescence,if=buff.efflorescence.down&buff.cat_form.down&buff.moonkin_form.down&find.health.pct>60
+actions.default+=/innervate,if=mana.pct<30&find.health.pct<100
+actions.default+=/moonkin_form,if=buff.moonkin_form.up&find.lowest_hp.pct<100
+actions.default+=/cat_form,if=buff.cat_form.up&find.lowest_hp.pct<100
+actions.default+=/call_action_list,name=cds,if=find.lowest_hp.pct<100&((!raid&find.hurt_num_big.count>1)|(raid&find.hurt_num_big.count>3))
+actions.default+=/call_action_list,name=health_aoe,if=((!raid&find.hurt_num.count>2)|(raid&find.hurt_num.count>3))
+actions.default+=/call_action_list,name=health_st
+actions.default+=/call_action_list,name=st,if=target_is_enemie&health_party_pct>95
+actions.default+=/wrath
 
-actions.cat+=/rake,if=buff.shadowmeld.up|buff.prowl.up|buff.sudden_ambush.up
-actions.cat+=/heart_of_the_wild,if=(cooldown.convoke_the_spirits.remains<40|!talent.convoke_the_spirits.enabled)|boss&fight_remains<46
-actions.cat+=/cat_form,if=!talent.fluid_form&talent.convoke_the_spirits.enabled&(active_enemies<=6)&(!buff.cat_form.up&cooldown.convoke_the_spirits.remains<=gcd.max&(buff.heart_of_the_wild.up|cooldown.heart_of_the_wild.remains>60-30*talent.cenarius_guidance.enabled|!talent.heart_of_the_wild.enabled))
-actions.cat+=/convoke_the_spirits,if=(buff.cat_form.up)&(buff.heart_of_the_wild.up|cooldown.heart_of_the_wild.remains>60-30*talent.cenarius_guidance.enabled|!talent.heart_of_the_wild.enabled)
-actions.cat+=/rip,cycle_targets=1,if=((refreshable|energy>90&remains<=10)&(combo_points=5&time_to_die>remains+24|(remains+combo_points*4<time_to_die&remains+4+combo_points*4>time_to_die))|!ticking&combo_points>2+spell_targets.swipe_cat*2)
-actions.cat+=/pool_resource,for_next=1
-actions.cat+=/thrash_cat,cycle_targets=1,if=refreshable&target.time_to_die>5&spell_targets.thrash_cat>4
-actions.cat+=/sunfire,cycle_targets=1,if=(refreshable&target.time_to_die>5)&!prev_gcd.1.cat_form
-actions.cat+=/rake,cycle_targets=1,if=refreshable&(time_to_die>8&!ticking)|(active_dot.rake<1&talent.primal_fury.enabled&talent.master_shapeshifter.enabled&spell_targets.swipe_cat>4)
-# [Hekili] Modified as cooldown.healing and druid.time_spend_healing are not supported.
-actions.cat+=/cat_form,if=!buff.cat_form.up&energy>60&!talent.fluid_form.enabled
-actions.cat+=/moonfire,cycle_targets=1,if=(refreshable&time_to_die>12&!ticking|(prev_gcd.1.sunfire&remains<duration*0.8&spell_targets.sunfire=1))&!prev_gcd.1.cat_form&spell_targets.swipe_cat<4
-actions.cat+=/sunfire,if=prev_gcd.1.moonfire&remains<duration*0.8
-actions.cat+=/starfire,if=(talent.master_shapeshifter.enabled&(spell_targets.starfire>4|(buff.heart_of_the_wild.up&spell_targets.starfire>5))|(buff.heart_of_the_wild.up&spell_targets.starfire>7))
-actions.cat+=/starsurge,if=active_enemies=1|(active_enemies<8&!buff.cat_form.up)
-actions.cat+=/cat_form,if=!buff.cat_form.up&energy>50&!talent.fluid_form.enabled
-actions.cat+=/pool_resource,for_next=1
-actions.cat+=/ferocious_bite,cycle_targets=1,if=(combo_points>3&target.time_to_die<3)|(combo_points=5&energy>=50&dot.rip.remains>10)&spell_targets.swipe_cat<4
-actions.cat+=/thrash_cat,cycle_targets=1,if=refreshable&target.time_to_die>5&spell_targets.thrash_cat>2
-actions.cat+=/rake,cycle_targets=1,if=refreshable&time_to_die>10&(!talent.primal_fury.enabled|!talent.master_shapeshifter.enabled|!spell_targets.swipe_cat>4)
-actions.cat+=/swipe_cat,if=active_enemies>2&combo_points<5
-actions.cat+=/thrash_cat,if=refreshable&fight_remains>5
-actions.cat+=/pool_resource,for_next=1
-actions.cat+=/shred,if=energy>60&combo_points<5
-actions.cat+=/ferocious_bite,if=energy>50&combo_points.deficit=0
-actions.cat+=/cat_form,if=!talent.fluid_form&!buff.cat_form.up
+actions.health_aoe+=/wild_growth,enable_moving=true,moving=0
+actions.health_aoe+=/swiftmend,if=find.lowest_hp.pct<80
+actions.health_aoe+=/invigorate
 
-# On the tank
-actions.healing+=/rejuvenation,if=active_dot.rejuvenation<1
-# On an ally
-actions.healing+=/lifebloom,if=(active_dot.lifebloom<1)|(active_dot.lifebloom<2&buff.lifebloom.up&talent.undergrowth.enabled)
-# On yourself
-actions.healing+=/lifebloom,if=(active_dot.lifebloom<2&buff.lifebloom.down&talent.undergrowth.enabled)
-# Maintain Efflo
-actions.healing+=/efflorescence,if=buff.efflorescence.down
-# transform into tree
-actions.healing+=/swiftmend,if=(active_dot.regrowth+active_dot.wild_growth+active_dot.rejuvenation)>1&talent.reforestation.enabled&buff.reforestation.stack=3
-# Always wild growth after swiftmend
-actions.healing+=/wild_growth,if=prev.1.swiftmend
+actions.health_st+=/rejuvenation,if=find.lowest_hp.pct<=100&(active_hot.rejuvenation<=5&!raid|active_hot.rejuvenation<=settings.raid_rejuvenation_num&raid)&find.lowest_hp.pct>40
+actions.health_st+=/grove_guardians,if=find.lowest_hp.pct<60&charges=1|charges=2&find.lowest_hp.pct<70|charges=3
+actions.health_st+=/convoke_the_spirits,if=health_party_pct<75|find.none_target_lowest_hp.pct<40
+actions.health_st+=/regrowth,if=(buff.clearcasting.up|buff.blooming_infusion_regrowth.up)&find.lowest_hp.pct<100&(!moving|buff.natures_swiftness.up|buff.blooming_infusion_regrowth.up)
+actions.health_st+=/swiftmend,if=find.lowest_hp.pct<80
+actions.health_st+=/natures_swiftness,if=buff.natures_swiftness.down&find.none_target_lowest_hp.pct<70
+actions.health_st+=/nourish,enable_moving=true,moving=0,if=buff.wild_synthesis.stack>2
+actions.health_st+=/gallagio_bottle_service,if=find.none_target_lowest_hp.pct<50
+actions.health_st+=/cenarion_ward,if=find.lowest_hp.pct<80
+actions.health_st+=/regrowth,enable_moving=true,moving=0,if=find.lowest_hp.pct<70
+
+
+
+actions.cds+=/chromebustible_bomb_suit,if=health.pct<50
+actions.cds+=/ringing_ritual_mud,if=health.pct<50
+actions.cds+=/grove_guardians,if=find.lowest_hp.pct<60&charges=1|charges=2&find.lowest_hp.pct<70|charges=3
+actions.cds+=/heart_of_the_wild,if=health_party_pct<85|find.none_target_lowest_hp.pct<70&buff.moonkin_form.up
+actions.cds+=/convoke_the_spirits,if=health_party_pct<85|find.none_target_lowest_hp.pct<60
+actions.cds+=/flourish,if=active_hot.rejuvenatio>0&active_hot.wild_growth>0
+actions.cds+=/gallagio_bottle_service,if=find.none_target_lowest_hp.pct<70
+actions.cds+=/incarnation_tree_of_life,if=buff.incarnation_tree_of_life.down&health_party_pct<80
+actions.cds+=/tranquility,enable_moving=true,moving=0,if=health_party_pct<80&((!raid&find.hurt_num_big.count>3)|(raid&find.hurt_num_big.count>8))
+
+actions.st+=/call_action_list,name=cat,if=target.distance<3&!talent.blooming_infusion.enabled&talent.thriving_growth.enabled
+actions.st+=/cat_form,if=buff.cat_form.up
+actions.st+=/moonkin_form,enabled=0,if=buff.moonkin_form.down&health_party_pct>=100
+actions.st+=/sunfire,cycle_targets=1,max_cycle_targets=5,if=target.debuff.sunfire.down&buff.cat_form.down&mana.pct>20
+actions.st+=/moonfire,cycle_targets=1,max_cycle_targets=5,if=moving
+actions.st+=/moonfire,cycle_targets=1,max_cycle_targets=5,if=target.debuff.moonfire.down&buff.cat_form.down&mana.pct>20
+actions.st+=/starfire,if=target_is_enemie&buff.blooming_infusion.up
+actions.st+=/starsurge,if=buff.cat_form.down&mana.pct>20
+actions.st+=/starfire,enable_moving=true,moving=0,if=active_enemies>2&buff.cat_form.down&mana.pct>20
+actions.st+=/wrath,enable_moving=true,moving=0,if=buff.cat_form.down&mana.pct>20
+
+actions.cat+=/cat_form,if=buff.cat_form.down&!talent.fluid_form.enabled
+actions.cat+=/rip,if=target.debuff.rip.down&combo_points=5
+actions.cat+=/ferocious_bite,max_energy=0,if=combo_points=5
+actions.cat+=/rake,if=target.debuff.rake.down
+actions.cat+=/thrash_cat,if=target.debuff.thrash_cat.down
+actions.cat+=/swipe_cat,if=active_enemies>2
+actions.cat+=/shred

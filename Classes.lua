@@ -16,7 +16,8 @@ local RegisterEvent = ns.RegisterEvent
 local RegisterUnitEvent = ns.RegisterUnitEvent
 
 local getSpecializationKey = ns.getSpecializationKey
-
+local isInGroup = IsInGroup
+local unitInRange = UnitInRange
 local LSR = LibStub( "SpellRange-1.0" )
 
 local insert, wipe = table.insert, table.wipe
@@ -52,14 +53,16 @@ local specTemplate = {
     damagePets = false,
 
     -- Toggles
-    custom1Name = "Custom 1",
-    custom2Name = "Custom 2",
+    custom1Name = "自定义 1",
+    custom2Name = "自定义 2",
     noFeignedCooldown = false,
 
     abilities = {
         ['**'] = {
             disabled = false,
             toggle = "default",
+            toggle_terrain = "default",
+            fightRemains = 0,
             clash = 0,
             targetMin = 0,
             targetMax = 0,
@@ -138,7 +141,7 @@ local HekiliSpecMixin = {
         local resource = GetResourceKey( resourceID )
 
         if not resource then
-            Hekili:Error( "Unable to identify resource with PowerType " .. resourceID .. "." )
+            Hekili:Error( "无法使用 PowerType 识别资源" .. resourceID .. "." )
             return
         end
 
@@ -510,7 +513,7 @@ local HekiliSpecMixin = {
         end
 
         self:RegisterVariable( key, function()
-            return self.phases[ key ].virtual[ display or "Primary" ]
+            return self.phases[ key ].virtual[ display or "主显示" ]
         end )
     end,
 
@@ -957,11 +960,11 @@ local HekiliSpecMixin = {
                     end
                     Hekili.InvalidSpellIDs = Hekili.InvalidSpellIDs or {}
                     table.insert( Hekili.InvalidSpellIDs, a.id )
-                    Hekili:Error( "Name info not available for " .. a.id .. "." )
+                    Hekili:Error( "名称信息在" .. a.id .. "上不可用。" )
                     return
                 end
 
-                if not a.name then Hekili:Error( "Name info not available for " .. a.id .. "." ); return false end
+                if not a.name then Hekili:Error( "名称信息在" .. a.id .. "上不可用。" ); return false end
 
                 a.desc = GetSpellDescription( a.id ) -- was returning raw tooltip data.
 
@@ -1278,9 +1281,9 @@ function Hekili:RestoreDefaults()
         local msg
 
         if #changed == 1 then
-            msg = "The |cFFFFD100" .. changed[1] .. "|r priority was updated."
+            msg = "|cFFFFD100" .. changed[1] .. "|r优先级更新完成。"
         elseif #changed == 2 then
-            msg = "The |cFFFFD100" .. changed[1] .. "|r and |cFFFFD100" .. changed[2] .. "|r priorities were updated."
+            msg = "|cFFFFD100" .. changed[1] .. "|r 和 |cFFFFD100" .. changed[2] .. "|r优先级更新完成。"
         else
             msg = "|cFFFFD100" .. changed[1] .. "|r"
 
@@ -1288,7 +1291,7 @@ function Hekili:RestoreDefaults()
                 msg = msg .. ", |cFFFFD100" .. changed[i] .. "|r"
             end
 
-            msg = "The " .. msg .. ", and |cFFFFD100" .. changed[ #changed ] .. "|r priorities were updated."
+            msg = "" .. msg .. ", 和 |cFFFFD100" .. changed[ #changed ] .. "|r优先级更新完成。"
         end
 
         if msg then
@@ -2026,7 +2029,182 @@ all:RegisterAuras( {
             t.v1 = 0
             t.v2 = 0
             t.v3 = 0
-            t.caster = unit
+            t.caster = "none"
+        end,
+    },
+
+    casting_target = {
+        name = "Casting_Target",
+        generate = function( t, auraType )
+            local unit = auraType == "debuff" and "target"
+
+            if UnitCanAttack( "player", unit ) and not UnitExists("focus")  then
+            
+                local spell, _, _, startCast, endCast, _, _, notInterruptible, spellID = UnitCastingInfo( unit )
+
+                if spell then
+                    startCast = startCast / 1000
+                    endCast = endCast / 1000
+
+                    t.name = spell
+                    t.count = 1
+                    t.expires = endCast
+                    t.applied = startCast
+                    t.duration = endCast - startCast
+                    t.v1 = spellID
+                    t.v2 = notInterruptible and 1 or 0
+                    t.v3 = 0
+                    t.caster = "target"
+
+                    if unit ~= "target" then return end
+
+                    if state.target.is_dummy then
+                        -- Pretend that all casts by target dummies are interruptible.
+                        if Hekili.ActiveDebug then Hekili:Debug( "Cast '%s' is fake-interruptible", spell ) end
+                        t.v2 = 0
+
+                    elseif Hekili.DB.profile.toggles.interrupts.filterCasts and class.spellFilters[ state.instance_id ] and class.interruptibleFilters and not class.interruptibleFilters[ spellID ] then
+                        if Hekili.ActiveDebug then Hekili:Debug( "Cast '%s' not interruptible per user preference.", spell ) end
+                        t.v2 = 1
+                    end
+
+                    return
+                end
+
+                spell, _, _, startCast, endCast, _, notInterruptible, spellID = UnitChannelInfo( unit )
+                startCast = ( startCast or 0 ) / 1000
+                endCast = ( endCast or 0 ) / 1000
+                local duration = endCast - startCast
+
+                -- Channels greater than 10 seconds are nonsense.  Probably.
+                if spell and duration <= 10 then
+                    t.name = spell
+                    t.count = 1
+                    t.expires = endCast
+                    t.applied = startCast
+                    t.duration = duration
+                    t.v1 = spellID
+                    t.v2 = notInterruptible and 1 or 0
+                    t.v3 = 1 -- channeled.
+                    t.caster = "target"
+
+                    if class.abilities[ spellID ] and class.abilities[ spellID ].dontChannel then
+                        removeBuff( "casting" )
+                        return
+                    end
+
+                    if unit ~= "target" then return end
+
+                    if state.target.is_dummy then
+                        -- Pretend that all casts by target dummies are interruptible.
+                        if Hekili.ActiveDebug then Hekili:Debug( "Channel '%s' is fake-interruptible", spell ) end
+                        t.v2 = 0
+
+                    elseif Hekili.DB.profile.toggles.interrupts.filterCasts and class.spellFilters[ state.instance_id ] and class.interruptibleFilters and not class.interruptibleFilters[ spellID ] then
+                        if Hekili.ActiveDebug then Hekili:Debug( "Channel '%s' not interruptible per user preference.", spell ) end
+                        t.v2 = 1
+                    end
+
+                    return
+                end
+            end
+
+            t.name = "Casting_Target"
+            t.count = 0
+            t.expires = 0
+            t.applied = 0
+            t.v1 = 0
+            t.v2 = 0
+            t.v3 = 0
+            t.caster = "none"
+        end,
+    },
+
+    casting_focus = {
+        name = "Casting_Focus",
+        generate = function( t, auraType )
+            local unit =  "focus"
+
+--and not UnitExists("focus")
+            if UnitCanAttack( "player", unit ) and UnitExists("focus")  then
+
+                local spell, _, _, startCast, endCast, _, _, notInterruptible, spellID = UnitCastingInfo( unit )
+
+                if spell then
+                    startCast = startCast / 1000
+                    endCast = endCast / 1000
+
+                    t.name = spell
+                    t.count = 1
+                    t.expires = endCast
+                    t.applied = startCast
+                    t.duration = endCast - startCast
+                    t.v1 = spellID
+                    t.v2 = notInterruptible and 1 or 0
+                    t.v3 = 0
+                    t.caster = "focus"
+
+                    if unit ~= "focus" then return end
+
+                    if state.target.is_dummy then
+                        -- Pretend that all casts by target dummies are interruptible.
+                        if Hekili.ActiveDebug then Hekili:Debug( "Cast '%s' is fake-interruptible", spell ) end
+                        t.v2 = 0
+
+                    elseif Hekili.DB.profile.toggles.interrupts.filterCasts and class.spellFilters[ state.instance_id ] and class.interruptibleFilters and not class.interruptibleFilters[ spellID ] then
+                        if Hekili.ActiveDebug then Hekili:Debug( "Cast '%s' not interruptible per user preference.", spell ) end
+                        t.v2 = 1
+                    end
+
+                    return
+                end
+
+                spell, _, _, startCast, endCast, _, notInterruptible, spellID = UnitChannelInfo( unit )
+                startCast = ( startCast or 0 ) / 1000
+                endCast = ( endCast or 0 ) / 1000
+                local duration = endCast - startCast
+
+                -- Channels greater than 10 seconds are nonsense.  Probably.
+                if spell and duration <= 10 then
+                    t.name = spell
+                    t.count = 1
+                    t.expires = endCast
+                    t.applied = startCast
+                    t.duration = duration
+                    t.v1 = spellID
+                    t.v2 = notInterruptible and 1 or 0
+                    t.v3 = 1 -- channeled.
+                    t.caster = "focus"
+
+                    if class.abilities[ spellID ] and class.abilities[ spellID ].dontChannel then
+                        removeBuff( "casting" )
+                        return
+                    end
+
+                    if unit ~= "focus" then return end
+
+                    if state.target.is_dummy then
+                        -- Pretend that all casts by target dummies are interruptible.
+                        if Hekili.ActiveDebug then Hekili:Debug( "Channel '%s' is fake-interruptible", spell ) end
+                        t.v2 = 0
+
+                    elseif Hekili.DB.profile.toggles.interrupts.filterCasts and class.spellFilters[ state.instance_id ] and class.interruptibleFilters and not class.interruptibleFilters[ spellID ] then
+                        if Hekili.ActiveDebug then Hekili:Debug( "Channel '%s' not interruptible per user preference.", spell ) end
+                        t.v2 = 1
+                    end
+
+                    return
+                end
+            end
+
+            t.name = "Casting_Focus"
+            t.count = 0
+            t.expires = 0
+            t.applied = 0
+            t.v1 = 0
+            t.v2 = 0
+            t.v3 = 0
+            t.caster = "none"
         end,
     },
 
@@ -2430,23 +2608,45 @@ all:RegisterAuras( {
     dispellable_curse = {
         generate = function( t )
             local i = 1
-            local name, _, count, debuffType, duration, expirationTime = UnitDebuff( "player", i, "RAID" )
-
+            local name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( "player", i)
+            
             while( name ) do
-                if debuffType == "Curse" then break end
+                if debuffType == "Curse" or spellId == 440313 then break end
 
                 i = i + 1
-                name, _, count, debuffType, duration, expirationTime = UnitDebuff( "player", i, "RAID" )
+                name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( "player", i )
             end
 
             if name then
                 t.count = count > 0 and count or 1
                 t.expires = expirationTime > 0 and expirationTime or query_time + 5
                 t.applied = expirationTime > 0 and ( expirationTime - duration ) or query_time
-                t.caster = "nobody"
+                t.caster = "player"
                 return
             end
+            if isInGroup() and (Hekili.DB.profile.toggles.defensives.dispel_party or Hekili:isHealerSpec()) then
+                local partySize = GetNumGroupMembers()
+                for j = 1, partySize - 1 do 
+                    local unit = "party" .. j
+                    i = 1
+                    name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( unit, i)
 
+                    while( name ) do
+                        if debuffType == "Curse" or spellId == 440313 then break end
+
+                        i = i + 1
+                        name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( unit, i)
+                    end
+
+                    if name then
+                        t.count = count > 0 and count or 1
+                        t.expires = expirationTime > 0 and expirationTime or query_time + 5
+                        t.applied = expirationTime > 0 and ( expirationTime - duration ) or query_time
+                        t.caster = unit
+                        return
+                    end
+                end
+            end
             t.count = 0
             t.expires = 0
             t.applied = 0
@@ -2457,23 +2657,45 @@ all:RegisterAuras( {
     dispellable_poison = {
         generate = function( t )
             local i = 1
-            local name, _, count, debuffType, duration, expirationTime = UnitDebuff( "player", i, "RAID" )
+            local name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( "player", i)
 
             while( name ) do
-                if debuffType == "Poison" then break end
+                if debuffType == "Poison" or spellId == 440313 then break end
 
                 i = i + 1
-                name, _, count, debuffType, duration, expirationTime = UnitDebuff( "player", i, "RAID" )
+                name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( "player", i)
             end
 
             if name then
                 t.count = count > 0 and count or 1
                 t.expires = expirationTime > 0 and expirationTime or query_time + 5
                 t.applied = expirationTime > 0 and ( expirationTime - duration ) or query_time
-                t.caster = "nobody"
+                t.caster = "player"
                 return
             end
+            if isInGroup() and (Hekili.DB.profile.toggles.defensives.dispel_party or Hekili:isHealerSpec()) then
+                local partySize = GetNumGroupMembers()
+                for j = 1, partySize - 1 do 
+                    local unit = "party" .. j
+                    i = 1
+                    name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( unit, i)
 
+                    while( name ) do
+                        if debuffType == "Poison" or spellId == 440313 then break end
+
+                        i = i + 1
+                        name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( unit, i)
+                    end
+
+                    if name then
+                        t.count = count > 0 and count or 1
+                        t.expires = expirationTime > 0 and expirationTime or query_time + 5
+                        t.applied = expirationTime > 0 and ( expirationTime - duration ) or query_time
+                        t.caster = unit
+                        return
+                    end
+                end
+            end
             t.count = 0
             t.expires = 0
             t.applied = 0
@@ -2484,23 +2706,45 @@ all:RegisterAuras( {
     dispellable_disease = {
         generate = function( t )
             local i = 1
-            local name, _, count, debuffType, duration, expirationTime = UnitDebuff( "player", i, "RAID" )
+            local name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( "player", i )
 
             while( name ) do
-                if debuffType == "Disease" then break end
+                if debuffType == "Disease" or spellId == 440313 then break end
 
                 i = i + 1
-                name, _, count, debuffType, duration, expirationTime = UnitDebuff( "player", i, "RAID" )
+                name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( "player", i)
             end
 
             if name then
                 t.count = count > 0 and count or 1
                 t.expires = expirationTime > 0 and expirationTime or query_time + 5
                 t.applied = expirationTime > 0 and ( expirationTime - duration ) or query_time
-                t.caster = "nobody"
+                t.caster = "player"
                 return
             end
+            if isInGroup() and (Hekili.DB.profile.toggles.defensives.dispel_party or Hekili:isHealerSpec()) then
+                local partySize = GetNumGroupMembers()
+                for j = 1, partySize - 1 do 
+                    local unit = "party" .. j
+                    i = 1
+                    name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( unit, i)
 
+                    while( name ) do
+                        if debuffType == "Disease" or spellId == 440313 then break end
+
+                        i = i + 1
+                        name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( unit, i)
+                    end
+
+                    if name then
+                        t.count = count > 0 and count or 1
+                        t.expires = expirationTime > 0 and expirationTime or query_time + 5
+                        t.applied = expirationTime > 0 and ( expirationTime - duration ) or query_time
+                        t.caster = unit
+                        return
+                    end
+                end
+            end
             t.count = 0
             t.expires = 0
             t.applied = 0
@@ -2515,7 +2759,7 @@ all:RegisterAuras( {
                 local name, _, count, debuffType, duration, expirationTime, _, canDispel = UnitBuff( "target", i )
 
                 while( name ) do
-                    if debuffType == "Magic" and canDispel then break end
+                    if debuffType == "Magic" and canDispel then if UnitName("boss1") ~= "无堕者哈夫" then break end end
 
                     i = i + 1
                     name, _, count, debuffType, duration, expirationTime, _, canDispel = UnitBuff( "target", i )
@@ -2525,30 +2769,76 @@ all:RegisterAuras( {
                     t.count = count > 0 and count or 1
                     t.expires = expirationTime > 0 and expirationTime or query_time + 5
                     t.applied = expirationTime > 0 and ( expirationTime - duration ) or query_time
-                    t.caster = "nobody"
+                    t.caster = "target"
                     return
                 end
 
             else
                 local i = 1
-                local name, _, count, debuffType, duration, expirationTime = UnitDebuff( "player", i, "RAID" )
+                local name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( "player", i )
 
                 while( name ) do
-                    if debuffType == "Magic" then break end
+                    if (debuffType == "Magic" or spellId == 440313) and not Hekili.isExcludedDespelAura(spellId)  then if UnitName("boss1") ~= "无堕者哈夫" then break end  end
+
+                    
 
                     i = i + 1
-                    name, _, count, debuffType, duration, expirationTime = UnitDebuff( "player", i, "RAID" )
+                    name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( "player", i)
                 end
 
                 if name then
                     t.count = count > 0 and count or 1
                     t.expires = expirationTime > 0 and expirationTime or query_time + 5
                     t.applied = expirationTime > 0 and ( expirationTime - duration ) or query_time
-                    t.caster = "nobody"
+                    t.caster = "player"
+                    if spellId == 440313 then 
+                        if UnitName("boss1") == "狂犬K.U.-J.0." then 
+                            t.count = 0
+                            t.expires = 0
+                            t.applied = 0
+                            t.caster = "nobody"
+                        end
+                    end
                     return
                 end
 
+
+                if isInGroup() and (Hekili.DB.profile.toggles.defensives.dispel_party or Hekili:isHealerSpec()) then
+                    local partySize = GetNumGroupMembers()
+                    for j = 1, partySize - 1 do 
+                        local unit = "party" .. j
+                        i = 1
+                        name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( unit, i)
+    
+                        while( name ) do
+                            if (debuffType == "Magic" or spellId == 440313) and not Hekili.isExcludedDespelAura(spellId)  then if UnitName("boss1") ~= "无堕者哈夫"  and unitInRange(unit) then break end  end
+    
+                            i = i + 1
+                            name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( unit, i)
+                        end
+    
+                        if name then
+                            t.count = count > 0 and count or 1
+                            t.expires = expirationTime > 0 and expirationTime or query_time + 5
+                            t.applied = expirationTime > 0 and ( expirationTime - duration ) or query_time
+                            t.caster = unit
+                            if spellId == 440313 then 
+                                if UnitName("boss1") == "狂犬K.U.-J.0." then 
+                                    t.count = 0
+                                    t.expires = 0
+                                    t.applied = 0
+                                    t.caster = "nobody"
+                                end
+                            end
+                            return
+                        end
+                    end
+                end
+
+                
             end
+
+
 
             t.count = 0
             t.expires = 0
@@ -2564,7 +2854,7 @@ all:RegisterAuras( {
                 local name, _, count, debuffType, duration, expirationTime, _, canDispel = UnitBuff( "target", i )
 
                 while( name ) do
-                    if debuffType == "Magic" and canDispel then break end
+                    if debuffType == "Magic" and canDispel then if UnitName("boss1") ~= "无堕者哈夫" then break end end
 
                     i = i + 1
                     name, _, count, debuffType, duration, expirationTime, _, canDispel = UnitBuff( "target", i )
@@ -2589,13 +2879,13 @@ all:RegisterAuras( {
     reversible_magic = {
         generate = function( t )
             local i = 1
-            local name, _, count, debuffType, duration, expirationTime = UnitDebuff( "player", i, "RAID" )
+            local name, _, count, debuffType, duration, expirationTime = UnitDebuff( "player", i)
 
             while( name ) do
                 if debuffType == "Magic" then break end
 
                 i = i + 1
-                name, _, count, debuffType, duration, expirationTime = UnitDebuff( "player", i, "RAID" )
+                name, _, count, debuffType, duration, expirationTime = UnitDebuff( "player", i)
             end
 
             if name then
@@ -2819,7 +3109,7 @@ do
 
     all:RegisterAbility( "potion", {
         name = "Potion",
-        listName = '|T136243:0|t |cff00ccff[Potion]|r',
+        listName = '|T136243:0|t |cff00ccff[药剂]|r',
         cast = 0,
         cooldown = 300,
         gcd = "off",
@@ -2847,7 +3137,7 @@ do
         end,
 
         usable = function ()
-            return potion_items[ all.abilities.potion.item ], "no valid potions found in inventory"
+            return potion_items[ all.abilities.potion.item ], "背包中未发现有效的药剂"
         end,
 
         copy = "potion_default"
@@ -3032,7 +3322,7 @@ all:RegisterAbilities( {
         gcd = "spell",
 
         -- It does start combat if there are enemies in range, but we often use it precombat for resources.
-        startsCombat = false,
+        startsCombat = true,
 
         -- usable = function () return race.blood_elf end,
         toggle = "cooldowns",
@@ -3085,7 +3375,7 @@ all:RegisterAbilities( {
         cast = 0,
         cooldown = 150,
         gcd = "spell",
-
+        startsCombat = true,
         -- usable = function () return race.lightforged_draenei end,
 
         toggle = "cooldowns",
@@ -3149,8 +3439,8 @@ all:RegisterAbilities( {
 
     -- INTERNAL HANDLERS
     call_action_list = {
-        name = "|cff00ccff[Call Action List]|r",
-        listName = '|T136243:0|t |cff00ccff[Call Action List]|r',
+        name = "跳转技能列表",
+        listName = '|T136243:0|t |cff00ccff[跳转技能列表]|r',
         cast = 0,
         cooldown = 0,
         gcd = "off",
@@ -3158,8 +3448,8 @@ all:RegisterAbilities( {
     },
 
     run_action_list = {
-        name = "|cff00ccff[Run Action List]|r",
-        listName = '|T136243:0|t |cff00ccff[Run Action List]|r',
+        name = "执行技能列表",
+        listName = '|T136243:0|t |cff00ccff[执行技能列表]|r',
         cast = 0,
         cooldown = 0,
         gcd = "off",
@@ -3167,8 +3457,8 @@ all:RegisterAbilities( {
     },
 
     wait = {
-        name = "|cff00ccff[Wait]|r",
-        listName = '|T136243:0|t |cff00ccff[Wait]|r',
+        name = "等待",
+        listName = '|T136243:0|t |cff00ccff[等待]|r',
         cast = 0,
         cooldown = 0,
         gcd = "off",
@@ -3176,16 +3466,16 @@ all:RegisterAbilities( {
     },
 
     pool_resource = {
-        name = "|cff00ccff[Pool Resource]|r",
-        listName = "|T136243:0|t |cff00ccff[Pool Resource]|r",
+        name = "资源池",
+        listName = "|T136243:0|t |cff00ccff[资源池]|r",
         cast = 0,
         cooldown = 0,
         gcd = "off",
     },
 
     cancel_action = {
-        name = "|cff00ccff[Cancel Action]|r",
-        listName = "|T136243:0|t |cff00ccff[Cancel Action]|r",
+        name = "取消指令",
+        listName = "|T136243:0|t |cff00ccff[取消指令]|r",
         cast = 0,
         cooldown = 0,
         gcd = "off",
@@ -3202,8 +3492,8 @@ all:RegisterAbilities( {
     },
 
     variable = {
-        name = "|cff00ccff[Variable]|r",
-        listName = '|T136243:0|t |cff00ccff[Variable]|r',
+        name = "变量",
+        listName = '|T136243:0|t |cff00ccff[变量]|r',
         cast = 0,
         cooldown = 0,
         gcd = "off",
@@ -3211,8 +3501,8 @@ all:RegisterAbilities( {
     },
 
     healthstone = {
-        name = "Healthstone",
-        listName = "|T538745:0|t |cff00ccff[Healthstone]|r",
+        name = "治疗石",
+        listName = "|T538745:0|t |cff00ccff[治疗石]|r",
         cast = 0,
         cooldown = function () return time > 0 and 3600 or 60 end,
         gcd = "off",
@@ -3226,9 +3516,9 @@ all:RegisterAbilities( {
 
         usable = function ()
             local item = talent.pact_of_gluttony.enabled and 224464 or 5512
-            if GetItemCount( item ) == 0 then return false, "requires healthstone in bags"
-            elseif not IsUsableItem( item ) then return false, "healthstone on CD"
-            elseif health.current >= health.max then return false, "must be damaged" end
+            if GetItemCount( item ) == 0 then return false, "需要背包中有治疗石"
+            elseif not IsUsableItem( item ) then return false, "治疗石CD中"
+            elseif health.current >= health.max then return false, "必须已受到伤害" end
             return true
         end,
 
@@ -3277,8 +3567,8 @@ all:RegisterAbilities( {
     },
 
     cancel_buff = {
-        name = "|cff00ccff[Cancel Buff]|r",
-        listName = '|T136243:0|t |cff00ccff[Cancel Buff]|r',
+        name = "取消Buff",
+        listName = '|T136243:0|t |cff00ccff[取消Buff]|r',
         cast = 0,
         gcd = "off",
 
@@ -3300,7 +3590,7 @@ all:RegisterAbilities( {
             return a or 134400
         end,
 
-        usable = function () return args.buff_name ~= nil, "no buff name detected" end,
+        usable = function () return args.buff_name ~= nil, "未检测到该Buff" end,
         timeToReady = function () return gcd.remains end,
         handler = function ()
             if not args.buff_name then return end
@@ -3318,8 +3608,8 @@ all:RegisterAbilities( {
     },
 
     null_cooldown = {
-        name = "|cff00ccff[Null Cooldown]|r",
-        listName = "|T136243:0|t |cff00ccff[Null Cooldown]|r",
+        name = "禁止爆发",
+        listName = "|T136243:0|t |cff00ccff[禁止爆发]|r",
         cast = 0,
         cooldown = 0.001,
         gcd = "off",
@@ -3330,8 +3620,8 @@ all:RegisterAbilities( {
     },
 
     trinket1 = {
-        name = "|cff00ccff[Trinket #1]|r",
-        listName = "|T136243:0|t |cff00ccff[Trinket #1]|r",
+        name = "饰品#1",
+        listName = "|T136243:0|t |cff00ccff[饰品#1]",
         cast = 0,
         cooldown = 600,
         gcd = "off",
@@ -3342,8 +3632,8 @@ all:RegisterAbilities( {
     },
 
     trinket2 = {
-        name = "|cff00ccff[Trinket #2]|r",
-        listName = "|T136243:0|t |cff00ccff[Trinket #2]|r",
+        name = "饰品#2",
+        listName = "|T136243:0|t |cff00ccff[饰品#2]",
         cast = 0,
         cooldown = 600,
         gcd = "off",
@@ -3374,16 +3664,16 @@ do
     -- 2.  Respect item preferences registered in spec options.
 
     all:RegisterAbility( "use_items", {
-        name = "Use Items",
-        listName = "|T136243:0|t |cff00ccff[Use Items]|r",
+        name = "使用道具",
+        listName = "|T136243:0|t |cff00ccff[使用道具]|r",
         cast = 0,
         cooldown = 120,
         gcd = "off",
     } )
 
     all:RegisterAbility( "unusable_trinket", {
-        name = "Unusable Trinket",
-        listName = "|T136240:0|t |cff00ccff[Unusable Trinket]|r",
+        name = "无法使用的饰品",
+        listName = "|T136240:0|t |cff00ccff[无法使用的饰品]|r",
         cast = 0,
         cooldown = 180,
         gcd = "off",
@@ -3393,11 +3683,11 @@ do
     } )
 
     all:RegisterAbility( "heart_essence", {
-        name = function () return ( GetItemInfo( 158075 ) ) or "Heart Essence" end,
+        name = function () return ( GetItemInfo( 158075 ) ) or "心能" end,
         listName = function ()
             local _, link, _, _, _, _, _, _, _, tex = GetItemInfo( 158075 )
             if link and tex then return "|T" .. tex .. ":0|t " .. link end
-            return "|cff00ccff[Heart Essence]|r"
+            return "|cff00ccff[心能]|r"
         end,
         cast = 0,
         cooldown = 0,
@@ -3408,7 +3698,7 @@ do
 
         toggle = "essences",
 
-        usable = function () return false, "your equipped major essence is supported elsewhere in the priority or is not an active ability" end
+        usable = function () return false, "你装备的心能效果在其他地方已被使用，或它不是主动技能。" end
     } )
 end
 
@@ -3962,10 +4252,10 @@ local function addItemSettings( key, itemID, options )
 
     options.disabled = {
         type = "toggle",
-        name = function () return format( "Disable %s via |cff00ccff[Use Items]|r", select( 2, GetItemInfo( itemID ) ) or ( "[" .. itemID .. "]" ) ) end,
+        name = function () return format( "禁用%s通过|cff00ccff[使用道具]使用|r", select( 2, GetItemInfo( itemID ) ) or ( "[" .. itemID .. "]" ) ) end,
         desc = function( info )
-            local output = "If disabled, the addon will not recommend this item via the |cff00ccff[Use Items]|r action.  " ..
-                "You can still manually include the item in your action lists with your own tailored criteria."
+            local output = "如果禁用，插件将不会通过|cff00ccff[使用道具]|r执行此项。" ..
+            "你仍然可以将其包含在你的技能列表中，在被插件推荐时手动使用它。"
             return output
         end,
         order = 25,
@@ -3974,8 +4264,8 @@ local function addItemSettings( key, itemID, options )
 
     options.minimum = {
         type = "range",
-        name = "Minimum Targets",
-        desc = "The addon will only recommend this trinket (via |cff00ccff[Use Items]|r) when there are at least this many targets available to hit.",
+        name = "最小目标数",
+        desc = "插件只会在至少有此数量的目标能被命中时，推荐使用（通过|cff00ccff[使用道具]|r）该饰品。",
         order = 26,
         width = "full",
         min = 1,
@@ -3985,9 +4275,9 @@ local function addItemSettings( key, itemID, options )
 
     options.maximum = {
         type = "range",
-        name = "Maximum Targets",
-        desc = "The addon will only recommend this trinket (via |cff00ccff[Use Items]|r) when there are no more than this many targets detected.\n\n" ..
-            "This setting is ignored if set to 0.",
+        name = "最大目标数",
+        desc = "插件只会在监测到小于该目标数时，推荐使用（通过|cff00ccff[使用道具]|r）该饰品。" ..
+        "设置为0时忽略此设置。",
         order = 27,
         width = "full",
         min = 0,
@@ -4228,7 +4518,7 @@ function Hekili:SpecializationChanged()
 
                 class.variables = spec.variables
 
-                class.potionList.default = "|T967533:0|t |cFFFFD100Default|r"
+                class.potionList.default = "|T967533:0|t |cFFFFD100默认|r"
             end
 
             if specID == currentID or specID == 0 then

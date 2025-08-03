@@ -219,7 +219,7 @@ all:RegisterAbilities( {
 
         item = 221023,
         toggle = "cooldowns",
-
+        startsCombat = true,
         proc = "primary",
         self_buff = "ethereal_powerlink",
 
@@ -237,6 +237,7 @@ all:RegisterAbilities( {
         cooldown = 60,
         gcd = "spell",
 
+        startsCombat = true,
         item = 212451,
         toggle = "cooldowns",
 
@@ -509,7 +510,7 @@ all:RegisterAbilities( {
         cast = 0,
         cooldown = 120,
         gcd = "off",
-
+        startsCombat = true,
         item = 225654,
         toggle = "cooldowns",
 
@@ -966,7 +967,7 @@ all:RegisterAbilities( {
         channeled = true,
         cooldown = 60,
         gcd = "spell",
-
+        startsCombat = true,
         item = 169344,
         toggle = "cooldowns",
         proc = "versatility",

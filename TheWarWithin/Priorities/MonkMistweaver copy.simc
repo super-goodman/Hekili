@@ -1,15 +1,15 @@
-actions+=/detox
-actions+=/spear_hand_strike
-actions+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check&!raid
-actions+=/potion,if=buff.aspect_of_harmony.up
-actions+=/life_cocoon,use_while_casting=1,if=find.lowest_hp.pct<=life_cocoon_party_health&cooldown.life_cocoon.remains<=0
+actions.default+=/detox,if=
+actions.default+=/spear_hand_strike,if=
+actions.default+=/call_action_list,strict=1,list_name=mitigation,if=!Pvepvp_check&!raid
+actions.default+=/potion,if=buff.aspect_of_harmony.up
+actions.default+=/life_cocoon,use_while_casting=1,if=find.lowest_hp.pct<=life_cocoon_party_health&cooldown.life_cocoon.remains<=0
 actions.default+=/ringing_ritual_mud,if=buff.invoke_chiji_the_red_crane.stack>=3&buff.enveloping_mist.downactions.default+=/call_action_list,name=ally,if=target.is_friendly,if=health.pct<50&!soothing_mist_casting
-actions+=/swarmlords_authority_444301,if=health.pct<50&!soothing_mist_casting
-actions+=/chromebustible_bomb_suit,if=health.pct<50&!soothing_mist_casting
-actions+=/use_item,slot=trinket1,enabled=0
-actions+=/use_item,slot=trinket2,enabled=0
-actions.default+=/call_action_list,name=harmony,if=talent.aspect_of_harmony.enabled
-actions.default+=/call_action_list,name=celestial,if=talent.celestial_conduit.enabled
+actions.default+=/swarmlords_authority_444301,if=health.pct<50&!soothing_mist_casting
+actions.default+=/chromebustible_bomb_suit,if=health.pct<50&!soothing_mist_casting
+actions.default+=/trinket1,enabled=0,slot=trinket1,if=
+actions.default+=/trinket2,enabled=0,slot=trinket2,if=
+actions.default+=/call_action_list,list_name=harmony,if=talent.aspect_of_harmony.enabled
+actions.default+=/call_action_list,list_name=celestial,if=talent.celestial_conduit.enabled
 
 
 actions.harmony+=/revival,if=incoming_party_damage_2s>health_party_max*0.3|health_party_pct<=50
@@ -57,7 +57,7 @@ actions.lei_tea+=/chi_burst,if=talent.chi_burst.enabled&!moving
 actions.lei_tea+=/tiger_palm,if=buff.teachings_of_the_monastery.stack<4
 
 
-actions.ally=expel_harm,if=health.pct<=75
+actions.ally+=/expel_harm,if=health.pct<=75
 actions.ally+=/life_cocoon,if=target.health.pct<30
 actions.ally+=/vivify,if=buff.vivacious_vivification.up&target.health.pct<=35
 actions.ally+=/enveloping_mist,if=!moving
@@ -68,5 +68,5 @@ actions.ally+=/renewing_mist
 
 actions.mitigation+=/life_cocoon,use_while_casting=1,if=find.health.pct<=40
 actions.mitigation+=/vivify,if=buff.vivacious_vivification.up&find.health.pct<=30
-actions.mitigation=/diffuse_magic,if=health.pct<=hp_gap&buff.touch_of_karma.down&buff.diffuse_magic.down&buff.fortifying_brew.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic)
+actions.mitigation+=/diffuse_magic,if=health.pct<=hp_gap&buff.touch_of_karma.down&buff.diffuse_magic.down&buff.fortifying_brew.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic)
 actions.mitigation+=/fortifying_brew,if=health.pct<=hp_gap&buff.touch_of_karma.down&buff.diffuse_magic.down&buff.fortifying_brew.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)

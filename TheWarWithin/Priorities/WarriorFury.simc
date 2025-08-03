@@ -1,5 +1,3 @@
-## https://github.com/simulationcraft/simc/blob/thewarwithin/ActionPriorityLists/default/warrior_fury.simc
-
 actions.precombat+=/battle_shout
 actions.precombat+=/berserker_stance,toggle=on
 actions.precombat+=/variable,name=treacherous_transmitter_precombat_cast,value=2
@@ -19,9 +17,8 @@ actions.precombat+=/variable,name=trinket_2_manual,value=trinket.2.is.algethar_p
 actions.precombat+=/variable,name=execute_phase,value=(talent.massacre.enabled&target.health.pct<35)|target.health.pct<20
 actions.precombat+=/variable,name=on_gcd_racials,value=buff.recklessness.down&buff.avatar.down&rage<80&buff.sudden_death.down&!cooldown.bladestorm.ready&(!cooldown.execute.ready|!variable.execute_phase)
 
-actions+=/pummel,if=target.debuff.casting.react
-actions+=/charge,if=time<=0.5|movement.distance>5
-actions+=/heroic_leap,if=movement.distance>25
+actions+=/pummel
+actions+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check
 actions+=/potion,if=boss&(fight_remains>300|boss&fight_remains<35&buff.recklessness.up|boss&fight_remains<25)
 actions+=/use_item,name=treacherous_transmitter
 
@@ -109,3 +106,9 @@ actions.thane+=/thunder_blast
 actions.thane+=/bloodthirst
 actions.thane+=/execute
 actions.thane+=/thunder_clap
+
+actions.mitigation=/spell_reflection
+actions.mitigation=/impending_victory,if=health.pct<=40
+actions.mitigation=/spell_reflection,if=health.pct<=hp_gap&buff.spell_reflection_defense.down&buff.enraged_regeneration.down&buff.rallying_cry.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic)
+actions.mitigation+=/enraged_regeneration,if=health.pct<=hp_gap&buff.spell_reflection_defense.down&buff.enraged_regeneration.down&buff.rallying_cry.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)
+actions.mitigation+=/rallying_cry,if=health.pct<=hp_gap&buff.spell_reflection_defense.down&buff.enraged_regeneration.down&buff.rallying_cry.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)

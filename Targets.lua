@@ -438,13 +438,13 @@ do
                                 excluded = maxR ~= nil and maxR > checkPlates
 
                                 if debugging and excluded then
-                                    details = format( "%s\n    - Excluded by range (%d > %d).", details, maxR, checkPlates )
+                                    details = format( "%s\n  - 由于距离限制而被排除 (%d > %d)。", details, maxR, checkPlates )
                                 end
                             end
 
                             if not excluded and showNPs and spec.damageOnScreen and not npUnits[ guid ] then
                                 excluded = true
-                                if debugging then details = format( "%s\n    - Excluded by on-screen nameplate requirement.", details ) end
+                                if debugging then details = format( "%s\n  - 由于屏幕内姓名板限制而被排除。", details ) end
                             end
                         end
 
@@ -477,7 +477,7 @@ do
 
                             local _, range = nil, -1
 
-                            if debugging then details = format( "%s\n - Checking %s [ %s ] %s.", details, unit, guid, UnitName( unit ) ) end
+                            if debugging then details = format( "%s\n - 检测中 %s [ %s ] %s。", details, unit, guid, UnitName( unit ) ) end
 
                             if excluded then
                                 excluded = enemyExclusions[ npcid ]
@@ -487,7 +487,7 @@ do
                                     excluded = FindExclusionAuraByID( unit, excluded )
 
                                     if debugging and excluded then
-                                        details = format( "%s\n    - Excluded by aura.", details )
+                                        details = format( "%s\n  - 由于光环限制而被排除。", details )
                                     end
                                 end
 
@@ -495,7 +495,7 @@ do
                                     excluded = not Hekili:TargetIsNearPet( unit )
 
                                     if debugging and excluded then
-                                        details = format( "%s\n    - Excluded by pet range.", details )
+                                        details = format( "%s\n  - 由于宠物攻击距离而被排除。", details )
                                     end
                                 end
 
@@ -504,13 +504,13 @@ do
                                     excluded = maxR ~= nil and maxR > checkPlates
 
                                     if debugging and excluded then
-                                        details = format( "%s\n    - Excluded by range (%d > %d).", details, maxR, checkPlates )
+                                        details = format( "%s\n  - 由于距离限制而被排除(%d > %d)。", details, maxR, checkPlates )
                                     end
                                 end
 
                                 if not excluded and spec.damageOnScreen and showNPs and not npUnits[ guid ] then
                                     excluded = true
-                                    if debugging then details = format( "%s\n    - Excluded by on-screen nameplate requirement.", details ) end
+                                    if debugging then details = format( "%s\n  - 由于屏幕内姓名板限制而被排除。", details ) end
                                 end
                             end
 
@@ -549,34 +549,34 @@ do
                     if unit and not UnitIsUnit( unit, "target" ) then
                         excluded = enemyExclusions[ npcid ]
 
-                        if debugging then details = format( "%s\n - Checking %s [ %s ] #%s.", details, unit, guid, UnitName( unit ) ) end
+                        if debugging then details = format( "%s\n - 检测中 %s [ %s ] #%s。", details, unit, guid, UnitName( unit ) ) end
 
                         -- If our table has a number, unit is ruled out only if the buff is present.
                         if excluded and type( excluded ) == "number" then
                             excluded = FindExclusionAuraByID( unit, excluded )
 
                             if debugging and excluded then
-                                details = format( "%s\n    - Excluded by aura.", details )
+                                details = format( "%s\n  - 由于光环而被排除。", details )
                             end
                         end
 
                         if not excluded and inGroup and FriendCheck( unit ) then
                             excluded = true
-                            if debugging then details = format( "%s\n    - Excluded by friend check.", details ) end
+                            if debugging then details = format( "%s\n  - 由于友善目标而被排除。", details ) end
                         end
 
                         if not excluded and checkPets then
                             excluded = not Hekili:TargetIsNearPet( unit )
 
                             if debugging and excluded then
-                                details = format( "%s\n    - Excluded by pet range.", details )
+                                details = format( "%s\n  - 由于宠物攻击距离而被排除。", details )
                             end
                         end
                     end
 
                     if not excluded and spec.damageOnScreen and showNPs and not npUnits[ guid ] then
                         excluded = true
-                        if debugging then details = format( "%s\n    - Excluded by on-screen nameplate requirement.", details ) end
+                        if debugging then details = format( "%s\n  - 由于屏幕内姓名板限制而被排除。", details ) end
                     end
 
                     if not excluded then
@@ -620,7 +620,7 @@ do
         if count ~= lastCount or stationary ~= lastStationary then
             lastCount = count
             lastStationary = stationary
-            if Hekili:GetToggleState( "mode" ) == "reactive" then HekiliDisplayAOE:UpdateAlpha() end
+            if Hekili:GetToggleState( "mode" ) == "reactive" then HekiliDisplay_AOE:UpdateAlpha() end
         end
 
         if details then
@@ -641,7 +641,7 @@ function ns.dumpNameplateInfo()
 end
 
 
-function ns.updateTarget( id, time, mine, spellID )
+function ns.updateTarget( id, time, mine )
     local spec = rawget( Hekili.DB.profile.specs, state.spec.id )
     if not spec or not spec.damage then return end
 
@@ -691,7 +691,7 @@ end
 
 ns.reportTargets = function()
     for k, v in pairs(targets) do
-        Hekili:Print("Saw " .. k .. " exactly " .. GetTime() - v .. " seconds ago.")
+        Hekili:Print("在 " .. GetTime() - v .. " 秒前侦测到了" .. k .. "。" )
     end
 end
 
@@ -941,6 +941,17 @@ do
         [10] = 0,
     }
 
+    local damages = {
+        [1] = 0,
+        [5] = 0,
+        [10] = 0,
+    }
+
+    local damages_unit = {        
+        [1] = {},
+        [5] = {},
+        [10] = {},}
+
     local physical = {
         [1] = 0,
         [5] = 0,
@@ -989,6 +1000,45 @@ do
         end
     end
 
+    
+    ns.storeDamages = function( _, dam, isPhysical, unit )
+        if dam and dam > 0 then
+            local db = isPhysical and physical or magical
+
+            db[ 1 ] = db[ 1 ] + dam
+            damages[ 1 ] = damages[ 1 ] + dam
+            damages_unit[1][unit] = 1
+
+            C_Timer.After( 1, function()
+                db[ 1 ] = db[ 1 ] - dam
+                damages[ 1 ] = damages[ 1 ] - dam
+                damages_unit[1] = {}
+            end )
+
+            db[ 5 ] = db[ 5 ] + dam
+            damages[ 5 ] = damages[ 5 ] + dam
+            damages_unit[5][unit] = 1
+
+            C_Timer.After( 5, function()
+                db[ 5 ] = db[ 5 ] - dam
+                damages[ 5 ] = damages[ 5 ] - dam
+                damages_unit[5] = {}
+            end )
+
+            db[ 10 ] = db[ 10 ] + dam
+            damages[ 10 ] = damages[ 10 ] + dam
+            damages_unit[10][unit] = 1
+
+            C_Timer.After( 10, function()
+                db[ 10 ] = db[ 10 ] - dam
+                damages[ 10 ] = damages[ 10 ] - dam
+                damages_unit[10] = {}
+            end )
+        end
+    end
+
+
+
     ns.damageInLast = function( seconds, isPhysical )
         local db
         if isPhysical == nil then db = damage
@@ -1010,6 +1060,38 @@ do
         end
 
         return db[ 10 ] * seconds / 10
+    end
+
+    ns.getTableSize = function( t )
+        local count = 0
+        for _ in pairs(t) do
+            count = count + 1
+        end
+        return count
+    end
+
+    ns.damagesInLast = function( seconds, isPhysical )
+        local db
+        if isPhysical == nil then db = damages
+        elseif isPhysical == true then db = physical
+        else db = magical end
+
+
+        if db[ seconds ] then return db[ seconds ], ns.getTableSize(damages_unit[seconds]) end
+   
+        if seconds < 1 then
+            return db[ 1 ] * ( seconds / 1 ), ns.getTableSize(damages_unit[1])
+        end
+
+        if seconds < 5 then
+            return db[ 1 ] + ( db[ 5 ] - db[ 1 ] ) * ( seconds - 1 ) / 5, ns.getTableSize(damages_unit[5])
+        end
+
+        if seconds < 10 then
+            return db[ 5 ] + ( db[ 10 ] - db[ 5 ] ) * ( seconds - 5 ) / 10, ns.getTableSize(damages_unit[10])
+        end
+
+        return db[ 10 ] * seconds / 10, ns.getTableSize(damages_unit[10])
     end
 
     ns.storeHealing = function( _, amount )

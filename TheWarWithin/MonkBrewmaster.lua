@@ -2,6 +2,7 @@
 -- August 2025
 -- Patch 11.2
 
+if not Hekili.check then return end
 if UnitClassBase( "player" ) ~= "MONK" then return end
 
 local addon, ns = ...
@@ -894,7 +895,7 @@ spec:RegisterStateTable( "healing_sphere", setmetatable( {}, {
     end
 } ) )
 
-spec:RegisterStateExpr( celestial_brew_choice, function ()
+spec:RegisterStateExpr( "celestial_brew_choice", function ()
     return talent.celestial_infusion.enabled and "celestial_infusion" or "celestial_brew"
 end )
 
@@ -1182,6 +1183,18 @@ local brew_spells = {
 
 -- Abilities
 spec:RegisterAbilities( {
+
+    tank_combat_wait= {
+        name = "坦克战斗介入",
+        listName = '|T134376:0|t |cff00ccff[坦克战斗介入]|r',
+        indicator = "wait",
+        texture = 134376,
+        cast = 0,
+        cooldown = 0,
+        gcd = "spell",
+        essential = true
+    },
+
     -- You focus the assault on this target, increasing their damage taken by 3% for 6 sec. Each unique player that attacks the target increases the damage taken by an additional 3%, stacking up to 5 times. Your melee attacks refresh the duration of Focused Assault.
     admonishment = {
         id = 207025,
@@ -1489,12 +1502,15 @@ spec:RegisterAbilities( {
 
         spend = 10,
         spendType = "energy",
-
+        target = function ()
+            return debuff.dispellable_poison.caster or debuff.dispellable_curse.caster
+        end,
         talent = "detox",
         startsCombat = false,
-        toggle = "interrupts",
 
-        usable = function () return debuff.dispellable_poison.up or debuff.dispellable_disease.up, "requires dispellable effect" end,
+        toggle = "defensives",
+        usable = function () return debuff.dispellable_poison.up or debuff.dispellable_disease.up, "requires dispellable_poison/disease" end,
+
         handler = function ()
             removeDebuff( "player", "dispellable_poison" )
             removeDebuff( "player", "dispellable_disease" )
@@ -1512,8 +1528,7 @@ spec:RegisterAbilities( {
         talent = "diffuse_magic",
         startsCombat = false,
 
-        toggle = "interrupts",
-        buff = "dispellable_magic",
+        toggle = "defensives",
 
         handler = function ()
             applyBuff( "diffuse_magic" )
@@ -1593,10 +1608,12 @@ spec:RegisterAbilities( {
         cooldown = 60,
         gcd = "totem",
         school = "fire",
-
+        toggle = "cooldowns",
+        toggle_terrain = "player",
+        usable = function () return target.distance <= 10, "target must be nearby" end,
         talent = "exploding_keg",
         startsCombat = true,
-
+        terrain = true,
         handler = function ()
             if talent.balanced_stratagem.enabled then
                 removeBuff( "balanced_stratagem_magic" )
@@ -1652,7 +1669,7 @@ spec:RegisterAbilities( {
         school = "nature",
 
         talent = "invoke_niuzao_the_black_ox",
-        startsCombat = false,
+        startsCombat = true,
 
         toggle = "cooldowns",
 
@@ -2015,9 +2032,14 @@ spec:RegisterAbilities( {
 
         toggle = "interrupts",
 
-        debuff = "casting",
-        readyTime = state.timeToInterrupt,
-
+        usable = function () return state.readyToInterrupt() and target.distance <= 5, "readyToInterrupt" end,
+        target = function () 
+            if not UnitExists("focus") then
+                return debuff.casting_target.caster
+            else
+                return debuff.casting_focus.caster
+            end
+        end,
         handler = function ()
             interrupt()
             if talent.energy_transfer.enabled then
@@ -2065,9 +2087,9 @@ spec:RegisterAbilities( {
         cast = 0.0,
         cooldown = 10.0,
         gcd = "spell",
-
+        toggle_terrain="player",
         talent = "summon_black_ox_statue",
-        startsCombat = false,
+        startsCombat = true,
 
         handler = function ()
             summonPet( "black_ox_statue", 1800 )
@@ -2132,7 +2154,7 @@ spec:RegisterAbilities( {
         cooldown = 0.0,
         gcd = "spell",
 
-        spend = function() return 30 * ( buff.vivacious_vivification.up and 0.25 or 1 ) end,
+        spend = function() return buff.vivacious_vivification.up and 7.5 or 30 end,
         spendType = 'energy',
 
         startsCombat = false,
@@ -2158,7 +2180,7 @@ spec:RegisterAbilities( {
         spend = 0.05,
         spendType = "mana",
 
-        startsCombat = false,
+        startsCombat = true,
         toggle = "cooldowns",
 
         handler = function ()
@@ -2186,10 +2208,10 @@ spec:RegisterAbilities( {
 
         -- Non-players can be executed as soon as their current health is below player's max health.
         -- All targets can be executed under 15%, however only at 35% damage.
-        usable = function ()
-            return ( talent.improved_touch_of_death.enabled and target.health.pct < 15 ) or ( target.class == "npc" and target.health_current < health.max ), "requires low health target"
-        end,
-
+        -- usable = function ()
+        --     return ( talent.improved_touch_of_death.enabled and target.health.pct < 15 ) or ( target.class == "npc" and target.health_current < health.max ), "requires low health target"
+        -- end,
+        usable = false,
         handler = function ()
             applyDebuff( "target", "touch_of_death" )
             if talent.fatal_touch.enabled then applyBuff( "fatal_touch" ) end
@@ -2215,13 +2237,13 @@ spec:RegisterOptions( {
 
     potion = "tempered_potion",
 
-    package = "Brewmaster"
+    package = "酒仙Simc"
 } )
 
-spec:RegisterSetting( "purify_for_celestial", true, {
-    name = strformat( "%s: Maximize Shield", Hekili:GetSpellLinkWithTexture( spec.abilities.celestial_brew.id ) ),
-    desc = strformat( "If checked, %s may be recommended more frequently to build stacks of %s for your %s shield.\n\n" ..
-        "This feature may work best with the %s talent, but risks leaving you without a charge of %s following a large spike in your %s.",
+spec:RegisterSetting( "purify_for_celestial_max", false, {
+    name = strformat( "%s: 最大化吸收量", Hekili:GetSpellLinkWithTexture( spec.abilities.celestial_brew.id ) ),
+    desc = strformat( "如果勾选，可能会更加频繁地推荐使用 %s，为你的 %s 构筑更多的 %s 吸收量。\n\n" ..
+        "这个功能可能在使用 %s 天赋时效果最佳，但也有在你的 %s 出现大幅波动后没有 %s 充能的风险。",
         Hekili:GetSpellLinkWithTexture( spec.abilities.purifying_brew.id ), Hekili:GetSpellLinkWithTexture( spec.auras.purified_chi.id ),
         Hekili:GetSpellLinkWithTexture( spec.abilities.celestial_brew.id ), Hekili:GetSpellLinkWithTexture( spec.talents.light_brewing[2] ),
         spec.abilities.purifying_brew.name, Hekili:GetSpellLinkWithTexture( 115069 ) ),
@@ -2229,34 +2251,40 @@ spec:RegisterSetting( "purify_for_celestial", true, {
     width = "full",
 } )
 
-spec:RegisterSetting( "purify_for_niuzao", true, {
-    name = strformat( "%s: Maximize %s", Hekili:GetSpellLinkWithTexture( spec.abilities.purifying_brew.id ),
-        Hekili:GetSpellLinkWithTexture( spec.talents.improved_invoke_niuzao_the_black_ox[2] ) ),
-    desc = strformat( "If checked, %s may be recommended when %s is active if %s is talented.\n\n"
-        .. "This feature is used to maximize %s damage from your guardian.", Hekili:GetSpellLinkWithTexture( spec.abilities.purifying_brew.id ),
-        Hekili:GetSpellLinkWithTexture( spec.abilities.invoke_niuzao.id ), Hekili:GetSpellLinkWithTexture( spec.talents.improved_invoke_niuzao_the_black_ox[2] ),
-        Hekili:GetSpellLinkWithTexture( 227291 ) ),
-    type = "toggle",
+
+
+spec:RegisterSetting("combat_delay", 1, {
+    name = "战斗延迟介入",
+    desc = "如果该值不等于0, 则允许战斗后延迟该值-X秒后再推荐技能,推荐值为6\n\n它同样会在x/2秒后当玩家停止不动时开始推荐技能\n\n它也同样会在玩家站定不动时自动开始介入",
+    type = "range",
+    min = 0,
+    max = 20,
+    step = 1,
     width = "full"
 } )
+
+spec:RegisterStateExpr( "combat_delay", function ()
+    return settings.combat_delay or 0
+end )
 
 spec:RegisterSetting( "purify_stagger_currhp", 12, {
-    name = strformat( "%s: %s Tick %% Current Health", Hekili:GetSpellLinkWithTexture( spec.abilities.purifying_brew.id ), Hekili:GetSpellLinkWithTexture( 115069 ) ),
-    desc = strformat( "If set above zero, %s may be recommended when your current %s ticks for this percentage of your |cFFFFD100current|r effective health (or more).  "
-        .. "Custom priorities may ignore this setting.\n\n"
-        .. "This value is halved when playing solo.", Hekili:GetSpellLinkWithTexture( spec.abilities.purifying_brew.id ), Hekili:GetSpellLinkWithTexture( 115069 ) ),
+    name = strformat( "%s: %s 检测当前生命值百分比", Hekili:GetSpellLinkWithTexture( spec.abilities.purifying_brew.id ), Hekili:GetSpellLinkWithTexture( 115069 ) ),
+    desc = strformat( "如果设置大于0，当你当前的 %s 达到|cFFFFD100当前|r生命值百分比（或更多）时，可能推荐 %s。"
+        .. "自定义优先级可以忽略此设置。\n\n"
+        .. "单人游戏时，该数值减半。", Hekili:GetSpellLinkWithTexture( spec.abilities.purifying_brew.id ), Hekili:GetSpellLinkWithTexture( 115069 ) ),
     type = "range",
     min = 0,
     max = 100,
     step = 0.1,
     width = "full"
 } )
+
 
 spec:RegisterSetting( "purify_stagger_maxhp", 6, {
-    name = strformat( "%s: %s Tick %% Maximum Health", Hekili:GetSpellLinkWithTexture( spec.abilities.purifying_brew.id ), Hekili:GetSpellLinkWithTexture( 115069 ) ),
-    desc = strformat( "If set above zero, %s may be recommended when your current %s ticks for this percentage of your |cFFFFD100maximum|r health (or more).  "
-        .. "Custom priorities may ignore this setting.\n\n"
-        .. "This value is halved when playing solo.", Hekili:GetSpellLinkWithTexture( spec.abilities.purifying_brew.id ), Hekili:GetSpellLinkWithTexture( 115069 ) ),
+    name = strformat( "%s: %s 检测最大生命值百分比", Hekili:GetSpellLinkWithTexture( spec.abilities.purifying_brew.id ), Hekili:GetSpellLinkWithTexture( 115069 ) ),
+    desc = strformat( "如果设置大于0，当你当前的 %s 达到|cFFFFD100最大|r生命值百分比（或更多）时，可能推荐 %s。"
+        .. "自定义优先级可以忽略此设置。\n\n"
+        .. "单人游戏时，该数值减半。", Hekili:GetSpellLinkWithTexture( spec.abilities.purifying_brew.id ), Hekili:GetSpellLinkWithTexture( 115069 ) ),
     type = "range",
     min = 0,
     max = 100,
@@ -2264,23 +2292,25 @@ spec:RegisterSetting( "purify_stagger_maxhp", 6, {
     width = "full"
 } )
 
-spec:RegisterSetting( "bof_percent", 50, {
-    name = strformat( "%s: Require %s %%", Hekili:GetSpellLinkWithTexture( spec.abilities.breath_of_fire.id ),
-        Hekili:GetSpellLinkWithTexture( spec.abilities.keg_smash.id ) ),
-    desc = strformat( "If set above zero, %s may be recommended only if this percentage of your identified targets are afflicted with %s.\n\n" ..
-        "Example:  If set to |cFFFFD10050|r, with 4 targets, |W%s|w will only be recommended when at least 2 targets have |W%s|w applied.",
-        Hekili:GetSpellLinkWithTexture( spec.abilities.breath_of_fire.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.keg_smash.id ),
-        spec.abilities.breath_of_fire.name, spec.abilities.keg_smash.name ),
-    type = "range",
-    min = 0,
-    max = 100,
-    step = 0.1,
-    width = "full"
-} )
+
+-- spec:RegisterSetting( "bof_percent", 50, {
+--     name = strformat( "%s: 需求 %s 目标百分比", Hekili:GetSpellLinkWithTexture( spec.abilities.breath_of_fire.id ),
+--         Hekili:GetSpellLinkWithTexture( spec.abilities.keg_smash.id ) ),
+--     desc = strformat( "如果设置大于0，只有拥有 %s 的目标数量大于此百分比时，才会推荐使用 %s。\n\n" ..
+--         "例子：如果设置为|cFFFFD10050|r，有4个目标，|W%s|w 只有至少有2个目标拥有|W%s|w 才会被推荐。",
+--         Hekili:GetSpellLinkWithTexture( spec.abilities.breath_of_fire.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.keg_smash.id ),
+--         spec.abilities.breath_of_fire.name, spec.abilities.keg_smash.name ),
+--     type = "range",
+--     min = 0,
+--     max = 100,
+--     step = 0.1,
+--     width = "full"
+-- } )
+
 
 spec:RegisterSetting( "eh_percent", 65, {
-    name = strformat( "%s: Health %%", Hekili:GetSpellLinkWithTexture( spec.abilities.expel_harm.id ) ),
-    desc = strformat( "If set above zero, %s will not be recommended until your health falls below this percentage.",
+    name = strformat( "%s: 生命值百分比", Hekili:GetSpellLinkWithTexture( spec.abilities.expel_harm.id ) ),
+    desc = strformat( "如果设置大于0，只有生命值低于此百分比，%s 才会被推荐。",
         Hekili:GetSpellLinkWithTexture( spec.abilities.expel_harm.id ) ),
     type = "range",
     min = 0,
@@ -2289,9 +2319,9 @@ spec:RegisterSetting( "eh_percent", 65, {
     width = "full"
 } )
 
-spec:RegisterSetting( "vivify_percent", 65, {
-    name = strformat( "%s: Health %%", Hekili:GetSpellLinkWithTexture( spec.abilities.vivify.id ) ),
-    desc = strformat( "If set above zero, %s will not be recommended until your health falls below this percentage.",
+spec:RegisterSetting( "vivify_percent", 75, {
+    name = strformat( "%s: 生命值百分比", Hekili:GetSpellLinkWithTexture( spec.abilities.vivify.id ) ),
+    desc = strformat( "如果设置为大于0，当你的生命值低于此百分比时，%s 才会被推荐。",
         Hekili:GetSpellLinkWithTexture( spec.abilities.vivify.id ) ),
     type = "range",
     min = 0,
@@ -2300,12 +2330,12 @@ spec:RegisterSetting( "vivify_percent", 65, {
     width = "full"
 } )
 
-spec:RegisterSetting( "max_damage", true, {
-    name = strformat( "%s: Maximize Damage", Hekili:GetSpellLinkWithTexture( spec.auras.blackout_combo.id ) ),
-    desc = strformat( "If checked, %s won't be recommended if %s is up to maximize damage.\n",
+spec:RegisterSetting( "combo_max_damage", false, {
+    name = strformat( "%s: 伤害最大值", Hekili:GetSpellLinkWithTexture( spec.auras.blackout_combo.id ) ),
+    desc = strformat( "如果勾选，%s 不会被推荐，当 %s 已经达到最大伤害值。\n",
         Hekili:GetSpellLinkWithTexture( spec.abilities.purifying_brew.id ), Hekili:GetSpellLinkWithTexture( spec.auras.blackout_combo.id ) ),
     type = "toggle",
     width = "full",
 } )
 
-spec:RegisterPack( "Brewmaster", 20241021, [[Hekili:nJvBVTnos4FlblGAC6gfjz7MKIydCTF52IdloaxG9BwMwI2MBKe1rrL0CWq)23HuVrklkB3KDBrbkCehoZZ8cho8zP7YVUCriIJx(7EoEtCD8CTDDhF30jlxWFjfVCrkk4r0w4hjOy4))ed)CmkJJzILEjIIcfQiJMZcGL3X5PzF8MB2s47YxBhqJVjJeNhH4eAsadTHl(7GBwUyDojI)Bjlx3V9hVCbkNVJcMzbj(ZGMjHH4sXXzblxie)AxNR9C)yXQpHw)skJs3a)mcamnNxS6Z0410IVu8LArDfI(VYsXbWQcz)3iwmn5LIvOGGCjkPm4psclwjmAXQ8ub2A0HZ9x759rHMtYYJXhASvpd(DXQVs2Ibf9FrrXQ71zQW(prjG(dP5RJWx)5p1kWDLkVsGeWg4Kmsakc0uoJS5fsYwWKqciRDt3ET3hGn91DaA(dey0)aqajz5IisgptMDXBq5rC4N)UmBJtqGLdx(PLlcyeirsqqUgX2I52H415B2yhajyWy2mmkGdjIar2dsYPyeZFheF8Z4mYJ4LCiTj0zTeHKnBYZW(XOTKavtbco2OX3Hrr8D2PI0YdZkwLH5cZNz)e5jWT9tXqTvcSOvXkj(GVJci08mFPeqmsyE780wKuUvHDNmGtN8OmMAPyZuzO2FdL5hGJWqGqKaajUSyfNeJ95uW9(MFWorildqCXQTbH2W3kwTFFfcLAHGdbXiaUAHU2cmCmIKuQdx7PfRUsrxJkvxaLgfsFoXUbn(RHsaT96PVtWwvOZFdRmGi8H5sJ0gIsRlQKkueQMEsHQYseD0iqyDu6ciqHIGeMnjgou(KWz1LUYedfVgPOTMCJiUhIGIlSYwxxDg0pqCeScjJADtDBlCZpy0n3YOvjRVFl3B5ughTf6j4hKZy7sL5cNsblxOS4F(SJTZHYE3A0TYOr0FM9kz5RZW1M3DAjTE9nRVFxduZ3NNj34qo09)WsxVoF6uswUoNw26VdVRUKAwJ7nS3mR)Wa0v1zqx08LP)DN)EZ8q3H9qVt7g7Iv3ovQEsc4dcnu6K(JZKwPsy5vtxjdko2WnwVV9NIlVkllgv77YydCjmxbuYGJYWgO4uCcmpclwc3tCaJIvtDEZH7LviwbthEtuh3rc6jQJpXP5b78PB8dXi(UoZp5A(2zPP3s2Wf7LVd7t)MnKRdEu6qtKiStmOPKbVRE(QwCG)wkoQnW(bvmMsRKrdB3QkY6ikn0Fto7LUIDNMyywgMjgRORy3RkgIfGseJDXysqQjQNJQOrKT74z()zE424EK1vv2negwc0UsPnqlkjagEGbdpaZHh1v0XAUdARm8ZibpM1vYUdH2KXzKKhXCxOPreLR83In1nH3ztED2KNCtMhUbNGzBFrM9N4OMTGcfOIPPM0Z8GeVYgAY1rYhGjcv7kF(LVYRVSFcfLJlVBYES8OM65XAD8mgLcVpsOekle6OvDLYfIhwX7XeLO0Md5gz9M5Hd9mpOXpbEF7S1hecAgQ(nkoyE(KxzCyJ4uQV27xC6BbXfut(EICEDICd5MJnpPYR0nptq3B6U5XFhKTvJsvHV3GK(yx9(4vo3JWo7(AET2KWR28xNZY62YDSwhYUorxHn)s92Y(nr5Kqc)fHsILxfvx43AhgjtChBwEsjYf6(ixE2jpQYKaxqMJFkksEz4yZ9xRqygCtryZilhaUhXaYIrz7KAZCR2kTjEipdExCkkld2FM2X8HSyBn4bQqLpIdwu9C5yPCIIkqZWejIGU4EtnHUxkKW9Ec7d3XetWLLLtAD6SussIaHbmXD5nzfZ9AFLPBZnVmDSDOjHNmytI(JJ9ZiIHuLOFs3iOyq16jmfR3QeZ1ec5U8OzSXNqXJYyR6Asgp0AtatlgrLQaQT7CMEIwBI2A)osP1MGLNTtOT)efI9FMK0DcTjAZmtsEI(i2pHK))ru5WV1d00DBMBbupzKOOf6LETsJ3gi3gbH20LBa(0wCIPofto(KyVs71)PkOhCkdlkSrTK(2uB3307MFNxtbxv79dp8125V8FlEcMQxSsfF(UU2WWTpJycGcJfljQMeNcpfcUWxq3(7QiO(DfRy4)xouIbLFzub96OCongXfFaQ5t2IZSl(Y)HKalnTKgEWAYLF3Wmoc6MtpQu1Ehi9LUFBKTGL9FtcvHj8kpIsHt1sU1HLLuIhig6(orqNUHeHRdnWJXRZcVF2nLX9IV03AnHWFLSzMPiUalvBg2YbmXxUvJC4RUxno6vxOKYCHMAFR4dZmqgV1WeXRQx9(PLivYMS1GKUBDzp0T)qfj3733hTXwgPy)bx7PxvT3r73Fes1FWRwwRdjsFUGPEf3txfQUNjIYTU8IHle737gb7RNPrReUNR0gv8LF5xQRA7jtebNK8dcNnvPWRbrM7R2BARuoRuOaSNTyxE52WvfsovoBF8a0OZs2ChlfwVMp7iCQniaf869JfFx5Ox7zmi2dgToFik5p8uryjzJ)dgapF0DYHV3kiwM1M5mSpmt3hGNZ9pyu87cIUAquH0Zo3EC7uRdzzDE7JCV6s416Vx8FxjJ8JgzzK4xvl2z9owDQZzB1l7L92rQ2uNCw1vAPlvaeJKXoFILci7HawT0U(adWxAzvv7RnKOQ(vDotvxPdfPAb1Agr10KgbOAwwLVt1fedxadqg)Rc2jNvZO5rLWt3zviLuevlNa(HjodF17zFS4uzPzUJ94RAlHSmrdP1fNchm)K4exCeUe)H4mASa(GNJ(hM7o5CCxpf39ngNNbk0c6hLtp4cGZpWRXvNMNw)sc1p210QR1HofrS5IJYgJwJYMNb30o8a61uLV5jVkJH2pRekBQN3(Q98P(ziXAi1BzITmdluxIo2YmFlpCVLaZT86mFYrI1NvO(WHdmvVQvRObvzXVzoSAFSsVbT9719VhMocEF1fhjpSF)LdeZgpyAAuNREB5EQ3IkTWDxMLuxu7bpMRNlViA(eNRnZzZvQ81CcvTNToLuTS8Vc]] )
+spec:RegisterPack( "酒仙Simc", 20250730, [[Hekili:DRX(VnrY5)wqvQbUQ6yVjHeQkOA4Noeb1wxvkuvVE8UJTh8(WANzJtqNSchLEHh3X127bfO9eioUR00J(4obheU(htZ6y(P8Vq)Mz9UE317o2oyGOgfLyV7389(18nt5cL)fLlPJy4YNwjVYc5xk)C5YNFHLw4WLlXwRfUCPwiTMO6WhSqMWFFXL)dB)S)ujIPg)vRzyJ05OGA76ObVUbJ1I(JMD26ewd3Q50SnNLsmDnqmITLMdQgJ)DTzlxQQlXG92wLRMg9xm)sLlHCznSDkxci2jamt01X(GJPaXluiNsNt25KE3(EDVZME3)V27BU2UBDRov69Ep07X)ZZCIt19kF32p5AcyU)xSZxCtV7DPbGbp9eT)zfxXSXp)NQ4SS5Y)QINQqvJFjU1jAE8IflwFvL2lBUkD5ZF6lS8foBr)FoZzA)2MNR(5oB7INI)ytJgNJE2ZzEwft25mpE1IfBRqpn70vVaD5IfH)vcGI2Ez6XfSXdE3U)L78I7SEVhCXUBCZUFYNY51R(LB)SR5D5pF3TUEVh9y4j9U719(GN5T16EF4J2DRlYxzVV5XDVY18LSEpFtV7Sb87o3(R924F07I3Q76pCNN9h7(N)mV3)F7DJG1SZ3DFVB(V8(QBie3VhTHDBMTTbJ0QZjNvdrzDQ8R)jAUouBNFtNkE3ytVp6(78b)2DUYTFXT)yVlDdakgYPtLepZFLE36dEXh)EEx(V19t(2YLmiugv4jHRHCnyWhpTWZcPXT78NZSxTCjSfQQbwV8XlZa7DuaOTWih1gilDvkZH0eNa454ap4jL0CimSdbbFcKjD72wQAnWAn7u573PcdzGTy5QAaUU2UmvWlSQDU(Rwarv3A1s(E3wdyhnKHHQ)xu5cNViQ6hciaNZuZpMm1yIxtcJuxeOWr(czICgXe3PYpUtfoJGyQ6yd0AcXY0EfIv9bKJHSAQ2hQ2icJJ3dVhWBgVz2ovugB6UyuZDlB))hZgVuMCwdmYG1ixlnMGlwiFenAdhBtCvxkJaRtTkquvQRpjpsuewnc75qSAIzfa3odBwKVdRPqE5lsjXIuelQqMSUWtRng1Y2IQAxt12rh7a(Ac92bavRpAYXkKJqZLL0Ko0WxQd)QceZfzOA6QNoCmaNCABqQ3GrbR3kc1V68Zp3cZTWqRrzI4eLXKtugnNmqz7sXQGg0Kk0Ukt34mhKgbziW8eLwHJVvWQylSjbt7u5yDQuymjjYglO34MXiv6bE(kJj9OC)FwOOMmDCvdBBD1AUoRjlNCvSdf70uezpCY4aOqoAilSkZ2Xbs6MaY5JczFJ(5D1RBomOlef0AehSGjta0HJrzlnmuSa8346IeqglDtvuDUxh4lQ1Kghqwq(8aDuQwhkdvVoe3cjIwzTaxBkMXaLdnNabQMOvv1rMIELcZZ56qQTgpYOQdUDOgE0j5oANkho)ij0GAzAydqxa2AbHYX9KI4Qe7LYlNoL4cIvnxkq8m5KaagYlPjUUk1erBmKDks9rPglbRuNuJjS5nGeoRMdmG8OQJfuXkrfLqzd3qTfg6KL7EgWr4vBHnGEtCmLBapOFcp)MpsyqcB(4DEhEvu)y9KaPb0OE)i9cDQCibNMbwdvWJcZHaMk2dxqCp14ahnXbOgb95EWrkufVczfGsbQ5bopWZHSv2UuvbeenHPowBz(lvERx8Epa6iWBin9Lo1A2oQd0mGhCGgM3GdKct4uhv0RRPNtagx5k4sbMiyDamsqz8HFHd2erS6R(YbLyFRi46qYYpiPTVicwwX8zWo95ZdoQ44qPmrRX(O(qYYOiPTYS57yzjE9Z7rZbTyM8FDh7PepKQpz)slQWoXCA0sKIYpLBqnhre0Xo6OwPmNQS7SMAByV)x2eXp5ZTGmz8iJNbCmQITheqan7n5tSqzIv89J8gW29YjAJJLtYUNEnh7D0qHuUmD00vgqZf5LkOz37WRhB5utolixohZUc47KxGEIfidCm4lKQZ5V7Q(alkA(wcvt(Cq7B)GbFKxw13f5qbYUq3af6zrBNjE9fDsTA8Dyc0IOLOdvGdAHTc72tYo2EnjkryOjqmsOaeIs2TwmvC6eVhrBH1enEZzyBR1GTOQ5kgaSTtUvqgUy)Cj5MtiYr1lb4qY0s0TzPqcFUmhd2Dhj6yOsVsFHSBvzFJEyqh)dPmc73FkQrYU5NPIgPgFJ)Qr7jwjFAVGNyz(9IoujHoCKcC2nenve4jK9t1fiCNzd5bevFPKFQ6iKDtu7B0lVQsreoGMSB4AFJo4vF6HqTr29Mnv0g7lsnekSJA2oVKc7eY6Vrtl0xNWG(7CWCrbXgJPU54sBW7548iDSABILEKjHC0ytsAii9jgD4ZoCyiJpP3yZSoPwjbSXMCnXAf7MyvlI7fq2jam2ijdnPnj8dzigGz3u1bcoxmHPW)i0s06SwdIAvxh6ioyUbH71mCj6e2AC5ZuC0jbb8r0xekxDrDT85xPd3inx2OtCJr4BhOfYWu(Ce6ZFunKHEyx3dXAdMTR0nShmStWB1bRduNYlqrJLBtgbheSnekIoXUHEz00qZjGJh9aygXAW148tLigqhraex6sCUqZpqMPTiwwCouZHFojbMej7R)LZwpQZImL8t7X9SEWS0JHBtj2SRZWuXtCMudY3ovW(G4VpYaWZ0NGd3bhPfBUXW5jYScJJPrS32dm8bHJxTLHTGeGR)G9toC8q8Kks2QgOJCQVMVtgKK)hgPIqi2giXq9d)fapQo2kR4AjBjAkrV0Jc4hYIn(vEDLxHLicEsKlka11eQXQgEujugI5IJfGhwlqrEjKr60psFzjjchLXrsbPuoS6dgPe3sHrTbfaJ0)J08pXR0MsLRuICmiapRbjfvKxIshlO)aV2btw8)BZKfJPggHceLKLpuqRJJQ3GHtoMDj9Xk3y2LeN0EPKuem8UmTOVYjjBLv9ALXkXD2vhsX9tADMSh8yIuYzeyLDxCsQU03DkJJIDOSkzaxyuZyEgWY7N5nuTjztf7LUHCjdGAcTLJSl69ihkzmitj1Embr0lWkyhXKO8VkWloheD3g5Wnn0YL693FG3V)Q7U1T8E0wEx(ZNP)vnDgVn(0E39l9VuTB)K13(P3U)LQ9)8vD)OV9)U(725K7S5Mfk07UxhwCVNVz33)EZeCR0KEP7Mz7N80zgV7N3m7U1gf6U5D3DRRmouC4Rlxk0kfGMmQi)Y2LcfhXcgBQl9cegNUYbDYO4O0Qzb0KrLjrRoolib17CYUB8HEx9Z89Y3(P)Uf3(jpS7vxV3LEUVNUakXfMwdcuo8s8b0yxJyaDykIIk))c]] )

@@ -1,5 +1,3 @@
-## https://github.com/simulationcraft/simc/blob/thewarwithin/ActionPriorityLists/default/warrior_arms.simc
-
 actions.precombat+=/battle_shout
 actions.precombat+=/battle_stance,toggle=on
 actions.precombat+=/variable,name=trinket_1_exclude,value=trinket.1.is.treacherous_transmitter
@@ -13,9 +11,9 @@ actions.precombat+=/variable,name=trinket_priority,op=setif,value=2,value_else=1
 actions.precombat+=/variable,name=trinket_1_manual,value=trinket.1.is.algethar_puzzle_box
 actions.precombat+=/variable,name=trinket_2_manual,value=trinket.2.is.algethar_puzzle_box
 
-actions+=/charge,if=time<=0.5|movement.distance>8
 actions+=/potion,if=gcd.remains=0&debuff.colossus_smash.remains>8|boss&fight_remains<25
 actions+=/pummel,if=target.debuff.casting.react
+actions+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check
 actions+=/call_action_list,name=variables
 actions+=/call_action_list,name=trinkets
 actions+=/arcane_torrent,if=cooldown.mortal_strike.remains>1.5&rage<50
@@ -40,15 +38,14 @@ actions.colossus_aoe+=/thunder_clap,if=!dot.rend.remains
 actions.colossus_aoe+=/thunderous_roar
 actions.colossus_aoe+=/avatar
 actions.colossus_aoe+=/sweeping_strikes
-actions.colossus_aoe+=/ravager
 actions.colossus_aoe+=/warbreaker
+actions.colossus_aoe+=/ravager
 actions.colossus_aoe+=/champions_spear
 actions.colossus_aoe+=/colossus_smash
 actions.colossus_aoe+=/cleave
 actions.colossus_aoe+=/bladestorm,if=talent.unhinged|talent.merciless_bonegrinder
 actions.colossus_aoe+=/thunder_clap,if=dot.rend.remains<5
 actions.colossus_aoe+=/demolish,if=buff.colossal_might.stack=10&(debuff.colossus_smash.remains>=2|cooldown.colossus_smash.remains>=7)
-actions.colossus_aoe+=/overpower,if=talent.dreadnaught
 actions.colossus_aoe+=/mortal_strike
 actions.colossus_aoe+=/overpower
 actions.colossus_aoe+=/thunder_clap
@@ -68,7 +65,7 @@ actions.colossus_execute+=/warbreaker
 actions.colossus_execute+=/execute,if=buff.juggernaut.remains<=gcd&talent.juggernaut
 actions.colossus_execute+=/skullsplitter,if=rage<40
 actions.colossus_execute+=/demolish,if=debuff.colossus_smash.up
-actions.colossus_execute+=/mortal_strike,if=debuff.executioners_precision.stack=2&!dot.ravager.remains|!talent.executioners_precision|talent.battlelord&debuff.executioners_precision.stack>0
+actions.colossus_execute+=/mortal_strike,if=debuff.executioners_precision.stack=2&!buff.ravager.up|!talent.executioners_precision|talent.battlelord&debuff.executioners_precision.stack>0
 actions.colossus_execute+=/overpower,if=rage<90
 actions.colossus_execute+=/execute,if=rage>=40&talent.executioners_precision
 actions.colossus_execute+=/overpower
@@ -109,7 +106,8 @@ actions.colossus_sweep+=/thunder_clap,if=dot.rend.remains<=8&buff.sweeping_strik
 actions.colossus_sweep+=/rend,if=dot.rend.remains<=5
 actions.colossus_sweep+=/slam
 
-actions.slayer_aoe+=/thunder_clap,if=!dot.rend.remains
+actions.slayer_aoe=thunder_clap,if=!dot.rend.remains
+actions.slayer_aoe+=/sweeping_strikes
 actions.slayer_aoe+=/thunderous_roar
 actions.slayer_aoe+=/avatar
 actions.slayer_aoe+=/champions_spear
@@ -145,7 +143,7 @@ actions.slayer_execute+=/execute,if=buff.juggernaut.remains<=gcd*2&talent.jugger
 actions.slayer_execute+=/bladestorm,if=(debuff.executioners_precision.stack=2&(debuff.colossus_smash.remains>4|cooldown.colossus_smash.remains>15))|!talent.executioners_precision
 actions.slayer_execute+=/skullsplitter,if=rage<=40
 actions.slayer_execute+=/overpower,if=buff.martial_prowess.stack<2&buff.opportunist.up&talent.opportunist&(talent.bladestorm|talent.ravager&rage<85)
-actions.slayer_execute+=/mortal_strike,if=dot.rend.remains<2|debuff.executioners_precision.stack=2&!dot.ravager.remains
+actions.slayer_execute+=/mortal_strike,if=dot.rend.remains<2|debuff.executioners_precision.stack=2&!buff.ravager.up
 actions.slayer_execute+=/overpower,if=rage<=40&buff.martial_prowess.stack<2&talent.fierce_followthrough
 actions.slayer_execute+=/execute
 actions.slayer_execute+=/overpower
@@ -208,3 +206,9 @@ actions.trinkets+=/use_item,name=bestinslots,if=cooldown.avatar.remains>20|(buff
 actions.variables+=/variable,name=st_planning,value=active_enemies=1
 actions.variables+=/variable,name=adds_remain,value=active_enemies>1
 actions.variables+=/variable,name=execute_phase,value=(talent.massacre.enabled&target.health.pct<35)|target.health.pct<20
+
+actions.mitigation=/spell_reflection
+actions.mitigation=/impending_victory,if=health.pct<=40
+actions.mitigation=/spell_reflection,if=health.pct<=hp_gap&buff.spell_reflection_defense.down&buff.die_by_the_sword.down&buff.rallying_cry.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic)
+actions.mitigation+=/die_by_the_sword,if=health.pct<=hp_gap&buff.spell_reflection_defense.down&buff.die_by_the_sword.down&buff.rallying_cry.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)
+actions.mitigation+=/rallying_cry,if=health.pct<=hp_gap&buff.spell_reflection_defense.down&buff.die_by_the_sword.down&buff.rallying_cry.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)

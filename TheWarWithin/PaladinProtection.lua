@@ -2,6 +2,7 @@
 -- August 2025
 -- Patch 11.2
 
+if not Hekili.check then return end
 if UnitClassBase( "player" ) ~= "PALADIN" then return end
 
 local addon, ns = ...
@@ -192,6 +193,7 @@ spec:RegisterTalents( {
     wrathful_descent                = {  95177, 431551, 1 }, -- When Empyrean Hammer critically strikes, 100% of its damage is dealt to nearby enemies. Enemies hit by this effect deal 5% reduced damage to you for 8 sec.
     zealous_vindication             = {  95183, 431463, 1 }, -- Hammer of Light instantly calls down 2 Empyrean Hammers on your target when it is cast.
 } )
+
 
 -- PvP Talents
 spec:RegisterPvpTalents( {
@@ -1086,6 +1088,48 @@ end )
 
 -- Abilities
 spec:RegisterAbilities( {
+
+    tank_combat_wait= {
+        name = "坦克战斗介入",
+        listName = '|T134376:0|t |cff00ccff[坦克战斗介入]|r',
+        indicator = "wait",
+        texture = 134376,
+        cast = 0,
+        cooldown = 0,
+        gcd = "spell",
+        essential = true
+    },
+
+    intercession = {
+        id = 391054,
+        cast = 1.5,
+        charges = 5,
+        recharge = 600,
+        cooldown = 600,
+        gcd = "spell",
+
+        spend = 3,
+        spendType = "holy_power",
+        usable = function ()
+            if not Hekili:isMouseOverMemberDead() then
+                return false, "not on interface"
+            end
+
+            if Hekili.resurrectionCount(391054) <= 0 then
+                return  false, "intercession unsuable"
+            end
+            
+        end,
+        target = "mouseover",
+        startsCombat = false,
+        texture = 4726195,
+
+        handler = function ()
+            spend( 0.02 * mana.max, "mana" )
+        end,
+    },
+
+
     -- Talent: Reduces all damage you take by 20% for 8 sec. While Ardent Defender is active, the next attack that would otherwise kill you will instead bring you to 20% of your maximum health.
     ardent_defender = {
         id = 31850,
@@ -1112,7 +1156,54 @@ spec:RegisterAbilities( {
         cast = 0,
         cooldown = function() return 15 * ( buff.moment_of_glory.up and 0.25 or 1 ) end,
         gcd = "spell",
+        usable = function ()
+            return target.exists
+        end,
+        talent = "avengers_shield",
+        startsCombat = true,
 
+        handler = function ()
+            applyDebuff( "target", "avengers_shield" )
+            interrupt()
+            removeStack( "moment_of_glory", nil, 1 )
+            removeBuff( "shield_of_virtue" )
+
+            if talent.barricade_of_faith.enabled then applyBuff( "barricade_of_faith" ) end
+            if talent.bulwark_of_order.enabled then applyBuff( "bulwark_of_order" ) end
+            if talent.crusaders_resolve.enabled then applyDebuff( "target", "crusaders_resolve" ) end
+            if talent.first_avenger.enabled then applyBuff( "first_avenger" ) end
+            if talent.gift_of_the_golden_valkyr.enabled then
+                reduceCooldown( "guardian_of_ancient_kings", 0.5 * talent.gift_of_the_golden_valkyr.rank * min( active_enemies, 3 + ( talent.soaring_shield.enabled and 2 or 0 ) ) )
+            end
+            if talent.refining_fire.enabled then applyDebuff( "target", "refining_fire" ) end
+            if talent.strength_in_adversity.enabled then addStack( "strength_in_adversity", nil, min( active_enemies, 3 + ( talent.soaring_shield.enabled and 2 or 0 ) ) ) end
+
+            if set_bonus.tier29_2pc > 0 then applyBuff( "ally_of_the_light" ) end
+            if set_bonus.tier30_2pc > 0 then
+                applyDebuff( "target", "heartfire" )
+                if active_enemies > 1 then active_dot.heartfire = min( active_enemies, active_dot.heartfire + 2 ) end
+            end
+
+            if conduit.vengeful_shock.enabled then applyDebuff( "target", "vengeful_shock" ) end
+            if legendary.bulwark_of_righteous_fury.enabled then addStack( "bulwark_of_righteous_fury", nil, min( 5, active_enemies ) ) end
+        end,
+    },
+
+    -- Talent: Hurls your shield at an enemy target, dealing 1,240 Holy damage, interrupting and silencing the non-Player target for 3 sec, and then jumping to 2 additional nearby enemies. Shields you for 8 sec, absorbing 25% as much damage as it dealt. Deals 167 additional damage to all enemies within 5 yards of each target hit.
+    avengers_shield_interrupt = {
+        id = 31935,
+        cast = 0,
+        cooldown = function() return 15 * ( buff.moment_of_glory.up and 0.25 or 1 ) end,
+        gcd = "spell",
+        usable = function () return state.readyToInterrupt() , "readyToInterrupt" end,
+        toggle = "interrupts",
+        target = function () 
+            if not UnitExists("focus") then
+                return debuff.casting_target.caster
+            else
+                return debuff.casting_focus.caster
+            end
+        end,
         talent = "avengers_shield",
         startsCombat = true,
 
@@ -1178,7 +1269,7 @@ spec:RegisterAbilities( {
         school = "holy",
 
         talent = "bastion_of_light",
-        startsCombat = false,
+        startsCombat = true,
 
         toggle = "cooldowns",
 
@@ -1198,7 +1289,7 @@ spec:RegisterAbilities( {
         school = "holy",
 
         talent = "blessed_hammer",
-        startsCombat = true,
+        startsCombat = false,
 
         handler = function ()
             applyDebuff( "target", "blessed_hammer" )
@@ -1341,8 +1432,8 @@ spec:RegisterAbilities( {
 
         talent = "cleanse_toxins",
         startsCombat = false,
-        toggle = "interrupts",
-
+        toggle = "defensives",
+        
         usable = function ()
             return buff.dispellable_poison.up or buff.dispellable_disease.up, "requires poison or disease"
         end,
@@ -1377,7 +1468,7 @@ spec:RegisterAbilities( {
         cooldown = 9,
         gcd = "spell",
         school = "holy",
-
+        usable = function () return target.distance <= 8 and target.exists, "target must be nearby" end,
         startsCombat = true,
 
         handler = function ()
@@ -1480,7 +1571,7 @@ spec:RegisterAbilities( {
         cooldown = function() return 60 * ( 1 - 0.33 * talent.inmost_light.rank ) end,
         gcd = "spell",
         school = "holy",
-
+        usable = function () return target.distance <= 8, "target must be nearby" end,
         talent = "eye_of_tyr",
         startsCombat = true,
         nobuff = function() return buff.hammer_of_light_free.up and "hammer_of_light_free" or "hammer_of_light_ready" end,
@@ -1657,7 +1748,7 @@ spec:RegisterAbilities( {
         talent = "hammer_of_wrath",
         startsCombat = false,
 
-        usable = function () return target.health_pct < 20 or ( level > 57 and ( buff.avenging_wrath.up or buff.sentinel.up ) ) or buff.hammer_of_wrath_hallow.up or buff.negative_energy_token_proc.up, "requires low health, avenging_wrath, or ashen_hallow" end,
+        usable = function () return (target.health_pct < 20 or ( level > 57 and ( buff.avenging_wrath.up or buff.sentinel.up ) ) or buff.hammer_of_wrath_hallow.up or buff.negative_energy_token_proc.up) and target.exists, "requires low health, avenging_wrath, or ashen_hallow" end,
         handler = function ()
             gain( 1, "holy_power" )
 
@@ -1771,7 +1862,9 @@ spec:RegisterAbilities( {
         recharge = function () return talent.crusaders_judgment.enabled and ( 11 - ( 0.5 * talent.seal_of_alacrity.rank ) ) or nil end,
         gcd = "spell",
         school = "holy",
-
+        usable = function ()
+            return target.exists
+        end,
         spend = 0.03,
         spendType = "mana",
 
@@ -1799,7 +1892,7 @@ spec:RegisterAbilities( {
         cooldown = function () return 600 * ( talent.unbreakable_spirit.enabled and 0.7 or 1 ) * ( talent.uthers_counsel.enabled and 0.85 or 1 ) end,
         gcd = "off",
         school = "holy",
-
+        usable = function () return time > 0 end,
         talent = "lay_on_hands",
         startsCombat = false,
 
@@ -1825,7 +1918,7 @@ spec:RegisterAbilities( {
         school = "holy",
 
         talent = "moment_of_glory",
-        startsCombat = false,
+        startsCombat = true,
 
         toggle = "cooldowns",
 
@@ -1847,9 +1940,14 @@ spec:RegisterAbilities( {
         startsCombat = true,
 
         toggle = "interrupts",
-
-        debuff = "casting",
-        readyTime = state.timeToInterrupt,
+        target = function () 
+            if not UnitExists("focus") then
+                return debuff.casting_target.caster
+            else
+                return debuff.casting_focus.caster
+            end
+        end,
+        usable = function () return state.readyToInterrupt() and target.distance <= 5, "readyToInterrupt" end,     
 
         handler = function ()
             interrupt()
@@ -1891,7 +1989,7 @@ spec:RegisterAbilities( {
 
         startsCombat = true,
 
-        usable = function() return equipped.shield, "requires a shield" end,
+        usable = function() return equipped.shield and target.distance <= 8, "requires a shield" end,
 
         handler = function ()
             removeBuff( "bulwark_of_righteous_fury" )
@@ -1977,9 +2075,34 @@ spec:RegisterAbilities( {
 
 local wog_str = Hekili:GetSpellLinkWithTexture( spec.abilities.word_of_glory.id )
 
-spec:RegisterSetting( "wog_health", 40, {
-    name = format( "%s Health Threshold", wog_str ),
-    desc = format( "If set above zero, %s may be recommended when your health falls below this percentage.", wog_str ),
+local bless = Hekili:GetSpellLinkWithTexture( spec.abilities.blessed_hammer.id )
+spec:RegisterSetting("bless_out_combat", true, {
+    name = format("%s 战斗外允许祝福之锤", bless),
+    desc = "开启后则允许战斗外推荐祝福之锤",
+    type = "toggle",
+    width = "full",
+} )
+spec:RegisterStateExpr( "bless_out_combat", function ()
+    return settings.bless_out_combat or false
+end )
+
+spec:RegisterSetting("combat_delay", 2, {
+    name = "战斗延迟介入",
+    desc = "如果该值不等于0, 则允许战斗后延迟该值-X秒后再推荐技能,推荐值为6\n\n它同样会在x/2秒后当玩家停止不动时开始推荐技能\n\n它也同样会在玩家站定不动时自动开始介入",
+    type = "range",
+    min = 0,
+    max = 20,
+    step = 1,
+    width = "full"
+} )
+
+spec:RegisterStateExpr( "combat_delay", function ()
+    return settings.combat_delay or 0
+end )
+
+spec:RegisterSetting("wog_health", 50, {
+    name = format("%s 生命值阈值", wog_str),
+    desc = format("当数值大于零时，若生命值低于该百分比，系统可能推荐使用%s。", wog_str),
     type = "range",
     min = 0,
     max = 100,
@@ -1993,9 +2116,9 @@ end )
 
 local loh_str = Hekili:GetSpellLinkWithTexture( spec.abilities.lay_on_hands.id )
 
-spec:RegisterSetting( "loh_health", 30, {
-    name = format( "%s Health Threshold", loh_str ),
-    desc = format( "If set above zero, %s may be recommended when your health falls below this percentage.", loh_str ),
+spec:RegisterSetting("loh_health", 30, {
+    name = format("%s 生命值阈值", loh_str),
+    desc = format("当数值大于零时，若你的生命值低于该百分比，系统可能会推荐使用%s。", loh_str),
     type = "range",
     min = 0,
     max = 100,
@@ -2007,80 +2130,80 @@ spec:RegisterStateExpr( "loh_health", function ()
     return settings.loh_health or 0
 end )
 
-local ad_str = Hekili:GetSpellLinkWithTexture( spec.abilities.ardent_defender.id )
+-- local ad_str = Hekili:GetSpellLinkWithTexture( spec.abilities.ardent_defender.id )
 
-spec:RegisterSetting( "ad_damage", 40, {
-    name = format( "%s Damage Threshold", ad_str ),
-    desc = format( "If set above zero, %s may be recommended when you take this percentage of your maximum health in damage over 5 seconds.\n\n"
-        .. "It is better to learn to use your defensive abilities proactively before taking damage, but this setting may help you learn (and prevent death).\n\n"
-        .. "By default, your |cFFFFD100Defensives|r toggle must also be enabled.", ad_str ),
-    type = "range",
-    min = 0,
-    max = 100,
-    step = 1,
-    width = "full",
-} )
+-- spec:RegisterSetting("ad_damage", 40, {
+--     name = format("%s 伤害阈值", ad_str),
+--     desc = format("当数值大于零时，若你在5秒内受到相当于最大生命值该百分比的伤害，系统可能会推荐使用%s。\n\n"
+--     .. "建议优先学会在受伤前主动使用防御技能，但此设置可辅助学习使用时机（并避免死亡）。\n\n"
+--     .. "默认需要同时启用|cFFFFD100防御技能|r开关。", ad_str),
+--     type = "range",
+--     min = 0,
+--     max = 100,
+--     step = 1,
+--     width = "full",
+-- } )
 
-spec:RegisterStateExpr( "ad_damage", function ()
-    return ( settings.ad_damage or 0 ) * health.max * 0.01
-end )
+-- spec:RegisterStateExpr( "ad_damage", function ()
+--     return ( settings.ad_damage or 0 ) * health.max * 0.01
+-- end )
 
-local goak_str = Hekili:GetSpellLinkWithTexture( spec.abilities.guardian_of_ancient_kings.id )
+-- local goak_str = Hekili:GetSpellLinkWithTexture( spec.abilities.guardian_of_ancient_kings.id )
 
-spec:RegisterSetting( "goak_damage", 40, {
-    name = format( "%s Damage Threshold", goak_str ),
-    desc = format( "If set above zero, %s may be recommended when you take this percentage of your maximum health in damage over 5 seconds.\n\n"
-        .. "It is better to learn to use your defensive abilities proactively before taking damage, but this setting may help you learn (and prevent death).\n\n"
-        .. "By default, your |cFFFFD100Defensives|r toggle must also be enabled.", goak_str ),
-    type = "range",
-    min = 0,
-    max = 100,
-    step = 1,
-    width = "full",
-} )
+-- spec:RegisterSetting("goak_damage", 40, {
+--     name = format("%s 伤害阈值", goak_str),
+--     desc = format("若设置大于零，当你在5秒内受到相当于最大生命值该百分比的伤害时，系统可能会推荐使用%s。\n\n"
+--     .. "最佳做法是在受到伤害前主动使用防御技能，不过该设置可帮助你学习使用时机（并避免死亡）。\n\n"
+--     .. "默认需要同时启用|cFFFFD100防御技能|r开关。", goak_str),
+--     type = "range",
+--     min = 0,
+--     max = 100,
+--     step = 1,
+--     width = "full",
+-- } )
 
-spec:RegisterStateExpr( "goak_damage", function ()
-    return ( settings.goak_damage or 0 ) * health.max * 0.01
-end )
+-- spec:RegisterStateExpr( "goak_damage", function ()
+--     return ( settings.goak_damage or 0 ) * health.max * 0.01
+-- end )
 
-local ds_str = Hekili:GetSpellLinkWithTexture( spec.abilities.divine_shield.id )
+-- local ds_str = Hekili:GetSpellLinkWithTexture( spec.abilities.divine_shield.id )
 
-spec:RegisterSetting( "ds_damage", 60, {
-    name = format( "%s Damage Threshold", ds_str ),
-    desc = format( "If set above zero, %s may be recommended when you take this percentage of your maximum health in damage over 5 seconds.\n\n"
-        .. "It is better to learn to use your defensive abilities proactively before taking damage, but this setting may help you learn (and prevent death).\n\n"
-        .. "If you are actively tanking for a group and use %s, you will lose threat on all enemies and need to taunt to regain it.\n\n"
-        .. "By default, your |cFFFFD100Defensives|r toggle must also be enabled.", ds_str, spec.abilities.divine_shield.name ),
-    type = "range",
-    min = 0,
-    max = 100,
-    step = 1,
-    width = "full",
-} )
+-- spec:RegisterSetting("ds_damage", 60, {
+--     name = format("%s 伤害阈值", ds_str),
+--     desc = format("若设为大于零的值，当你在5秒内受到最大生命值此百分比的伤害时，可能会推荐使用%s。\n\n"
+--     .. "最好在受到伤害前主动使用防御技能，但此设置可辅助学习（并避免死亡）。\n\n"
+--     .. "若你正在为团队担任坦克并使用%s，将失去所有敌人的仇恨且需嘲讽重新获取。\n\n"
+--     .. "默认情况下需同时启用|cFFFFD100防御技能|r开关。", ds_str, spec.abilities.divine_shield.name),
+--     type = "range",
+--     min = 0,
+--     max = 100,
+--     step = 1,
+--     width = "full",
+-- } )
 
-spec:RegisterStateExpr( "ds_damage", function ()
-    return ( settings.ds_damage or 0 ) * health.max * 0.01
-end )
+-- spec:RegisterStateExpr( "ds_damage", function ()
+--     return ( settings.ds_damage or 0 ) * health.max * 0.01
+-- end )
 
-local bosp_str = Hekili:GetSpellLinkWithTexture( spec.abilities.blessing_of_spellwarding.id )
+-- local bosp_str = Hekili:GetSpellLinkWithTexture( spec.abilities.blessing_of_spellwarding.id )
 
-spec:RegisterSetting( "bosp_filter", false, {
-    name = format( "%s: Cast Filter", bosp_str ),
-    desc = format( "If checked, %s may be recommended |cffff0000ONLY|r when your target is casting specific spells on you.\n\n"
-        .. "The spell filter is updated behind the scenes for each season and raid tier.", bosp_str ),
-    type = "toggle",
-    width = "full",
-} )
+-- spec:RegisterSetting("bosp_filter", false, {
+--     name = format("%s：施法过滤", bosp_str),
+--     desc = format("若勾选，%s 将仅在目标对你施放特定法术时被推荐（|cffff0000仅限此类情况|r）。\n\n"
+--     .. "法术过滤列表会随赛季和团队副本层级在后台自动更新。", bosp_str),
+--     type = "toggle",
+--     width = "full",
+-- } )
 
-local sent_str = Hekili:GetSpellLinkWithTexture( 389539 )
+-- local sent_str = Hekili:GetSpellLinkWithTexture( 389539 )
 
-spec:RegisterSetting( "sentinel_def", false, {
-    name = strformat( "%s: Use Defensively", sent_str ),
-    desc = format( "If enabled, %s is placed on the |cFFFFD100Defensives|r toggle by default (rather than |cFFFFD100Cooldowns|r) and is recommended based on your %s Damage Threshold Setting.",
-        sent_str, goak_str ),
-    type = "toggle",
-    width = "full",
-} )
+-- spec:RegisterSetting("sentinel_def", false, {
+--     name = strformat("%s：防御性使用", sent_str),
+--     desc = format("启用后，%s 将默认归类至|cFFFFD100防御技能|r开关（而非|cFFFFD100冷却技能|r），并根据你的%s伤害阈值设置进行推荐。",
+--     sent_str, goak_str),
+--     type = "toggle",
+--     width = "full",
+-- } )
 
 spec:RegisterStateExpr( "defensive_sentinel", function()
     if settings.sentinel_def ~= nil then return settings.sentinel_def end
@@ -2104,7 +2227,8 @@ spec:RegisterOptions( {
 
     potion = "tempered_potion",
 
-    package = "Protection Paladin",
+    package = "防骑Simc",
 } )
 
-spec:RegisterPack( "Protection Paladin", 20250425, [[Hekili:nZvBVnUns4FlbfWRn6ghl5KSzxeBG2E4W1f9wS4sl2pCOwM2I2MnYs(eLs2ae4F73mK6fsjsjzhVPlqrtS1OHZB8HZmC2mZz2Vp7oFscD2NCh5E1OlDVAOJJ71UZUl5PD0z3TJS8EYA4xcjBH))NJJsOltyrH7N)zsaXNfI08uqeXhzfpknEjq3MKKD8pCXfRzjBsxmCz02l4STPbe8vxgtwLGFE5fZUBrkli5xdNTWOC48(z3rst2efp7U7yB)fGZmFFQKCkF5S7qYpF0LN7E1h2p)FY(6(5)C0DFE)8vaBPX7)4(pMtXiKcKjW))PWLLpYf(p4r)umW4K9Z)h0v0qF4DNNUdfj)mkV8CNrN74829ZHF6k(PZ5UUz)ez(FiOhw74OTzlv(Ro69Np6gGK)dLNefd0SLLWwtKwssMfnGXt0EdK54pVm7N3uObsrRK4BKsMRBlIX7o3DmqYVVbE(xiGo(fWdHorCT5IOb6ksAqc8RFseDifUz3ftxKEp4APHKfbu)z)8SeWzHuu(nfeVKee4j)GhYzj)9KbrLQoYIXhdlwgff4h9yih5WLhdhsIzH3ttem4QJHb8esOpj2hya8GDXuiiFbPUDZN(qKGdK0yIjZxoHbS1Bs4E)vQ)6TqGyfshRskjEjjK6brsX1P8svkxgfYPWgo5N0ORQwhTdukAs57(ajMHpf)TGu4hoa)IzW2kgPWaomXz4gc3l3JSFEV9ZR8mWuLmKe(KN)oU4593p)mfQCnq1ZpRXMC2p0pnoBxZ0jASWafdKSP(sLtRqh1di84a2GhpicDRF66d2g5A0g52GnYK2x3gzYsQzJmAbM2Mr0GjY5GmrjQBgZJ9vSyLgd(okSDkHeVg22nSs0U0D6winXeMVh9b4jdj((8H0VI4tYhx9zmPI(URm)40D23JvDpibET1SW1EpcgOnM2cAu1wKUA1q93vBz3fLJ2vfRQKhG)2eBIPBjSqqZVfoNjtdbstyBPcT2zKWjoOCX2gHQMx0kV1brXpzARUnNcFdJg4JVAYgQxmASOrPCPZzScMg7bMa)jiW0UK2mmsTOiA0QgJl6OYvDbHlasbXt4hXL(Dh0sxWAWWDtjJxXGd3cIIYWYloAWq4C(RKag5cbH7LdYxtayHH0yVykNfWOHlPIWISDtwyrdhRMjzovIBYbHgwBd6(5Gn0jhpPjVXkuk80S9xoQaFO9fX1mWEHtoMs8FQy7TnjzGkIutRieVJ)cxXM0qUez04Ey2n3xd7MJzW(xn7MRmMViBMgI5lZmP0kUCdcDW1GVxLcqkq(qIh5jrQq7Y6L(d3s(k8spTmGMd6GRNHq(k7J2q2Uf2iLVDXBvmLQHnMT2cI5Bi3tfqyBOOXIRJIQBnRtCnak6tInQjpfRZOHxzogaKMsRwfjV5dsG4Gn7wdaREU(emrbWSDv5r0Ka8unGv(P879apMhs1WmwjIb6vqwgUY6uMpbrEYxWcjRuTA9KPAcLJI5gEdohJhrbdLhiyA59cq2rVmzY(5w9vnifhu5TtwFAuCPnrZtAGspgeww47MOiZ5rivJ9eBj1oF3Y5MMoBSTxruwBmBx2bTPWU01qLHPObnAfOYyLB(XKh7)7F5lqq)LFEaFhbQZJhLaLZraDyB6YnYFBxe4yGvE)8hHY8IsbaGhXdrrwcQn8PnuSy0C6uTWTP9AGJO8LRlOWP8Cm6jk4jVDrpI1u)J7NNJJ4P(9tLr6L4MFBDVIuMmK)WH5EalkN5tLEgd(O3IM2OaPfa)DHQAZhLebwt4NKIpbAp(cg4m6rdbDMlDTadfDvqzDoyFjuxJ3IOWu(qyvEKe)OOZaECkHdjD56D5ULhQpTIlTtVJmoO3X5vrx6nwbno7GuYVTbGNk8L3Fahw31K9H0UfcOeDpnaStID3LA3Q04NkG5NKtVQF8wrbdMoP3zutoOwwZSy1mhJD6kCpyGDhvB9ACezzrJHAUfVGqYTxCB5bHuFpcNdfylZ2)qKGBZnKwZ0ZuAf1cjCAjxQxtXmFTKIRq6APm6tG052vPBzCkN4dMroKn89uH4zppib3Yk9TidMSnbiQLLUUHm1EImH0VM4rI3sKDbb4dNSmg0)hPKDrHkGrYSvvFyrMQ9n(u1esVUztIoGBZfKxTFdID95AGma8A1EQugPAQPkoVtLw1gluHo7W65O00vSquQXY5RNzPP9Zhc4zdgUmbitrX0YjHpWckLbJf8yhgSEmHWgNH2j9v51DnrVyJA(c3ounNjPZogsZfovAoQ)8U4tCBS4OtfcX4I0sSQkDcQ1T9(59AlT1rCDBSmQtLq6EicPbGxx7Dr8SUx)OPik79i8me0ReQwxeRGH7AhaQFH8Xc3gXtK5XPLdIXEwJ9kkR6(oANZY1Qi)rDZIpnG9anUlvw7wf6RROpnH1mEKkwELarD48XoMpIOs1w6VJwR6RgcvH2wYYaSWIZku6MuzjR5zxwBtrHhnVl8ngvQFOQuhxHxPOTIxk0ThJIfE)Ig4pw7s9QgKxr1TVD)LeXmULU8B0I2KkzFBzL6iusSQYfFIS5gTGcRx3zI29o34fvLqcVx0IKEfyzg3ooS4U80QTDOpKiYswsURTasml5MDPXqn)Y4nfFEd14z76awO04nbacSb1h(CLUu8F)x07zbS)eN(GLrquyOF(usWY7Pq24smNXXUoKf(IGuaFHkIJeSIpC)8FjLNGJvWUyweyXyyoiGpz)8uonNRYosefR02jOkBGWvusskKCMwrP0eSHu8HlI478KYHWXAp8GscGKV2TmreE8y0Ap5x9Y8fkhDzeBOP9N2tdiB)gKAkjWt0LDn4b1ynwi4DWf2NSLSM6DLSwCFE2xKd6xCJeIbwb2dlNxfDLyDkglqe3wgS9MHuEVWoRrwMDqg8P)i5Lwwv11Ebu1TJ20bDBDe5(VN0oR8f1u7aGcHKdiPEC4nGLmORo3V3ma5YpQV2bO7GIr8)EsTQSOO2zpDUk4lbrBYWxk5xa5jVOqi1MqF(SSXGaohLJpmBc2g9EaNGehkIEUtmWvST7IIbMUcHgFtXid9gi9q6)lfQA1hBJpEDzKuaKvm7zyLEWH9a07h)nqNHtd)aachfcRM4XVj)sd1hBJ3iBG8BSmvhWJ7781bDKPQtDIfgxHKoX86d(snMBKKoXCdt7Ibr3enFtzFRm2Wy8yWQC0Y9XY(oW4gd)Q9ynP96xFM(cd7SX8tYgg7s(X58(gZ(wz8XUzPJY9XY(oW4JcsD)hnG2N9w8ddS3TDxL42IAYpLtGMT80X4cwoUD3JzwAGanz90XyHZ5xf(fKtxRp61OzhNK3iOie6S7(HFaQKOJZX(IGOfxOEJIx8tcg)zzvsp9Bi7VyNCI5ZVBqmpf8T3)rCP(JDsXxo72YsOWz3gu()nu2l8jNXGFdYTy)8Zbb)g)XV7sXSPJVTup4dlsQ4hNCbMqJO0qitQeguhKCMpBLEI)FLpFOF0eDAt0SzsQoDNgjsVyEZ0OwqVzkYN2P3Itv3KmFF5ip9wXC5oX5TSvtmVVUNDS7E9pZ(Pgp)CdaqtN0aQ6GNF(mZhX9surxvv01SkwxluuX66FPkAqlM2G6RQHvMp8pwOJyiN4FubQFt1zUxQZk)RLOvAZxjE7KMdk3oL5ZhNI4xO186b8OROX5DE6exWezEkNF(56DlE67UQ(xdf5yuy0VLkZ0iRtcLtlxSLX3QYSfJVEFtVFw3nV1bK6(4eao1z0GbM5PYD(v3SzPRytNm2mZQoJW2vWNFUiQ1IWpz8iDWs1fIf(q09up6xHIgXw7GlImur04jpw4Qu(ryHlMfzBVyM0n9g1qXY9halSyZeWdYc371ABn71VEt0Mm65Nn38mWZcMPV)6ZOfdKT(Mkc)m0oslSrRlG47w24GBlBk5HzjZ(EJTGCGf5qRBisVSTEo2lpaOExBMw0NXEN13sNAYKUM6sJUIv0HMSVUO7m20fRSwn61GWR0hT)of)82NHsB9Mc2K1)7efOYA2IvVOjF)DkYQ9IRYUWYw3PcwMFwo8UfNxRndeYSfZgXcXj11hP9BNKno7g5BLr6RalVPXy)w3In)wgF9BDGCgSqI2bA1hy9BDgchfRnO636Au0lFxXP7Qt(9KRW06AEi0h0RLlf9qxtNmRYcJtz(0rh1c2WrK9pR9P(uXu3YeFobKVZm66lM9w8OZx558(qTjnRb9K79nmd496RC43pAyEFNo5kOuHtUjFGmHKVNhp7tSlOdZ1C7odHVOvhwVdXrCWQzNuKtD8sRBrpWJo6wnmJLPH3YawdL60R0(F7yJctLjcPmGPPjPUxxNI6EDtFMyw2SmCpfNjUWWSN1Tv82XzoUgQTsrqwOnqsV(RFLjw6uiaU2faSW1yQFkS64yCfa5w9HYsz7yG8ljhi1w3vORghF6jxzoWrBaZqwOnAAt0M2zauqMzuLbKgq0m895PaDTn7xVo0CalOBvM3zJ0O0ZJUUFUPPC(GbOSO0TmiZhLxsD4b7LfpnXCQN2K4UAISNBCV2Mj5df5Q)lDN74bwZ2VZWx)niegWWEXsH7blfM89hrvavrOoRYWa3LAvAyWF7zOnUtUeQHQtMf44uiVKwhxZx8EYoeRDiBo6suJrAQ1nTSqcdncRx)2MqxSRZngpuIVBEUCTM7ALqVoeICK(WdWEywq1UDnrJrkZI08bU6x2wjj5xtcqskN6XsOBZU)eZ)jSOqAn8x)Ig5k)TI)4eKFVmIJQ6B)pNbtC6z82hWt91B1XKlhH120aRC1URp97noVRl1wMb49CzNPdoeL1TnL190PSoA363jszf)7lD5SpD91I5HB2))d]] )
+
+spec:RegisterPack( "防骑Simc", 20250729, [[Hekili:TZ1FRnYX5)xlMa6KjNLLwjF25WsqslfQPneQt4(pTAK2rYB8QDf7UY(myexBPTPhFl0afAPTqjfAieU2cF)R0Wf6lME31l)vEl0NzM9hZo7mZoRLSpFHahNS0oZZ88R555zEMpsd7m89hESdkgp8DTABTx79TERwDUx32DgEC8flWdpEbAYPOzWF4JMd))x)h())6p)Jp2D(eYJUWla5qOquWYWjWJpjoEr093D3zUXNSCCRjbZ3nYD(spuSBG)Kq00yY7NS7WJhV01l(h6pCS0LVDVHhJwgFsq4WJHf77bu21XbZgoocwCYW3PDVDS27(Rg9dCF4QrVtWXV3QrtbYIdxD0QJshrBYiieb()l8NK)il4FWJE7qGWXRg99XtX(oWChTCbHLCsgzVD60ENoDU7QrWRw0x7SJLvYReI)b0XdRDyW8KLkDQTFRDAFamKFcokoiegZC3y3zu1XQrOjSx9CJIlmdcXjV2l51dYKagRLp4dyCMLvfSX(7y1fgY7Fc88hGaz8bGfY1F4XK1oIycrby4L3L6qG9rJ9WodFNHhpj0f0NUiIfB60wrN4I9CSdMAhFc2o0D2jX4GLrTCcohigtGa3b5JAymyMvs)y35aZDirnNtj0zy)z4WiBgjjuORafsh6hU0z2CWsYtZjNGcNHJwnAqFqjTA0LxcQNLEE2Hy2JStwv4XZM40Ao6HWKUyIh8aYJbvdOrGfTxfS9GvJ2B1OgRg1C1iQI6e0854qIkWJi(2tdX4wH45ix)iQuMWnjAv0PyQU6emrIJkmYoSrULYbVCbBetcc8igIw4lWuL)fHfjulGh3oLnNs5RSNpGO4z0jkWlagyUQvqyikK9QwHCq6kDYIz2Xb2woOZbV9(uvvIefJ8atwlGYolJo1g57ytgvRekNYUjdJU6r2Zw66G8NGthvoJMl4eE8ERdp2HZ(aeikY1FgH2u2lkgclsjq71Jf3xjl2Kx)KTfYEryqmEceljxfvW0lzK2UGNDMDUphpVLcN1qmY5cWTYOD0hOy)OQPqdGh6UGnkNLHGIfIbUKOqdMcImjgLti68MV)dEaSlP37TD0c0CIBzme4cbYW8LtoH9xlcaddSYRgDoeqlyjeh)CuumLKGydV7emjSB6441Wvj9f2pt4VuzHWCCpN49e4DH9IGZjzpEZvJsdfzZ)5dyo(BZmyx7MxY)iMN3ATmpGgnY1bZSmsSr3LOAd8yAaYFtfvv2OyiSYy4vu27aPNmbjuMyr9bzoIzAbcsZFYTo12wgHJThh4dPRGv5Cu450CG2ryuuGVTLDVftQRnvWKA0C6NMR4QyvjMuibPQOgBvlP861dCtfGPJynj6Y4hTadP3tsERQCfQHRlLdzX3x6bkk6(7CXB6YWlYc03pD88wsiLAx5Ll0rDzoBv5AM4TMyzupUm7dX12qXotoYYawr1wDel3sOGqAQrSJnkkAzinJx6MnZ4OdtzOu9cLhi5AppefFsbFKCVOY(iQlq7gNntxlg7s5o1vlTP4olt5UjHlJqWXCSJIdDpftzp1fkrPMJ7zU(48AAs2uqIJXr3a)imCep67ievDPn(4hgBJcNJMtp4fqNi0Kqq(phJwqoquw0jwbV8pmRy3MsFkF5U3tVkPyiyHhNthYoM0yV5EIKOaPsaZbuSmOc745voPl9wKuAGIDMgDin5Dz3FkpYVAKdwPoPG(k9ZxGe7CCGNhLIQplyAwd8uxFIsBQBiUq8itdVyjgOuxSDn2XegkrfrogbY)mxV8YVLfL2sDSTYUOutEsWyMRt6zljhTuNRHLySjjYOmUtDqd9hfmxDu(5xjBK6Wdn5pG06faRBwDukfnJYeyP9ivVs42YjeSuhTydYKw1HjLKxWs8Sdf8a1FG3A5H1vDSRYNupzDD9NhefZQNSWIgICDSXNrgdYXjcgiRUNEjDDWq9xsPsz1XwuCDWEUNHdn5i(DvhgvFugDXu6AXNzqWbRyIHUDLNer4yFfNtp(5i6Aim2kkUb0W0CeC9bl)SZPf5wYzpZIMKR3aVTSC5mzCkcmZQofvMSDEqi16pZli8cQ4yqxJQYDwDiib351YVsDme16DDcU6D7ch6HRQpu4eeTKHWqsImGm9AxW1HVIMc(nXKonmfT0lEyABNtNuiE8YsUzg044jbZhJIj6q0fu1Ry9vXi)tTtg15ixk)QUga10vXt2nTmCtwxvffmH42YEJnP58Sw0BZU(L8BpGqcXnEgrI0Dj0WiI(6grbiiG)PywCi1E6P1OiR03XbrrftqO5GeQDZjZ4mSn2hp3fNuyRHYa52oIl3Cm10(Wcf5PL2rXm37fHyMnFOK7vjLso4ZcOKbbb(kThUWttUKfpsn6tGWc90VTqStfmnpjqRDWY4e3XIvYoG13BwGPINnyCPAye34eabxIWX5t5meWhJj9C9mK3s4Lof2DX8IAf3bIxhzN6wYClk(m48MqUC)lSDweXD4WSrzjzuK0gCKjl3GZYWKBFJiSCKqYi2o)AkkUuPJLkJf3vyhDH)e7iVaPBYRwhzjvhzPrhjt6lRJKPjlOJKQbguLsuIkQtTurX8rK0E)JfRBljFz6rOkCdFBvUiq8dj3Zj7XslqC1O93t(J5tAkSQ63aA6XUlEIw95KmLMlcsdFQUXynL3zKc3y4E5fGLx8t69l0OU3J48aA3W5R6qDXJ1RoDd5fLzDe69r1h5vsFik0NCdAOKH8mxqyYvBbzdc4Uiw1zG1ACjLGMtys)Bg7fe4W2rMLHxtIRyWwMXiKcxzzQkXaU((WjhcXrUEUy2XytbtIksizxv2QY4SocwK0WOTkfIj9UCBK3Xqfwob7aXo1Rn)L7uXIyjp1u(fNqUZJSauQ4KT5JPQBfb3cYFeXPtKe5qqVzvp9M1nHERJ80v3y6nlMpFK0Y0kFMQnl8xsNY1k4vuNoPPI7N7BBOvrBsWxvWtrDQpzm1ndEu0M371JRlwmHyvt57WJssC6RxZBk4fwp4c9D4r5wiEu0Enb1qiVEDa3uXxkH(gD5Wn9qmxZWrrDznBv5AE7cokQpU9M6wZmgNh6GJYTiuZmUmCuU(blZAbhLkUqPRgCuuxzZ3kHJI2gZFvHJcn3Dz3FzWrPJ6KcM2dlr4OO5sI3yWrPoqnuJD8Qbhf1X22OWrXGVafY4o1bn0FwVC1XgcokAp30MkawTa4Ho4OuDNeVP52YjeUzWmZAdhfTqSZaacyShM6yxFlaokQdJUgWrPW93pwlCuSKNerlCukaHLkGJsff386gCum4lAvvWrXaeTSbGJsfxerTHJI6D71bokDlaHwTWrHdCfIisbshIGzce(HGPtWJtZvWJrEqrblMeZUHro7KlPrdtiTXJvBvfhyyTB8CvFbgpmTjazUeTZpqAsLymY3k7kOzfar)6ZcEkSV9ScpD2s45Ui6vwbErUKHEk4giY5cuHWXQD85vRaFFEWmB2hLUno3bPfqr3jUXP72YY(KislwgUiicNvgVUqecxE4bACEvVJtG39cojH3ZPMh6c7aFi6PVt0WK7ih2es9uY(AsdlkkKWLG34l)7F6Z)4h)np9p(8)5tF(V4VDNmGNCNN)r)(x(jF2x)NF0l)0F6Z(Ih9SV8p9YF1N)8h)zp7F)pEXV7F9FE0pB1r)3N8KUV8t()Gz)YV6jV438xVt6DWu8E8VZZ(IV8okUJ)78np9J68IN8jFZt)1MqsEqiiJSfEUPKUmkiksAjp3uslb4dISD5bCTsCGWvPnQGQYgGPS8vI4gWYQD3SQYDR3nljxt3m5KEJS5qfxFfSyxReNZDqL24kSVWuw(krCdy5RAaZvhjgcpzIrggb3QkldTd3knlSNww7TriBL78fVRFLMcvS5gHSPS5QJEXh9BF(J)lmdXZ(YF5(p7l(8x84h9YF(xXSf0rrq3zWuxYf49gVbuWHH)UNm2ly8U83dYUVnnP)7f6gaLiCXpIGsTDxG8qoU(P3Ob88wKzV6iYs9bly3uf736d2vrr(T(4(Rg9JHYFH31boNiPmHvJ2z1i0boD3Vh93YeYSz1ye1kReH3S)UKAtivVebfOf7cLlXW2xLJh58HP4a8izJRa4vVBcSv737UUt7ZkbRe4wLtNIhNKm9867oSBJXcqATrsNWg0VtJTOGdqPKicIqLdS45kupo(ZxixysHMYDjqGQFI7yo(uUlfgO97qKs5XvAOoFrJMBPop1LxQj63G(AIMV9LxUL8uQRJiAXlIwYfXYsbNiww(ZfrjsXanIpVekah5JYKrINp9lMa)NiISFQqbNq4q(VzanynwV(ZR0NSRLeAjcgDMEN7hAOkhBQ0gv9qttmvyKCE9ebzl62BHlzObb0)ujAWEvVmOamHsKpphf(d6u9eJIlpVdT4mJzw)OYbaitvlmJh03cCvKdU4lVSCR(gS)EL)y4SKszMIxLaHxkCtjd60(YlzXZKnBgIFZcUw6EjQl9eWQlz6nLr5eQDyhqsBsnVDAV92nAkFT2w(IXDvpLTbk6QXG(DvUkI(zfwmru0Qu0wU4YlZIvOqS73TToHLprbpp46FwWPGd6dJXH(ipBYYZCGPP1SD9NUmsR9uUSLbKxvtmLhpGFlrEScyBvHwDjFm8nVIMpoRPgd2VTSPaCMcRygFQRdxkiPqtJYIHUhZ83UHIMx1qzJRAyqtRuWmf6burLYH5DOQrZY9MQp4UiVNujFU0(rL4JFqrFScSubjNQDyn3DQlXLdYC67K2v3gKesWA0W1hY3qwmh0C0mS9ErdCIsEtJTAkvZLXOQvCzdPO1i7JzrViILg5rj5zYMsbywa60BjIqeqpyY0OC0fpIKNk9t1zfUfjeY23PMXro3SSTuwMVNQcBoZBblFiX06CG5UeIgch5zEsbqY)slKfhtY33bTun6Uu4ONwyfTY)MQbWoCOgL5QkKf6W(9Ad11QJuwfoWqXZddL5iFz2MuSSAIUDDewRQewRnNW2PWrh2ycBU4gfVXYYrjvwrPfqJb7OHzhXfkhT8xjGd7N81bqGIcWEmVUhDW))qRSSqkG9)HDs1FYUsFUsOkd0)d70AptQvKY(5tNY58iKV)EKtWPhS(qct9xAR5RwNevYyP4WFq7AUuACAAUv1iILtdxbAy7dC2wsT4z4s(iiO)nmg4nxBON3tIvibz8nAYv21Bkbf0d6Vhj8XMwzV92u95TzqRVXu(gGZ7QnduRqLMQg1Xeudb0iryt7Ju5gsJtky2PM7YoJtfymNC4A(USkWgcOmj39qhmYBykeYByMKaSys)guMNtEs4XsWYMzR5HDBOOsbbwOCpRVPwzb0rTjwAl1ln5mcHyNL(q(TyYVK5(47NFQHkDzVA1Xi2Vr(tguev493t01Oa01itUaO36xa(2WMDwznci(gIrj5ZtlP5EQ0wnmPxsIXRk1BvX2QULqdHf3cqxcHNk0UTQAlOQT86GDTITM6CguO1Qal110aZJOX0BkQVLHCz1Qe11b3Okqqx)Gznx3n2D3wzT9ger7gD5LewBTxFRAS(YS16lYp3EQ9KfSU41OPgCe3qYfl0VhCKhJetipjuKrL46Cn2hP1tXm3z9wBHNwQvRPhTUCxsZ0RLDtYkwRzf2XSW2YbYRKImLfRu6MBPUc12wvd9HiJw4ETjtLROpXCNfVCBE3AuawFP11O3hmAPqdEiVgKnYnA5fmskPpjS7tQXRjTlHjgYJZC912eJx1nx7tQ0X7M)4AVk7FsLQJVRbkxJnqzD1(g1(HQSdxRDqPAj0izyt7Lu5EsZZyywfvRBpuuMJ72rtueZc(QOlkmE4vsBuyl9TP(OuTF7vSsNRwNus8pEnQvkYL2Q7LI4obHMPWECn7MI6cCRv7uQ2NyD7NIzM5QAOIE(0a1YgTLkvgABTBQGHn1qv8TB21)vyxvuBVRFBv0DYJBp9vP(7N07UyOxDf2CXhxJMjCJ3Cf1HoLVpFTBVsTvjL4vdBWs5eu0F7OMm8DV39OFdqh()c]] )

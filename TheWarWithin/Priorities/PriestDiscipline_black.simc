@@ -1,6 +1,18 @@
 actions.precombat+=/power_word_fortitude
+actions.precombat+=/power_word_shield,if=talent.body_and_soul&!buff.body_and_soul.up&!buff.angelic_feather.up&movement.distance>8&!buff.premonition_of_insight.up
+actions.precombat+=/angelic_feather,if=(!buff.body_and_soul.up|!talent.body_and_soul)&!buff.angelic_feather.up&charges>2&movement.distance>8&!buff.premonition_of_insight.up
+actions.precombat+=/renew,if=find.lowest_hp.pct<100&find.lowest_hp.pct>80
+# actions.precombat+=/penance,if=find.lowest_hp.pct<=80&buff.surge_of_light.up&!raid
+actions.precombat+=/flash_heal,if=find.lowest_hp.pct<=80&!raid
 
+actions+=/purify,if=!raid
+actions+=/dispel_magic,if=!raid
+actions+=/pain_suppression,line_cd=11,if=find.lowest_hp.pct<40&time>0
+actions+=/call_action_list,name=pre_hot,enabled=0,if=find.pre_hot.state&active_hot.atonement<5&!raid
 actions+=/call_action_list,name=cooldowns
+actions+=/evangelism,if=((find.hurt_num.count>2|find.hurt_num_big.count>2)&!buff.premonition_of_insight.up|buff.premonition_of_piety.up)&(active_hot.atonement>4&!raid|raid&active_hot.atonement>5)&health_party_pct<80&time>0&!raid
+actions+=/power_word_shield,if=find.lowest_hp.pct<=30&!raid
+actions+=/power_word_radiance,line_cd=11,,if=active_hot.atonement<=4
 actions+=/variable,name=te_none,op=set,value=!buff.twilight_equilibrium_holy_amp.up&!buff.twilight_equilibrium_shadow_amp.up
 # Twilight Equilibrium is buffing shadow damage
 actions+=/variable,name=te_shadow,op=set,value=buff.twilight_equilibrium_shadow_amp.up|variable.te_none
@@ -120,7 +132,7 @@ actions+=/variable,name=next_divine_star_time,op=add,value=action.mind_blast.exe
 # Mindgames is always better
 actions+=/variable,name=next_divine_star_time,op=add,value=action.mindgames.execute_time,if=talent.mindgames
 actions+=/variable,name=can_divine_star,op=set,value=cooldown.divine_star.duration<variable.next_divine_star_time
-actions+=/run_action_list,name=scov_prep,if=talent.shadow_covenant&cooldown.mindbender.up
+## actions+=/run_action_list,name=scov_prep,if=talent.shadow_covenant&cooldown.mindbender.up
 ## actions+=/run_action_list,name=short_scov,if=variable.short_scov&variable.can_enter_scov
 actions+=/run_action_list,name=long_scov,if=variable.long_scov&variable.can_enter_scov
 actions+=/shadow_word_pain,if=(target.time_to_die>(0.3*dot.shadow_word_pain.duration))&(!ticking|(refreshable&(!talent.painful_punishment|(talent.painful_punishment&(dot.shadow_word_pain.remains<(cooldown.penance.remains-variable.expected_penance_reduction))))))
@@ -142,7 +154,6 @@ actions+=/smite
 
 # Prepare to enter shadow covenant
 actions.scov_prep+=/power_word_radiance,if=cooldown.shadowfiend.remains<cast_time
-
 # Long Shadow Covenant
 actions.long_scov+=/mindbender
 ## actions.long_scov+=/schism
@@ -173,13 +184,17 @@ actions.long_scov+=/halo
 actions.long_scov+=/smite
 
 ## Cooldowns
-# Don't use pets during shadow covenant windows, wasting GCDs -- is this even possible anymore?
-actions.cooldowns+=/shadowfiend,if=!buff.shadow_covenant.up
-actions.cooldowns+=/mindbender,if=!buff.shadow_covenant.up
-actions.cooldowns+=/voidwraith,if=!buff.shadow_covenant.up
+# Don't use pets during shadow covenant windows, wasting GCDs
+actions.cooldowns+=/shadowfiend,if=!talent.mindbender.enabled&!buff.shadow_covenant.up
+actions.cooldowns+=/mindbender,if=talent.mindbender.enabled&!buff.shadow_covenant.up
 # hold PI to use with shadow covenant if we have it
-actions.cooldowns+=/power_infusion,if=!talent.shadow_covenant.enabled|(talent.shadow_covenant.enabled&(cooldown.shadowfiend.up|buff.shadow_covenant.up))
+actions.cooldowns+=/power_infusion,enabled=0,if=!talent.shadow_covenant.enabled|(talent.shadow_covenant.enabled&(cooldown.shadowfiend.up|buff.shadow_covenant.up))
 # sync potion with PI
 actions.cooldowns+=/potion,if=buff.power_infusion.up
 # sync trinkets with PI
 actions.cooldowns+=/use_items,if=buff.power_infusion.up|cooldown.power_infusion.remains>=cooldown
+
+actions.pre_hot+=/power_word_shield,enabled=1,if=find.lowest_hp<=100&!raid
+actions.pre_hot+=/renew,enabled=1,if=find.lowest_hp<=100&!raid
+
+

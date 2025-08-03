@@ -2,8 +2,9 @@
 -- August 2025
 -- Patch 11.2
 
+if not Hekili.check then return end
 if UnitClassBase( "player" ) ~= "MONK" then return end
-
+SetCVar("autoSelfCast", 1)
 local addon, ns = ...
 local Hekili = _G[ addon ]
 local class, state = Hekili.Class, Hekili.State
@@ -513,7 +514,8 @@ spec:RegisterAuras( {
     },
     renewing_mist = {
         id = 119611,
-        duration = function() return 20 + ( buff.tea_of_serenity_rm.up and 10 or 0 ) + ( buff.tea_of_plenty_rm.up and 10 or 0 ) end,
+        --self
+        duration = function() return 20 + ( buff.tea_of_serenity_rm.up and 10 or 0 ) end,
         max_stack = 1,
         dot = "buff",
         friendly = true
@@ -708,6 +710,9 @@ spec:RegisterGear({
 
 -- Totems (which are sometimes pets)
 spec:RegisterTotems( {
+    jade_serpent_statue = {
+        id = 620831
+    },
     chiji = {
         id = 877514
     },
@@ -829,8 +834,121 @@ spec:RegisterHook( "runHandler", function( action )
 
 end )
 
+spec:RegisterStateExpr("healthed_player_soothing_mist_remains",function()
+    if find.lowest_hp.unit == "none" or not find.lowest_hp.unit then return 0 end
+    local _, _, _, _, _, expires, _, _, _, spellId = FindUnitBuffByID(find.lowest_hp.unit, 115175)
+
+    local remains = 0
+    if spellId then 
+        if GetTime() <= expires then remains = expires - GetTime() end
+        return remains 
+    else 
+        return 0 
+    end
+
+end)
+
+spec:RegisterStateExpr("soothing_mist_casting",function()
+    if find.lowest_hp.unit=="none" then return false end
+    local _, _, _, _, _, _, _, _, _, spellId = FindUnitBuffByID(find.lowest_hp.unit, 115175)
+    if not spellId then return false end
+    return true
+end)
+
+
+
 -- Abilities
 spec:RegisterAbilities( {
+
+
+    summon_jade_serpent_statue= {
+        id = 115313,
+        cast = 0,
+        cooldown = 10,
+        gcd = "spell",
+        school = "nature",
+        toggle_terrain = "player",
+        talent = "summon_jade_serpent_statue",
+        startsCombat = false,
+        handler = function()
+            summonTotem("jade_serpent_statue")
+        end
+    },
+    detox = {
+        id = 115450,
+        cast = 0,
+        charges = 1,
+        cooldown = 8,
+        recharge = 8,
+        gcd = "spell",
+        school = "nature",
+
+        spend = 0.06,
+        spendType = "mana",
+        target = function ()
+            if debuff.dispellable_magic.up then
+                return debuff.dispellable_magic.caster
+            elseif  debuff.dispellable_poison.up then
+                return debuff.dispellable_poison.caster 
+            elseif  debuff.dispellable_disease.up then
+                return debuff.dispellable_disease.caster 
+            elseif  Hekili:isMouseOverMemberDispelable("Magic") then
+                return "mouseover"
+            end
+        end,
+        talent = "improved_detox",
+        startsCombat = false,
+
+        toggle = "defensives",
+        usable = function ()
+            return debuff.dispellable_magic.up or ((debuff.dispellable_disease.up or debuff.dispellable_poison.up) and talent.improved_detox.enabled) or Hekili:isMouseOverMemberDispelable("Magic"), "requires magic, dispellable curse, potion"
+        end,
+
+
+        handler = function ()
+            removeBuff( "player", "dispellable_magic" )
+            if talent.improved_detox.enabled then
+                removeBuff( "player", "dispellable_poison" )
+                removeBuff( "player", "dispellable_disease" )
+            end
+        end,
+    },
+
+    
+    soothing_mist_cancel= {
+        name = "取消毛线",
+        listName = '|T606550:0|t |cff00ccff[取消毛线]|r',
+    
+        usable = function() 
+            local _, _, _, _, _, _, _, spellID = UnitChannelInfo("player")
+            if spellID == 115175 then return true end
+            return false
+        end,
+        texture = 606550,
+        indicator = "cancel",
+        cast = 0,
+        cooldown = 0,
+        gcd = "off",
+        essential = true
+    },
+
+    mana_tea_cancel= {
+        name = "取消喝茶",
+        listName = '|T606550:0|t |cff00ccff[取消喝茶]|r',
+        usable = function()
+            local _, _, _, _, _, _, _, spellID = UnitChannelInfo("player")
+            if spellID == 115294 then return true end
+            return false
+        end,
+        texture = 608949,
+        indicator = "cancel",
+
+        cast = 0,
+        cooldown = 0,
+        gcd = "off",
+        essential = true
+    },
+
     -- Strike with a blast of Chi energy, dealing 1,429 Physical damage and granting Shuffle for 3 sec.
     blackout_kick = {
         id = 100784,
@@ -904,7 +1022,8 @@ spec:RegisterAbilities( {
         end,
         cooldown = 0,
         gcd = "spell",
-
+        hot_id = 124682,
+     
         spend = function()
             return 0.04 * manaTeaMulti * ( pet.yulon.up and 0.5 or 1 )
         end,
@@ -943,11 +1062,35 @@ spec:RegisterAbilities( {
         handler = function ()
         end,
     },
+	-- You exploit the enemy target's weakest point, instantly killing $?s322113[creatures if they have less health than you.][them.    Only usable on creatures that have less health than you]$?s322113[ Deals damage equal to $s3% of your maximum health against players and stronger creatures under $s2% health.][.]$?s325095[    Reduces delayed Stagger damage by $325095s1% of damage dealt.]?s325215[    Spawns $325215s1 Chi Spheres, granting 1 Chi when you walk through them.]?s344360[    Increases the Monk's Physical damage by $344361s1% for $344361d.][]
+    touch_of_death = {
+        id = 322109,
+        cast = 0,
+        cooldown = function () return 180 - ( 90 * talent.fatal_touch.rank ) end,
+        gcd = "spell",
+        school = "physical",
+
+        startsCombat = true,
+
+        toggle = "cooldowns",
+
+        -- Non-players can be executed as soon as their current health is below player's max health.
+        -- All targets can be executed under 15%, however only at 35% damage.
+        -- usable = function ()
+        --     --return ( talent.improved_touch_of_death.enabled and target.health.pct < 15 ) or ( target.class == "npc" and target.health_current < health.max ) or (target.health_current < health.current), "requires low health target"
+        --     return false
+        -- end,
+        usable = false,
+        handler = function ()
+            if talent.fatal_touch.enabled then applyBuff( "fatal_touch" ) end
+        end,
+    },
 
     invoke_chiji_the_red_crane = {
         id = 325197,
         cast = 0,
-        cooldown = 120,
+        --self
+        cooldown = 60,
         gcd = "spell",
 
         spend = function() return 0.05 * manaTeaMulti end,
@@ -1019,7 +1162,7 @@ spec:RegisterAbilities( {
         cooldown = function() return 120 - ( 45 * talent.chrysalis.rank ) end,
         gcd = "off",
         icd = 0.75,
-
+        usable = function () return time > 2 end,
         spend = function() return 0.02 * manaTeaMulti end,
         spendType = "mana",
 
@@ -1126,7 +1269,7 @@ spec:RegisterAbilities( {
         cooldown = 9,
         recharge = 9,
         gcd = "spell",
-
+        hot_id = 115151,
         spend = function() return 0.02 * manaTeaMulti end,
         spendType = "mana",
 
@@ -1452,48 +1595,90 @@ spec:RegisterAbilities( {
     },
 } )
 
-spec:RegisterSetting( "experimental_msg", nil, {
-    type = "description",
-    name = "|cFFFF0000WARNING|r:  Healer support in this addon is focused on DPS output only.  This is more useful for solo content or downtime when your healing output "
-        .. "is less critical in a group/encounter.  Use at your own risk.",
+local invoke_yulon_the_jade_serpent_str = Hekili:GetSpellLinkWithTexture( spec.abilities.invoke_yulon_the_jade_serpent.id )
+
+spec:RegisterSetting("invoke_yulon_the_jade_serpent_party_health", 75, {
+    name = format("%s 队伍生命值阈值", invoke_yulon_the_jade_serpent_str),
+    desc = format("若设为大于零的值，当你的队伍的当前总生命值小于该阈值时，才会推荐使用%s。\n\n", invoke_yulon_the_jade_serpent_str),
+    type = "range",
+    min = 0,
+    max = 100,
+    step = 1,
     width = "full",
 } )
 
-spec:RegisterSetting( "save_faeline", false, {
-    type = "toggle",
-    name = strformat( "%s: Prevent Overlap", Hekili:GetSpellLinkWithTexture( spec.talents.jadefire_stomp[2] ) ),
-    desc = strformat( "If checked, %s will not be recommended when %s and/or %s are active.\n\n"
-        .. "Disabling this option may impact your mana efficiency.", Hekili:GetSpellLinkWithTexture( spec.talents.jadefire_stomp[2] ),
-        Hekili:GetSpellLinkWithTexture( spec.auras.awakened_jadefire.id ), Hekili:GetSpellLinkWithTexture( spec.auras.jadefire_teachings.id ) ),
+spec:RegisterStateExpr( "invoke_yulon_the_jade_serpent_party_health", function ()
+    return settings.invoke_yulon_the_jade_serpent_party_health or 75
+end )
+
+
+local sheiluns_gift_str = Hekili:GetSpellLinkWithTexture( spec.abilities.sheiluns_gift.id )
+
+spec:RegisterSetting("sheiluns_gift_party_health", 80, {
+    name = format("%s 队伍生命值阈值", sheiluns_gift_str),
+    desc = format("若设为大于零的值，当你的队伍的当前总生命值小于该阈值时，才会推荐使用%s。\n\n", sheiluns_gift_str),
+    type = "range",
+    min = 0,
+    max = 100,
+    step = 1,
     width = "full",
 } )
 
-    spec:RegisterStateExpr( "distance_check", function()
-        return target.minR > 0
-    end )
+spec:RegisterStateExpr( "sheiluns_gift_party_health", function ()
+    return settings.sheiluns_gift_party_health or 80
+end )
 
-local brm = class.specs[ 268 ]
+local revival_str = Hekili:GetSpellLinkWithTexture( spec.abilities.revival.id )
 
-spec:RegisterSetting( "aoe_rsk", false, {
-    type = "toggle",
-    name = function ()
-        return strformat( "%s: AOE", Hekili:GetSpellLinkWithTexture( state.talent.rushing_wind_kick.enabled and spec.abilities.rushing_wind_kick.id or spec.abilities.rising_sun_kick.id ) )
-    end,
-    desc = function ()
-        return strformat( "If checked, %s may be recommended when there are more than 3 enemies detected.\n\n"
-        .. "This can result in lower damage but maintains your %s and other rotational buffs for healing.",
-        Hekili:GetSpellLinkWithTexture( state.talent.rushing_wind_kick.enabled and spec.abilities.rushing_wind_kick.id or spec.abilities.rising_sun_kick.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.enveloping_mist.id ) )
-    end,
+spec:RegisterSetting("revival_party_health", 55, {
+    name = format("%s 队伍生命值阈值", revival_str),
+    desc = format("若设为大于零的值，当你的队伍的当前总生命值小于该阈值时，才会推荐使用%s。\n\n", revival_str),
+    type = "range",
+    min = 0,
+    max = 100,
+    step = 1,
     width = "full",
 } )
 
-spec:RegisterSetting( "single_zen_pulse", false, {
-    type = "toggle",
-    name = strformat( "%s (%s): Single Target", Hekili:GetSpellLinkWithTexture( spec.abilities.vivify.id ), Hekili:GetSpellLinkWithTexture( spec.auras.zen_pulse.id ) ),
-    desc = strformat( "If checked, %s may be recommended with %s when there is only one enemy detected.\n\n",
-        Hekili:GetSpellLinkWithTexture( spec.abilities.vivify.id ), spec.auras.zen_pulse.name ),
+spec:RegisterStateExpr( "revival_party_health", function ()
+    return settings.revival_party_health or 55
+end )
+
+
+
+local celestial_conduit_str = Hekili:GetSpellLinkWithTexture( spec.abilities.celestial_conduit.id )
+
+spec:RegisterSetting("celestial_conduit_party_health", 85, {
+    name = format("%s 队伍生命值阈值", celestial_conduit_str),
+    desc = format("若设为大于零的值，当你的队伍的当前总生命值小于该阈值时，才会推荐使用%s。\n\n", celestial_conduit_str),
+    type = "range",
+    min = 0,
+    max = 100,
+    step = 1,
     width = "full",
 } )
+
+spec:RegisterStateExpr( "celestial_conduit_party_health", function ()
+    return settings.celestial_conduit_party_health or 85
+end )
+
+
+local life_cocoon_str = Hekili:GetSpellLinkWithTexture( spec.abilities.life_cocoon.id )
+
+spec:RegisterSetting("life_cocoon_party_health", 25, {
+    name = format("%s 队伍生命值阈值", life_cocoon_str),
+    desc = format("若设为大于零的值，当前生命值最小的成员的当前生命值小于该阈值，才会推荐使用%s。\n\n", life_cocoon_str),
+    type = "range",
+    min = 0,
+    max = 100,
+    step = 1,
+    width = "full",
+} )
+
+spec:RegisterStateExpr( "life_cocoon_party_health", function ()
+    return settings.life_cocoon_party_health or 25
+end )
+
 
 spec:RegisterRanges( "blackout_kick", "rising_sun_kick", "paralysis", "provoke", "crackling_jade_lightning" )
 
@@ -1503,8 +1688,8 @@ spec:RegisterOptions( {
     aoe = 3,
     cycle = false,
 
-    nameplates = false,
-    nameplateRange = 10,
+    nameplates = true,
+    nameplateRange = 20,
     rangeFilter = false,
 
     damage = true,
@@ -1512,9 +1697,12 @@ spec:RegisterOptions( {
 
     potion = "tempered_potion",
 
-    package = "Mistweaver",
+    package = "龙僧Simc",
 
     strict = false
 } )
 
-spec:RegisterPack( "Mistweaver", 20250329, [[Hekili:TR16VnoUr8)wcoaNK724ZpYZIKa0hFOxUUhkQ3I9BsMrI2MRLivjPC2uyO)27qkBjskszN2nO7hUVKKvCMHdhoZV5b3OXrFkAwksIJ(TjJMC1OPtUB44RgD7OjrZKVwGJMvGswJwc)bfLd)8JeH8fmAdMRw61mgkvjcbRKNalhn75ssM8xOrp7vUaLf4e4J3mkA2ksAkUMsSijA2FfJYW8Q5fCcJtKeSOAoIJRM)x(7ZUa(cMkXPvZz0SxREQ6jqWxEX4Xxm6U)q18pIwde(p(8VwnpHrfGwcud0nNJlYqjQ1M9RwCDnW1)SqPJvZFcLIxquB1mjlVqXvgsVzsqLOsrlNJUyYuGZXJhoA4vnFE0Dxm5wdbUGbNJpHrjRi0LWXGTae1kyHpYOiq34TNGr3CX0raRFsT8NraFFMib2IMLbNcH(ccVavMjH)830xyOejHr12sepEfIMglKCYA4catrpNHtJ(trsWkBsCPahtK4CHdrtnj65mglnErj)vhQU0IkmxG5RHJMdvxzsvgz5kPi(lLPlZbBOdPxBsQY2R3AhIUXKienbdhtuwCcklZHYBT0p0Yy2IyWKKS294ENjHfS6FBrX4rksA)0SeWzeZjiiKGKJJLS4C0xJtwH4lvUO3)q18LjPdHp2kzoMIFbmqX5WLOwQJdk1ni4xWNhkXO4YIwHOoNX1)JyLZqTlrCDK4cwsPigyrl9jbLEbwoeCd)czOs0k)KefdgQAjn4MKWruSEdMgCdoPAUalLkh9HcaziEbcNrOG382T7dGgIEbcqP404VSluB4ozvnFq18NlxSWdjPSxOwsz)kQJDDOvxX4HgLCApVneiuX66d3LbpCkMGJeOx5A8OhHl7PEnJ9EzHy1wXRo6n6()R2hTVg8PcooHL)mQlMHxxElGcWOf)Cjx4gX66bWuUtyzlJ79Jv)vwjwLlaUpuo1qWyH6c81yUyn4hwFP6zzCEVRUY7QaweMscZDZ68dS(gNLxvstX84MinDeeCk3zS3fUQn4QlyxtDh(9z196m04idhPc2lyUcavRC94LBHCWH02zk8hTu0qXufETN7rNT9FJPXfLzcSLa3q2qw8AtMaVS3Gcagd1fTbedrO0fbG0SgWKBsv8wftPqDuJbG10gbDDqbDwdUrcodsDquPoy00sI0c24Kg6(AjMkIxwssvjBAj68AVcFGbxAMoMqvg5ynQzJcEt40jhn2OnMLLNqJdGoL3kCC((smgkKGxGgk5sBV(dZGbGJKSeCIlqz5njAdzUBTKDUQSotjmwMcuEOJJXqoohrOktB18jvZ)XMmR16FlFDeFpCEUEpp7Op(GeMcCzwve8DwPS5k9UJbVSUoI(CoSOxUpB7EyKEDzOjQYH7lpyxsAmr37PGLUGv9Iq9UPhyHadXEGEqL9Jw9UPcDlqimMNw(e6g2ACCDvwTorgXqy6gCgRWSGqRALDbi7Pw5UGGEQzouaQvmAp4onGfoap1vKD(rH(4MQ94I62hR(DkuspGcHrg7K3qFu9Mrb8ACYjT35fYCLW4ojMgCu3NhmfLfEM9bRpmnJmdUqzIUvEEuLdDCbetFlbeHdEpKD77X8VHRB63dVFxdVdxNzB3VWpZWXnvq3Ahpur13CmfuC7rg71gG1BPeCej9qnlzeL5oqJ3A4A40NEAYZiZ5xlWzXRq88JirSVg68zUdhe9w6R0SN1(s1RVu2G5c16Q5HE54XJUlA2liUclwentp7pc0QhxUB2HNUBMFNQMf5)QecrH7kblhOdvcXQ1tNmzfIUelgw90FtpWLXQrt(NzGgW1RFAiOaqSswpRVpgeO7SXF98dUbDBh1zhcp5M2TO6jp2bOjW3Mn4A)AyNwaDuWGTi6AcciF7whDeU)(kDL8T(LChemhHhea9awwDjaVnB74aUxU1x76EfQeDxlWe1i0PIYcLEQ2H6GkqsMTfCQf9VN6tOWPVvY)M35W1aY)BGhvVESEkznGfYtrTh7E8)UnYBuH4nc5E17M61R8)gCfw90VKVpo762qn9Robldz0kLRy8Oz)rYAefTw9wcC2cIAaV1elg2mN5F6HFUEYYvp5BTMsA8V8(jh)b1GvFqQNR6h0dr(bpjCRNH82THYf7FLvDwXo)EG149S2gJL8mRyLjE3PfoJDESoZfBECoZp2(yCwFT5X3m)QZJTzUuZJRz(r7htZs(MpEM5co3VWxSQj8dKfp459XU)H9vxBWO7ByuFV3y7uIY5rXS2w7hSQMzD2Spu)EjpmwjbZh(YKD7EEuuEI33VA72qXQdQNQK33RQHRUv8mWULlP17tDyZdujK15trq7SdE8HPhweWVdlH7NQCyBdqBUo8DtRAEOViMaIXUnHQN(HFy375pVu1Ue05O6xqJIK6hmNaqYCWtxx39()7aaydvZtz0tbqBiQIMQaSrzkeCyRa(Wi)BFBVeQJqiqc)8w38GlF2pDK)n1UFGGsOhORCBWeOLAqUDqCCwVJT2Ev38dUsVP9sDC9bsAnW)qsgCuZg4(lBp19t4yhL0QhDLEE2zNesv3ThEg4X5hunnVx6vdFC65dAuHoM4bhAygpo5h3bwUD7HhGrl1N7yxA9vdoAIbDglHJm8KX2XXW0JeWM63LSMGqplztqH(Z2V5zquttvUw8oXO(pD1K6CdyzR29UJDyX9I4yyYZax1oQH66CWjEBz88TBDH7VSJ1)78q2ATSBm7)hIxgC2rP9q4Chp4UHfbVOTtNQ)UVGeZBl3gh3vPrO3V6E3ARA2fZ(LFx2GUvr9nFlcL5S7ZT944UChm)xdbHtbUNKFpbtNem7nnba2CqPM2b3ACdcNNzamiO19a3nEcZmF1ezu0)5d]] )
+
+
+spec:RegisterPack( "鹤僧Simc", 20250730, [[Hekili:TR1BRTrYz8pl(nc7lgDRwzfBdsgSttcnyzsRknn(fA9QvJ0or7)y3zLIecrOxB5469IsHsHCxBVwsiTLdUECu61R39PPXoPVQFf6ZS)r7S7oZQ1YjKgiHGXENN555zE()8B3U16(J62PVkb19ezj5gs7jvVQuTDAuB)UDitDqD74OQnsDi8lwQMWp)p)ZNC(h8Soytn6stnSv7tzHNTVRgSC3o98XgKVVv3E84BT6naADqAWJ3vQBhDC)(OqArEahp)jp7fF5xD(t(lV4P)E4NV8V)l)VF7JxCNf35g78doCSP(p8UYUTnB)to84A9m(XiNBm6Odd)3q9B1BMxBZBntUT5dVTS3jhBE0m5PtBpB6nMzFQ5Pdp9(32u)0zTNnXBs77E49AhS37lBkBso9EM36yGCVtM1(OJo8EhsfAO28IN(0Z)1F8vtBUNS5TUD7EhF8S2hFC7hyEQ5rGQa6diUV3SBmBVdV)dVzWgpTNApzZtpv2dih29SBEZdV)rbAZx)Xx8PFYZ)Up75)Rp)8)2V7LFXV58N84l(S)Xfp6zV4X)Sq9lGUp5pDXN(5RN(EYAB9ojV1Re6B3ogypIhncsx1102Ak8RNeeuISu7zG639OUD0CXeKlwTBhSLMTj2AOIJQlzQsFvti0ur2BXzhS4mDKQbrpAjt1hU4S3BXzsvRV4S5ZZSQJgzXznBT4SgqqOQgbBB1TJlAmESQrxceCkud65pyqv1jQJqwO(kdurgylu1(2tScfZMb)pGQhO2hna7IuiivnDqR9yOtefUitvSLxO2jV4STwCwLfNrunqweE0hPKaHjhKLK5rSnDONN6cppGYUog1AnkYQUVuSIRzBBqp0kA6iTrjQi2AS9ie8u8dWkeDKIlyn1CvTqu1DNIu3byR(v19Djkw(Mv1S9TibAQCOgLAzLE4HPjjuT4O2GUImqEeSQHIMTvFFmjA9qId23gloZbctugQ1VA0ryQVHTvWrGA2v8qUoiQ4YqTNocB4B5PmepGKyhYjt6XVXRlV1qFpII9aftiPBPzb8x1KkYBMs1ZytcnNHjf066bSpkvokAVc1NmuNOSm0gu0gjMG0wg44F9Io(8vX9Ks0Ja3aY0XEcY1KM14rGwyrh0mjFIOBzGc4cnThdM7sDoJC4vRvfcL1gzqDtbIXGAaSG)KXZlIcWcS7R8aGI8V7f59j2eKzvQ(ngvWXvrvtZ303qLy7wDCngXwnrGnym0Rhh2pKdXfqQs09T6JCvgyR57rlawvdy3qeCUdDyvcQ8sWMOGS59UuAqtoAWUncIc2sqimnPIPcxvxSh1R45BPmcRncQKR2FArkrvFhMWbvddLW)qH2tmSZOs4qxgim9etdn27s2zY3j2YuCpPxbnz2xOQfXzxFpk)uMaLOdTrXuN0doljugxtsiNJCAlJL3LPWc6HoiJaJDatcMQiEnITVMo1x0hPs0zzoLuXT)JojGDrPNVlufDPPHTybJBnMWa(kUnCywNc46mX0qAAri2AKoylAXHWwKjggXnkzmPPJld2N4omxL8LKIg0bP0W2qIk8B4bynvQUehmg2IoJNRMeZOyb7AAGQkUBqGKwgKs1wAxyqDv9akMMQEEcR7zap12NKymexTTKsOzkbqWdHYuoQg0Woc9Mndu9nilhSnMU(iI9dZe5jZsa4euDbpaKj4rCXJqziwC0eeiE3XiNXoHJDfhC6QIHunkV0ON7sw8XedNOa)xXJMvIICo2XSjBaOVhszIo2agjeST0uiw9ZapawWgk1AXkXG4idO)nOR6ojHsmKNFeUL1RzOk9u3s8gcjjBYAinDcucFyQnt)(X3mgSHtfwAIEtJy3GNTnjOihDmSLN3cB7Fj5vsi0eWlyy723tr1NOBdmCQYo7StDPAf3mzDfOMURTjQhmNjgyQspBZEqLNWXAt1FOhtcdythHiG)2ZWMW835k9NFtYz2KCsP(IQFNpmnxNOcZjIVSA5AwKDg)lPWwU)W6jWeMWaG9uZxrbCAW1EqEEilneRvlyFm5XCUJ96NaMTq(osDx9nOxJge152FqCrWS7x3rzOQtspQLJamcCMQjJbfSyF8GbutcmBnwlZAdSDjG0Pjb9CrtswDtAjwlyyCi6c8Nb7nA0A6KQeftol13MK(HmZyLslkU67BRNw6dzzJJ(upr8HDTegf)ug7wgDom(pjn6Dqm9oiMEhetVE8wVdIP32Hy6noocINk9kIJGyakUeWiiglcMHttJUqPgjDnHuqCBek9RbKcIRJZEjO8qkSIlgU6BrVY7PVcqlwTek(E6b3FRWrdkFusr3jGott1m3VID2w2zTlSVAjgKMN0OJs3G3O0I9GCIcrwJrg2oX3eS4EkbAAQBoMQGwwENIYIlxZHZrhDo8n5OUl71MCHuKjlfhJCcclIXETWiJvv1Md6XsPrJGl6XmbRzr)EvrzxPcL1tzEYKSNYav8CuRZGeYfnNW1BKAEGC9xZ67FL2YuC8D5lmCDwlBHGqFLrLKwpDNcQNUY2SRxhjXnzlPE3mLANPknKqog56rxk8dlzxAPZjQUuNKx3ox8H)QZ)O)W5FX3E(p)Pp)B(f7(8V(VEXh9Ox(bF35F4V9L)X)8)(r)0f3byEawyD7Cp7jg(QuivShGnqXs17ATE)a0zxCNKhKdnw2fZIFZ2uKBALG4Y2HGU2Q224bT2GfB2kBqrLLLxHGKsjuiIQSKZ0Uy7CG4ekW84K2SLimsRue(OnBjTu0vJW1guH8yIUu7fFjSq39bTQxjGWm9tckDMxs8TZ0o3ujg1Td7PmWfJS6h(0KKZMnKQSbxamt5OfJz66WoriIUo8I6FHSjZTPyE2kgN0TJY2yCoIOvMdTR08gf3fAHlg(0YZ0L3kLHTcbkL(5eLW6izsd8cHtHYcrTAoiBBM3tQA95ZZ2EPzRgs8Kq6BNKKuYdDM5Z3CZIUC085RarMMTK3QYkV90w80tX5zuDEZlJ1PwdEMN9L2QsAKw4Pg58GbsNdCkhipFUayuoamc5KFXaNuzJYbzcdDPGeG3rjfbRLrmpuih0QMepJRy4p2QsbJwwj1yLh0GRhrWanbNO8AYEsvka5cq)zcI5To472iC8Gcv8nwXazCpjCRJenE(L3bXZpSh4Dy)kyeCgY82WJyF1qg3iYcD521(ZNV6V0LwYv2K(9T0CVskJMPKXUn2ARmHm1AuP4BGisqSdHSgLl9DQuyPY1SkyUlZW0Cr4DH4XOKH2Z0MU1UCZYspjp3O34zKz73LDa74ChU1JYJxdLvHbQXO8CqlUQxgxlDF8il8(XIN8S4ORkfJhrLmVuVMqTqUTCtDrLLkZQU3au6HRJz51hknNAkZoSXYgpVgh3GvgLnd6nZahSA6B0royvK36h6G9W8w9yhP8kVLp4X6Ku(kTTwQkpxTgBSSQCT2y3r6MBPBEKYJVET4sf9FPBYLYkvuBowcFf0IjLb6Q2KjAiwGtzh9tCZyEPI1KwX4C5e5vp2IHrPLipskSOWLPqNmV6zxVXwckIajMXvhkFfGe1UC5mj0lACWekw3iWD4AvxVepg9DncG3jnOmum4Avo7eL0RLg4s8sW7y2uDPC7jZeQIh2mp3AvpVkKb0rkFZzLIinf2ClvG8VtR8Mz(QE23zLW9L6TtL2MNGV81kpoWSMKDKeWSsBNZXY6CzzR3p1Nyw2OJWpwTWCxoFOAHlK)Jul858(a1QSzUpnn4M98(S0MppZNK2wcmjzeZ)pFeMpp)xux(9g)8SFjDBf8Aw6()o]] )
+spec:RegisterPack( "龙僧Simc", 20250730, [[Hekili:LVXAVnXv2Fl9lvG2TETDsigjcsHwrBr1vTBqlB8k84XJV2EiZlnpSRJQSsin8iekSSbkecB5rOK2ceOvBjnpGFm1Zy7p1)c75Ehpp84zgp2uwaT5dr2375EUN3V8mztK94zNQaTkk7NMmEYXINkEYyjgF0uzNsTMek7us0mZqxc(Ganp8)2p)g6l8GPy5zWBvJtKUagbkIAYmW2vfRYPrNDQ8ASCQFSq28DH7XhjoaQeIb((4WhlZwOaYeiKcGWejILS(XQFm9Tw2yTB2yVB3yNhQ)KB1AZRQV(Qg3(zgZ9GMR(v6R)9T(px4DQNZ4N2P51(g7vmU(MUb733D(gBDr9lVmgG1224gB2EH9AS7QgRDE71BE6F14NVkaz7BDfGZAS1f0p7D(9DxgqyZ7)V1F(DAT9pcFT1lUE7hDAJ12e(SXvVx7hTI(sFlgS794wlCM2lELMp686R)aJLMR1c7z81B06IxU1z)b9N9u9DNdFKlDLg78lT356TE86abG3APnAF2Lmw55WUn27maLdKeSL(wpg4AJLURjR1(SxcZf7DB9lTzJDUVX5VaCWMF38nxzJwV4gn2(MDUrY6gBEt3NclhnjfGYA(0F2ug977UkEJeXQNR1w3T9nF(71yVVUXlUL(tpDRNVqJT2U15Us75oD9J9(J(5twHV8F9ZskNMp9FFYpjrEU)gs69N5itA(xPYhn)Stp9PuZWNrjdVkhxMYFujUmWF8zYuot80ZMUA60FWSvHDZm9jMM)JM8t4np6KktN5eNGho6X(4jR((tIjjqRFZ7AS2d7IoJkv8bZc3w(pmFs(JIMC2AkkkPNvrPAAA(mF40FiF5mtNeai9NKE2pO0rpo5K8QsQzYZZLbdE68ZM(4F(KLo6KzNIJvrvbBtltZWsZH)4NsCsOzuzffaBBorXcuf1KRLDkKaDEouHShjRkyt3fuizfK8mScL8a1iUHIJTuzvfQtPvOepsq1dOJ6g0ISYiYv7bOXCdeTadsrvMMJIHMJZdKhOl6JUeLyrkvzwMzu6gqvmVZwWMXD2Z(0yStz(fkSaZ0dwMvQdzq2rjgtbfkmQ(tt8xKrvyRqZ9NzlorrwHcXkRjRsjOXtLNTumgrnb1dpY7wgrZPwMsIwwTgLeJ6H6CQoRyUTPkIYmEK1nyl)DrSa9OIKzHWrQ0YLqQXmpFmgnzzqyxp3HQNZCP65E3656auba5yXiz7dq2bZovquibeplsPEUdxpxCYgqqifrr1YGwMIhtum0kQevULGsvuJPmwqxardKUL(3xQmiSrUkIqJtSkOEPklfdeoaDmr9ChmEGBd0)bhZIozef5kiwviMSMc5gQcNGAgq7hROgOmLrmLXcakvwEG3NWIfDohW(vTiTyMaR4cqZZ5w0WlwXI63hzH8AflgBwKaLKgNckMMu9CF5x2ZYYiEAwbtXmq(73eObtYqyDhTasOcItuY642(w(QgiKd2SJHvutHc(eBrwgAmMiKCqx5e)pvCBjovlRjuajtvuKbiwveTTy1cIbNvW2vPg7Tdo1TPMJcNWP1Sdp6REEiSO81EnmBI65sep(BusQG56qfJhWJyutbrvTmlhYoKhKRWvATIWgIaHl4wIhKXKlW7ksF3CVlOCIrCOj6xSypbNWmZ4bAtqOqbrbqhqYgq51ZWXkyy1Mr5kI7ik9YtqMjompKkqEGNwGUhQTF3kyPoECtq9MeMSzkxKe(cWwvUOMdgi10pJxCSMeE1roPp9AjJTTaMGbQckjrxMiUNR28JuwMYfHs4qoiSlQik2MU8F9pvpMg8wMKdA7uYHLy8arWwT)r29G0rIasdeJUss(fsiokqVWt4PqQMQNm99PiOE8qixaPqOoQPpnUxf3rcWfWLbqy(W(e92KAnLDOcusC01azr3KE3Xv8nmNPvxWLpSps1oMYis8F7syufvr8XofDbef0AGeuckfuQPQgQNWz7pIcwfnEEiMPpOKqKbN7ZKijgf2EZWbHyxK)B6wokHkSQIRdt0)JnI5XSJcrIEqo)(94NhrU06Qi8K3er9uKF31V7UTnGcf1uDmadonqpf8BZw(DjPCPqGAmfWCcJmnyLAFvPC36LkBjWWtIMJVN(UkGksRXP2tpNfqQIFryTBQiHOLbNxWbd6)JDgKFDD6IxLeTqS5fAJOoB4tfYb37NR(XSAA2NkVc(8D1cePBo3OKVgyCW4xrirbJ9GoRUfdw7deXNvbjvrIIPmcBvBALAIjS0LrTRQDcvGWZcQB6oYuyljOUar(80dGo2kgzIqIr6jVw0dmgElKKob6FcWG7PDi7a5qt0DjhofIo6lBwJedI0XM7)JjTXFynJ4r84t)TbhN8L7QS1eQ2EM(mNOb1lbpghh)83ohKZBpTe5x09bUhO3nWYnJs)gh22ZYPbbwfmUu0eIqxu(PJtKkmQYuE0Z5amoESX6F)wb76(kQFlFl136mEBu3NwYgMaadquUebk0cp56Gh9b6al0iDb3j8aExD34TtkNO0C7Fq2U9ZS5WoMa7R)qd4DS4oT)fEAyxdSnIgWDAM1vdcHeZXtP)VuT4hEn)DeLbgRpccoxI5a(XkiWKey6(1LBKhnqkBQZTAiyX5(DnmYah4NN7ySb9ogIPdeobfGJ3bgCZ0qJjKi4ksh2b9yTzeMKs3fJh(4cIalVVafBJhpqx3aRKTh31iWqoXcnNPquQ)g6aMzgoSuGmEcYV0ParVXuJHZYZtXfs8tYqolIxc4gz8VqQprR6NoRNab2tCS3mVD3VZqmIxxbVgjR98kIK8QmlvEn5a7ElW4zriyMtSL3zOk4QtuIHqE0jHhhw117P6WO4an2dKjkYQxF92zzAyL4brSsdYwN4ef4medUWL3GMHyWf)0NXaMOt4g3ZbmkJ)2hNYUlmZ94atoyLg4FxG9zoHjdofUFHwgzaDk7ZyldyIIj7A6FHmrr7hqcF6spWArglQDfldFdVlGinAokET(8GymS3JsvOWdorzGzO1ullciSg1OJo6iXte(8Ng2lKPSSip4CdlJdbLxKppeOKvDWgbvzelNMGcvj2IbfwFFEkXS7YlJsfOeoQeqP4PtG5g79TTgd1Hlc1dBxFupTKATX(FjYzsoA)(DcNO3NZKWBlpmX2ibePbSqGUNboNf)eujkua04EE2JSnq8cx49CBg3UMgN)tQjeRGu93ky0OhTNvOI4mikcHqbj96kUF4DUhqs0XCfAUenhhDjwrWFrvLJG3kSmOotl0zs4(elA4NEMx7XrJhEmOiuXTV4DeFhoqed9aNVSevjAt8tiHcSflI5AEqIXedB77Sxrrzv4cW6X8YOQo7Up8VdHa4(OaTJXzE2ovgy65Y7Zwfev7Erx911fve(GbFdMHWl6gnsLRPeeECVNdISw1LOXdn7Kpn45E)YN45)FZO(Qm94qeQ3ITKKrvOkXuiwOHo7bAp5(dnTrK7P2dsT77j1RbPxx0sVsUali5vvEYxAgku9B4MgbOSFDLSnKrIpKvf53ZH9RghKo3ejylSCfKScEDxVajqGlCdrkzNY4rR3EXl2CVhBCTZ2yNFP5UBR)K)P(M)A75wT5kB0((pr)FnFZv)kJv20y55)T5oT(oB36Xp2yZl1yRFOXUxxFXZ1C7h0EH9AV2CT(U51xErJl8qZ38GCVx9C)Jg79cannp)3dO5K4x3JLxu)Y)yJD2PXEx14NUJXAN3Cf912WgBn26rWnAE14x9JZDTwZTOfcnxoXj1VYYD(CYtsE9sUHXTFM(8RQ)KZ05v2yZFvF7vmbP19wuF9ZAC7l5g1)g(D0W4CxwFPVvFZD1x8(n2(mPaUY8fcr)CFtR7Sbbg8dCGyrOSk8JlLzGE73shSao7)9d]] )

@@ -1,4 +1,4 @@
-## https://github.com/simulationcraft/simc/blob/thewarwithin/ActionPriorityLists/default/priest_shadow.simc
+## https://github.com/simulationcraft/simc/commits/thewarwithin/ActionPriorityLists/priest_shadow.simc
 ## Up to date with SimC: April 12 2025 - 9b983fb
 
 actions.precombat+=/power_word_fortitude
@@ -57,7 +57,7 @@ actions.cds+=/call_action_list,name=trinkets
 # Use Desperate Prayer to heal up should Shadow Word: Death or other damage bring you below 75%
 actions.cds+=/desperate_prayer,if=health.pct<=75
 
-actions.empowered_filler+=/mind_spike_insanity,cycle_targets=1
+actions.empowered_filler+=/mind_spike_insanity,cycle_targets=1,if=1
 actions.empowered_filler+=/mind_flay_insanity,cycle_targets=1
 
 ### Healing spell action list for proccing Twist of Fate
@@ -111,7 +111,9 @@ actions.main+=/vampiric_touch,cycle_targets=1,if=buff.unfurling_darkness.up&tale
 actions.main+=/mind_spike,if=talent.mind_melt&talent.void_blast&(buff.mind_melt.stack<(1*talent.distorted_reality+1-talent.unfurling_darkness-talent.minds_eye*1)&talent.halo|!talent.halo&buff.mind_melt.stack<2)&cooldown.mindbender.up&cooldown.dark_ascension.up&time<=4&insanity<=20&!set_bonus.tww2_4pc
 actions.main+=/call_action_list,name=cds,if=boss&fight_remains<30|target.time_to_die>15&(!variable.holding_crash|active_enemies>2)
 # Use Shadowfiend and Mindbender on cooldown as long as Vampiric Touch and Shadow Word: Pain are active and sync with Dark Ascension
+actions.main+=/shadowfiend,if=(dot.shadow_word_pain.ticking&variable.dots_up|action.shadow_crash.in_flight&talent.whispering_shadows)&(fight_remains<30|target.time_to_die>15)&(!talent.dark_ascension|cooldown.dark_ascension.remains<gcd.max|fight_remains<15)
 actions.main+=/mindbender,if=(dot.shadow_word_pain.ticking&variable.dots_up|action.shadow_crash.in_flight&talent.whispering_shadows)&(fight_remains<30|target.time_to_die>15)&(!talent.dark_ascension|cooldown.dark_ascension.remains<gcd.max|fight_remains<15)
+actions.main+=/voidwraith,if=talent.mind_melt&talent.void_blast&(buff.mind_melt.stack<(1*talent.distorted_reality+1-talent.unfurling_darkness-talent.minds_eye*1)&talent.halo|!talent.halo&buff.mind_melt.stack<2)&cooldown.mindbender.up&cooldown.dark_ascension.up&time<=4&insanity<=20&!set_bonus.tww2_4pc
 # High Priority Shadow Word: Death when you are forcing the bonus from Devour Matter
 actions.main+=/shadow_word_death,cycle_targets=1,if=priest.force_devour_matter&talent.devour_matter
 # Blast more burst :wicked:

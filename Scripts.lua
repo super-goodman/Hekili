@@ -1618,6 +1618,23 @@ function scripts:CheckScript( scriptID, action, elem, default )
     return false
 end
 
+function scripts:CheckFinding( scriptID, content)
+    local script = self.DB[ scriptID ]
+    --print(script)
+    if not script then
+        return false
+    end
+    local script_lua = script.Emulated
+    if script_lua then
+        if string.find(script_lua, content) then
+            return true
+        end
+    end
+
+    return false
+
+end
+
 
 function scripts:CheckVariable( scriptID )
     local script = self.DB[ scriptID ]

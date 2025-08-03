@@ -1196,10 +1196,10 @@ local noClassWarned = false
 -- Need to make caching system.
 RegisterUnitEvent( "UNIT_SPELLCAST_SUCCEEDED", "player", "target", function( event, unit, _, spellID )
     if not noClassWarned and not class.initialized then
-        Hekili:Notify( UnitClass( "player" ) .. " does not have any Hekili modules loaded (yet).\nWatch for updates.", 5 )
+        Hekili:Notify( UnitClass( "player" ) .. " 尚未加载任何 Hekili 模块。\n请关注更新。", 5 )
         noClassWarned = true
     elseif not lowLevelWarned and UnitLevel( "player" ) < 70 then
-        Hekili:Notify( "Hekili is designed for current content.\nUse below level 70 at your own risk.", 5 )
+        Hekili:Notify( "Hekili 专为当前版本内容而设计。\n角色70级以下使用，风险自负。", 5 )
         lowLevelWarned = true
     end
 
@@ -1675,6 +1675,25 @@ function Hekili:UpdateDamageDetectionForCLEU()
     countPets = spec and spec.damagePets or false
 end
 
+local function IsPlayerInCurrentGroup(playerName)
+    local currentPlayerName = UnitName("player")
+    if playerName == currentPlayerName then
+        return true
+    end
+    if IsInGroup() then
+        for i = 1, GetNumSubgroupMembers() do
+            local unit = "party"..i
+            local name = GetUnitName(unit, true)
+            if name == playerName then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+
 
 -- Use dots/debuffs to count active targets.
 -- Track dot power (until 6.0) for snapshotting.
@@ -1771,6 +1790,60 @@ local function CLEU_HANDLER( event, timestamp, subtype, hideCaster, sourceGUID, 
         if damage and damage > 0 then
             ns.storeDamage( time, damage, bit.band( damageType, 0x1 ) == 1 )
         end
+    end
+  
+    if dmg_events[ subtype ] and not ( amSource or petSource )  and (UnitInParty(destName) or UnitInRaid(destName))  then
+       
+        if IsPlayerInCurrentGroup(destName) then
+            local damages, damagesType
+
+            if subtype:sub( 1, 13 ) == "ENVIRONMENTAL" then
+                damagesType = 1
+
+                if subtype:sub(-7) == "_DAMAGE" then
+                    damages = spellName
+
+                elseif spellName == "ABSORB" then
+                    damages = amount
+
+                end
+
+            elseif subtype:sub( 1, 5 ) == "SWING" then
+                damagesType = 1
+
+                if subtype == "SWING_DAMAGE" then
+                    damages = spellID
+
+                else
+                    if spellID == "ABSORB" then
+                        damages = interrupt
+                    end
+
+                end
+
+            else -- SPELL_x
+                if subtype:find( "_MISSED" ) then
+                    if amount == "ABSORB" then
+                        damages = a
+                        damagesType = school or 1
+                    end
+
+                else
+                    damages = amount
+                    damagesType = school
+
+                end
+
+            end
+
+            if damages and damages > 0 then
+                ns.storeDamages( time, damages, bit.band( damagesType, 0x1 ) == 1, destName )
+            end
+
+        
+        end
+        
+        
     end
 
     local minion = ns.isMinion( sourceGUID )
@@ -2553,186 +2626,9 @@ if select( 2, UnitClass( "player" ) ) == "DRUID" then
     local owlOrder = { 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14, 15 }
     local defaultOrder = { 1, 2, 3, 4, 5, 6, 10, 7, 8, 9, 13, 14, 15 }
 
-    function Hekili:GetBindingForAction( key, display, i )
-        if not key then return "" end
-
-        local ability = class.abilities[ key ]
-        key = ability and ability.key or key
-
-        local override = state.spec.id
-        local overrideType = ability and ability.item and "items" or "abilities"
-
-        override = override and rawget( self.DB.profile.specs, override )
-        override = override and override[ overrideType ][ key ]
-        override = override and override.keybind
-
-        if override and override ~= "" then
-            return override
-        end
-
-        if not keys[ key ] then return "" end
-
-        local caps, console = true, false
-
-        local queued = ( i or 1 ) > 1 and display.keybindings.separateQueueStyle
-
-        if display then
-            caps = not ( queued and display.keybindings.queuedLowercase or display.keybindings.lowercase )
-            console = ConsolePort ~= nil and display.keybindings.cPortOverride
-        end
-
-        local db = console and keys[ key ].console or ( caps and keys[ key ].upper or keys[ key ].lower )
-
-        local output, source
-
-        local order = defaultOrder
-        -- TODO: These checks should use actual aura data rather than potential stale/manipulated virtual state data.
-        if class.file == "DRUID" then
-            order = ( state.prowling and prowlOrder ) or ( state.buff.cat_form.up and catOrder ) or ( state.buff.bear_form.up and bearOrder ) or ( state.buff.moonkin_form.up and owlOrder ) or order
-        end
-
-        if order then
-            for _, n in ipairs( order ) do
-                output = db[ n ]
-
-                if output then
-                    source = n
-                    break
-                end
-            end
-        end
-
-        output = output or ""
-        source = source or -1
-
-        if output ~= "" and console then
-            local size = output:match( "Icons(%d%d)" )
-            size = tonumber(size)
-
-            if size then
-                local margin = floor( size * display.keybindings.cPortZoom * 0.5 )
-                output = output:gsub( ":0|t", ":0:" .. size .. ":" .. size .. ":" .. margin .. ":" .. ( size - margin ) .. ":" .. margin .. ":" .. ( size - margin ) .. "|t" )
-            end
-        end
-
-        return output
-    end
 
 elseif select( 2, UnitClass( "player" ) ) == "ROGUE" then
-    local stealthedOrder = { 7, 8, 1, 2, 3, 4, 5, 6, 9, 10, 13, 14, 15 }
-    local defaultOrder = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15 }
-
-    function Hekili:GetBindingForAction( key, display, i )
-        if not key then return "" end
-
-        local ability = class.abilities[ key ]
-        key = ability and ability.key or key
-
-        local override = state.spec.id
-        local overrideType = ability and ability.item and "items" or "abilities"
-
-        override = override and rawget( self.DB.profile.specs, override )
-        override = override and override[ overrideType ][ key ]
-        override = override and override.keybind
-
-        if override and override ~= "" then
-            return override
-        end
-
-        if not keys[ key ] then
-            return ""
-        end
-
-        local queued = ( i or 1 ) > 1 and display.keybindings.separateQueueStyle
-
-        local caps, console = true, false
-        if display then
-            caps = not ( queued and display.keybindings.queuedLowercase or display.keybindings.lowercase )
-            console = ConsolePort ~= nil and display.keybindings.cPortOverride
-        end
-
-        local db = console and keys[ key ].console or ( caps and keys[ key ].upper or keys[ key ].lower )
-
-        local output, source
-        local order = state.stealthed.all and stealthedOrder or defaultOrder
-
-        for _, n in ipairs( order ) do
-            output = db[ n ]
-
-            if output then
-                source = n
-                break
-            end
-        end
-
-        output = output or ""
-        source = source or -1
-
-        if output ~= "" and console then
-            local size = output:match( "Icons(%d%d)" )
-            size = tonumber(size)
-
-            if size then
-                local margin = floor( size * display.keybindings.cPortZoom * 0.5 )
-                output = output:gsub( ":0|t", ":0:" .. size .. ":" .. size .. ":" .. margin .. ":" .. ( size - margin ) .. ":" .. margin .. ":" .. ( size - margin ) .. "|t" )
-            end
-        end
-
-        return output, source
-    end
 
 else
-    function Hekili:GetBindingForAction( key, display, i )
-        local ability = class.abilities[ key ]
-        key = ability and ability.key or key
 
-        local override = state.spec.id
-        local overrideType = ability and ability.item and "items" or "abilities"
-
-        override = override and rawget( self.DB.profile.specs, override )
-        override = override and override[ overrideType ][ key ]
-        override = override and override.keybind
-
-        if override and override ~= "" then
-            return override
-        end
-
-        if not keys[ key ] then return "" end
-
-        local queued = ( i or 1 ) > 1 and display.keybindings.separateQueueStyle
-
-        local caps, console = true, false
-        if display then
-            caps = not ( queued and display.keybindings.queuedLowercase or display.keybindings.lowercase )
-            console = ConsolePort ~= nil and display.keybindings.cPortOverride
-        end
-
-        local db = console and keys[ key ].console or ( caps and keys[ key ].upper or keys[ key ].lower )
-
-        local output, source
-
-        for _, n in ipairs( { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15 } ) do
-            output = db[ n ]
-
-            if output then
-                source = n
-                break
-            end
-        end
-
-        output = output or ""
-        source = source or -1
-
-        if output ~= "" and console then
-            local size = output:match( "Icons(%d%d)" )
-            size = tonumber(size)
-
-            if size then
-                local margin = floor( size * display.keybindings.cPortZoom * 0.5 )
-                output = output:gsub( ":0:0:0:0|t", ":0:0:0:0:" .. size .. ":" .. size .. ":" .. margin .. ":" .. ( size - margin ) .. ":" .. margin .. ":" .. ( size - margin ) .. "|t" )
-            end
-        end
-
-        return output, source
-    end
 end

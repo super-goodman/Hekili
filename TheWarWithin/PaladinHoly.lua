@@ -2,8 +2,9 @@
 -- August 2025
 -- Patch 11.2
 
+if not Hekili.check then return end
 if UnitClassBase( "player" ) ~= "PALADIN" then return end
-
+SetCVar("autoSelfCast", 1)
 local addon, ns = ...
 local Hekili = _G[ addon ]
 local class, state = Hekili.Class, Hekili.State
@@ -468,6 +469,12 @@ spec:RegisterAuras( {
         duration = 30,
         max_stack = 1
     },
+    --self
+    empyrean_legacy_icd = {
+        id = 387441,
+        duration = function() return 20 end,
+        max_stack = 1,
+    },
     forbearance = {
         id = 25771,
         duration = function() return talent.holy_reprieve.enabled and 20 or 30 end,
@@ -724,6 +731,33 @@ end )
 
 -- Abilities
 spec:RegisterAbilities( {
+
+    rebuke = {
+        id = 96231,
+        cast = 0,
+        cooldown = 15,
+        gcd = "off",
+        school = "physical",
+
+        talent = "rebuke",
+        startsCombat = true,
+
+        toggle = "interrupts",
+        target = function () 
+            if not UnitExists("focus") then
+                return debuff.casting_target.caster
+            else
+                return debuff.casting_focus.caster
+            end
+        end,
+        usable = function () return state.readyToInterrupt() and target.distance <= 5, "readyToInterrupt" end,
+
+        handler = function ()
+            interrupt()
+            if talent.punishment.enabled then class.abilities.judgment.handler() end
+        end,
+    },
+
     absolution = {
         id = 212056,
         cast = 10,
@@ -1190,9 +1224,21 @@ spec:RegisterAbilities( {
 
         startsCombat = false,
         texture = 135949,
-
-        toggle = "interrupts",
-        usable = function() return buff.dispellable_magic.up or talent.improved_cleanse.enabled and ( buff.dispellable_poison.up or buff.dispellable_disease.up ), "requires a dispellable effect" end,
+        toggle = "defensives",
+        target = function ()
+            if debuff.dispellable_magic.up then
+                return debuff.dispellable_magic.caster
+            elseif  debuff.dispellable_poison.up then
+                return debuff.dispellable_poison.caster 
+            elseif  debuff.dispellable_disease.up then
+                return debuff.dispellable_disease.caster 
+            elseif  Hekili:isMouseOverMemberDispelable("Magic") then
+                return "mouseover"
+            end
+        end,
+        usable = function ()
+            return debuff.dispellable_magic.up or ((debuff.dispellable_disease.up or debuff.dispellable_poison.up) and talent.improved_cleanse.enabled) or Hekili:isMouseOverMemberDispelable("Magic"), "requires magic, dispellable curse, potion"
+        end,
 
         handler = function ()
             removeBuff( "player", "dispellable_magic" )
@@ -1550,16 +1596,22 @@ spec:RegisterAbilities( {
         end,
     },
 
-
+    --self
     intercession = {
         id = 391054,
-        cast = 2,
+        cast = 1.5,
+        charges = 5,
+        recharge = 600,
         cooldown = 600,
         gcd = "spell",
 
-        spend = 3,
-        spendType = "holy_power",
 
+        spend = 0.02,
+        spendType = "mana",
+        usable = function ()
+            return Hekili:isMouseOverMemberDead() and Hekili.resurrectionCount(391054) >= 1
+        end,
+        target = "mouseover",
         startsCombat = false,
         texture = 4726195,
 
@@ -1605,7 +1657,7 @@ spec:RegisterAbilities( {
         cast = 0,
         cooldown = function () return ( talent.unbreakable_spirit.enabled and 0.7 or 1 ) * 600 end,
         gcd = "spell",
-
+        usable = function () return time > 0 end,
         startsCombat = false,
         texture = 135928,
 
@@ -1866,18 +1918,47 @@ spec:RegisterAbilities( {
         handler = function ()
             removeBuff( "divine_purpose" )
             removeBuff( "shining_righteousness_ready" )
-            applyBuff( "eternal_flame" )
+            --applyBuff( "eternal_flame" ) self
         end,
 
         copy = 461432
     },
 } )
 
-spec:RegisterSetting( "experimental_msg", nil, {
-    type = "description",
-    name = "|cFFFF0000WARNING|r:  Healer support in this addon is focused on DPS output only.  This is more useful for solo content or downtime when your healing output is less critical in a group/encounter.  Use at your own risk.",
+
+local judgment_str = Hekili:GetSpellLinkWithTexture( spec.abilities.judgment.id )
+
+spec:RegisterSetting("judgment_party_health", 80, {
+    name = format("觉醒%s 队伍生命值阈值", judgment_str),
+    desc = format("若设为大于零的值，当你的队伍的当前总生命值小于该阈值时，才会推荐使用附带满层觉醒效果的%s。\n\n", judgment_str),
+    type = "range",
+    min = 0,
+    max = 100,
+    step = 1,
     width = "full",
 } )
+
+spec:RegisterStateExpr( "judgment_party_health", function ()
+    return settings.judgment_party_health or 80
+end )
+
+
+local avenging_wrath_str = Hekili:GetSpellLinkWithTexture( spec.abilities.avenging_wrath.id )
+
+spec:RegisterSetting("avenging_wrath_party_health", 70, {
+    name = format("觉醒%s 队伍生命值阈值", avenging_wrath_str),
+    desc = format("若设为大于零的值，当你的队伍的当前总生命值小于该阈值时，才会推荐使用附带满层觉醒效果的%s。\n\n", avenging_wrath_str),
+    type = "range",
+    min = 0,
+    max = 100,
+    step = 1,
+    width = "full",
+} )
+
+spec:RegisterStateExpr( "avenging_wrath_party_health", function ()
+    return settings.avenging_wrath_party_health or 70
+end )
+
 
 spec:RegisterRanges( "judgment", "hammer_of_justice", "crusader_strike", "holy_shock" )
 
@@ -1887,8 +1968,8 @@ spec:RegisterOptions( {
     aoe = 3,
     cycle = false,
 
-    nameplates = false,
-    nameplateRange = 40,
+    nameplates = true,
+    nameplateRange = 10,
     rangeFilter = false,
 
     damage = true,
@@ -1897,7 +1978,8 @@ spec:RegisterOptions( {
 
     potion = "tempered_potion",
 
-    package = "Holy Paladin",
+    package = "神圣Simc",
 } )
 
-spec:RegisterPack( "Holy Paladin", 20240908, [[Hekili:9E1xVnUnm8pl3lPTyTEojTnPdn9HT9WUUHIdihW9MTvSLT1ITKNKCYfGa9zFuYXoY)lTpSBOanjIuKuu)i5p5n17RERJqsS3BZCNDV7tUlDM(0dp(W9ERLhkWERlqHBrjWxOOC4))bl7Gk4lOmueHQLEiJHI0wrWk5HGgER3usYKFM6TzitpvBArbo07ThFWBDkjkcxPkwec2hJYWCvqbNW4ejblubiowf87Fz9DXSWsbosfWOqu8Q6vTHVZDXDZDVvf4(0DUl)fvWxtb1)gcmY3iYuDuMresHjglW0imx)93mhDmfTjdh59RERdb3H5eK(KKXubtubxRcsH4rM6uekvbpRcw4QcoEuf8jva(Fkjff4ihrkbNbb1nM9SPmowVeLqt85KKujMvkOyHWNJrrhCklQmHrrCEXbyzQFgobfQf6TgfkjmiQ3Z4r(Sy)Kmg)GNesJJgXjCM2SFm3F2dzA5AxeH2t1EyU2d1sRoxAXYu8zBzhcs4p4IlgvMjBYP17NJ3uUf3w9QZqTgODyAIoq3ZrY0oAoFqnd5LceCf2r57TvofWO(iEoayPYoX7BpyRjSSqOnlCifL559S7JJPnQuwMt7O9IX0EpHk7z7LJgja4NM0r7NS12CXj8)7YOe9zSJQtDT1TGv9zBvgh9BqqBYySOSsHSnCT9f2iYQVIAb1IjaCqBuJ3BHcGsAFW55DVPMoF0yek)KqFcQCaVEAdvrwiJLfX2thqpoohrOq7LxubjHro5OVxThd8PGTh0bG2Kqcu6VcAVavesojuhzNd(quwMF1p81TzQA24x1SSPDJEpTGOrKDek2xYYY6EQFOhugGdI8UQ94LBgyHSWOqi4aC1ocxwIn7EXO7(9ZRqxM4s4uZXHPiEcCki5yt3XtPrRSZPn7RZCBRC9Y)FCDtTH2NpDjKeKDe4qaqd7Z5uB0kR40j(DiuFoIQNg2CcT2SP)wRAVuKUNIPdWaD4M1QD5ifZZM1dpiszHB7Q24fln1aN38qG)lERnRf6fXdrg0lN3lGHFwaxpS8ni5LhZA6AuuXKa6NYro6O0QgbVZ06Yi7YZ)0Bzh2pIjDod3nnjRlD7xnye3mO5DgRoOdIra)IXDGrSjJa5KDqBaT8kUqlDbQp7rC9uAOTNHXcjVGXH4nMbmxU60q1RubCnrdUg9lyAWom5HLd0QGfGIaamkCuV(xq3evW05a9NFJrbNzKF1yvuGzLSliVUId076PF)MZoyXpAhS8hMduV(ztgwB251v4Qad3qqSg2YIjzn12cNgC8pT6NBbgVLeVAy0R61H2ChqNE7JJyx5(EgXaS0gXGpNmo2uBQgJbMOIrM9kThOpOK6mQTW2mSSLSPhJQXKwXGAmPvmMg1Yggs2s7WiYwufbi7vAiJ0CrAZ354XH560DDlEo2gVHoJ9IDPjCRMGWQA(b3wrSy1uD88PXG0hp((SzE5uZ8Jh7ZIXcyPb0NzG07M1q4OvUVdhIgWxRZy7XgADg7OmP)u8NR5GzzX6BZ)dmL9CAtwUZu)jvQo6e)w5O2t1hkI7LsnJDFNS1fgu)YahP2tHTQ0DQXvGsTEeP2j6h3o56ZpR95fUhp(PopM9MjFG3rEQEO)tyhmqA9wZZnV(a(zqZn6JtH2kPm4Pw)jGxyBH(ZuIzcS3)(d]] )
+
+spec:RegisterPack( "神圣Simc", 20250730, [[Hekili:DR16UTXXv4Nf9NajeacskrDbOYaRTduRHOqsybmK(bxo7UdjxX9gMDwYqIacPA0MeN2Ka0cKIeJ24w7u1adBeu020A5NMksj)l)k0Zm79L7oK0jcfPWgsI7EMZ8nN5C57mdBwP5pVzdnef38GQLRwR82LxVu51RvU8onBqh6GB2WbP2d1b(dlKj8ZlF8FyYd(Zn0nvzVAOHnsJPcxBpIk86b2dm8qnBO4PBq)zwnvYr7BSZ6BbJWbR28GnR1SrxDnnSVOyxqTvQuQ647m(oV80F70V6dE5do5QV(0lEXxD1h8nt(NF70N9PtFYdN(rF8K7F2KN9VU8lFkiZfF39F15N(YN)7V6PpAYJ(ltV)jxDVx8Y79Ilo)lM8GZM(jF0vp8KPF()GPbyuNFYRo)xdkCYN(SlE(JV8Rp9YF3ztE69U45pjqTmboLHaqxx(T)Tjp6VE1F)JN(jND1V5ZE15Fb7f36TEljZ3SSI0216)ULpC4B(oQV9p9y672)wssshkjnc(vDP9hvN9pZJUB9BVF9Jnossrzu57w)4JGNwFGRXnLQpqsrsP((mPoQQ5rM09KKEhP9zAy0ajoi(Y)00h8KVpG42MVx9r3Au99p(9CRxFpae9oCVrhAE0HDoA)BdIE7Qsvp8UmPg6EWO6khij1r6UsaW2BVrsnByO7sDzBZeKQoYa(Rd4ooivQUTf8BlvSlLGmKvrggnBGTqkgyTM3Sjf25tjjrfzHLP2ec2IMrY1tkPcQJSDBzkrxTNBgb3iLGyIlM0t3QtgPQLukd9oDPUYh7P1XCMzg(OPovVdIlB2vNQbgz5IZBzf)KgQeDkMOd((DXidA3soQ0XTUX4wBvECR3yCl)Nk7Gi0HYHVB7AXtJUfmEWo6Y(uO1yUtWpz3XTw3FgwDClcYQdwgcTmmKnrD0vh369F)XTOishmv2mNxPztN9HjvJt3HUfPNKVlwrHpDT41MMEFDyB3TRo2qlAhCHwCDDK7GC4lqfV2TlfOkhInfZ1Ejn7bw)iXaeJ6ih0CncWkPRTb4NypatkP6XJw4Emv9NSuMcpIJTlUKhyLwJBiARBPvkLHCCRnkhJMb2enwWvhdBYqF)FE8bpGRlgSeGtkjkqi)9Pxl8fcodyGUu5Uor4Rszbauq02IOoowD7AR2ZFXYefSoSugcxJ8vbAaQh2cKvMGrAdlrWMiDlx(QnkWtSKaEQ5BxMnla8UWKsbp2xMW9YaxoDxzSf2uhN4HGb2LYY9Y1sqwGcSh1syoIscoFdBxpcv2YZuwrVtjvBV4DzrtvC0kQp2QdZImGGaNrwOAIIbPEP4CEfmxBwlWEyaRNqhoQTHrPaTeUbPABBWM9skyKQTfZ5QVoH6HtTFUDyyoxDXI2gPdOpsLRLCsj6US1GRNfpgkuQzI9zOsCQVcwJbfqYFppJtUdGgZR)ClZcYDQji6DZLDjN0BTdqPaYmBlRytPgqMxmPVoW1e07wIJC5ltfpJbisVGqYLiheF0iIjIfQ4YMUTxQKH(b9Hbcz9swwGeM96GDYac))u20UplDwkuTY4w(pogg6wT9yemyBpPacbP7hRiCPSiWTTbYTBK(bMv(i7GYm0xP8RNnCfXMXvJxPrEWZUu9jkWeyLWfSqFAH1q0WTrEguXfqYlMnrGcbR41dlonma13Up2PVJSAxSAVqRbd(Scza9yMznbBviCr2)dYmE7(S3L97Elbl3CY2UqQiOfGCsKTqdxvZvC6jnmF3dB6meczbnG7GuhkRRQft0liZBgzsLYxO3uU1uVUQINFD3nt1cJbJ2VfVHhxpttmjtZgBvK0ipQNPvgP3UiPhW7XiJ07uisGIjZ0uLGa4Rldyc2ez0SNt(g3kIIi5UoaZdmHhiKYRzjiBLiZaITJXTVH8yQmhAvw2mcb(twM8o7YZ7uOpmuMEJLpUh6lXsd6tMJTIjzfyCI4LPs8CrW4szJsZRlsKGmXzTGliaNrFCKoVUeZ4aTteDC))VsIYAIyZwH7KX8lxDbhX68repirt2pmt0AlQH0gh1BdZewCI2fPONyNkAQzQysEbP0ZPfZyVgUJxEsmdDAHykV2yzGRyMIRW6nWYfRgKoiLFCMk383WM6(4a3B)2gQMaDj0fFMlM04pyjBwckHcll67ipdcUrXLnxlIovUV7ncJmssoBvHur5vhkeKRjKX2Uldt0QVMmrf069QxFKisyN9trhQ)enLwqd(l3r4KMQVG6u3G1ZhxYOwRJPixsTlBq(j9kQtMQfxKS4OVIWCIiWGkiYSIKbSRlUK3Ye(xCuEvbvQYbW7gUA8zXhQ1OKxAOb(Qn1ryNDHLIyg4E7qWQ2MkO50tIF794(28mOipckZXYK6DrnNeHICpn8InWxth3GOdlm7MHG8HlG6fLfHMGALqJ(QZj4LziYPWs50NcyH(J(hSEyDpcdOyBpxFeYA5kl4uIhl4mz1dtRSaMLnk3mBVQZQOQlSIw6B4iGirBBIcgrygImUUgOHYGJBxKLFBMZJazUh4eRRhEMBDQhYq20JFJfftKsGQu7sSnbq7s1zEGkq4j0GNEChGlcZmplDqZRSBqWGdSiHijQn4dLxisgXb)LEflCMZrDMRUQGodrayBVyhchtwSM8amYb2zMTVTzoMnAEDdmNtzrupDVgvZfs3sWf)T8ZuiVHRfsd5tiqqu3YIFHvDPPBgz(1K(r2fTS6)V2PP)4kmZDXmnzBVXvhNTSBCqLfVwfVOVoD4cZLOamTDT5U6eEHvBL4C6N9GnYEQJIpDK2CoCjDDRKiDsUhZXsFHqB))Ml9kbdX03O1CoJbbnrSmBEccfN)vnM(YXMtPxXaEJYFVaCryQ4YOZFMkYprS1jrf)u5jbMdPLov6YCCMJknM9SowEI3j)cXqhsCL1WgaPyoxVmnWN9upI19c42VByjLz86dKmDm9CXA2XZa4sExxr7MrPRdV0RS3ZHG7oKD8Wr3y2cyhyH)cAavWbPxGrzXU5wo7ayBL)DDY)7g4MvHroaryL1DB2y6h(ztU)FCYZoFYV8Xx8V)vvkFX39n(FV(M8HF(vp8S)Zj)IX3bMkpAxBs837qhIDBDdWvHpfn)V]] )

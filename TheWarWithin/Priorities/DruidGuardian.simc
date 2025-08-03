@@ -1,40 +1,41 @@
-## https://github.com/simulationcraft/simc/blob/thewarwithin/ActionPriorityLists/default/druid_guardian.simc
+## https://github.com/simulationcraft/simc/blob/thewarwithin/ActionPriorityLists/druid_guardian.simc
 ## Up to date with SimC: March 8 2025 - ccb7c79
 
 actions.precombat+=/mark_of_the_wild
 actions.precombat+=/variable,name=if_build,value=1,value_else=0,if=talent.thorns_of_iron.enabled&talent.ursocs_endurance.enabled
-actions.precombat+=/heart_of_the_wild,if=talent.heart_of_the_wild.enabled&!talent.rip.enabled
-actions.precombat+=/bear_form,if=time=0|!talent.fluid_form.enabled
+actions.precombat+=/bear_form,line_cd=2,if=(time=0|!talent.fluid_form.enabled)&buff.cat_form.down
 
+actions+=/bear_form,line_cd=2,if=buff.cat_form.up
 actions+=/skull_bash
 actions+=/soothe
 actions+=/use_item,name=bestinslots,if=buff.incarnation_guardian_of_ursoc.up|buff.berserk_bear.up
-actions+=/use_item,name=tome_of_lights_devotion,if=buff.inner_resilience.up
-actions+=/use_item,slot=trinket1
-actions+=/use_item,slot=trinket2
+actions+=/use_item,enabled=0,name=tome_of_lights_devotion,if=buff.inner_resilience.up
+actions+=/use_item,name=bestinslots,if=buff.incarnation_guardian_of_ursoc.up|buff.berserk_bear.up
+actions+=/use_items,if=buff.incarnation.up&!trinket.1.is.chromebustible_bomb_suit&!trinket.1.is.ringing_ritual_mud&!trinket.1.is.tome_of_lights_devotion_443535&!trinket.2.is.chromebustible_bomb_suit&!trinket.2.is.ringing_ritual_mud&!trinket.2.is.tome_of_lights_devotion_443535
 actions+=/potion,if=(buff.berserk_bear.up|buff.incarnation_guardian_of_ursoc.up)
-actions+=/call_action_list,name=mitigation
+actions+=/call_action_list,name=mitigation,if=cooldown_check
 actions+=/run_action_list,name=bear
 
+actions.bear+=/incarnation,if=fight_remains>30
 actions.bear+=/maul,if=buff.ravage.up&active_enemies>1
 actions.bear+=/heart_of_the_wild,if=(talent.heart_of_the_wild.enabled&!talent.rip.enabled)|talent.heart_of_the_wild.enabled&buff.feline_potential_counter.stack=6&active_enemies<3
-actions.bear+=/moonfire,cycle_targets=1,if=buff.bear_form.up&(((!ticking&target.time_to_die>12)|(refreshable&target.time_to_die>12))&active_enemies<7&talent.fury_of_nature.enabled)|(((!ticking&target.time_to_die>12)|(refreshable&target.time_to_die>12))&active_enemies<4&!talent.fury_of_nature.enabled)
+actions.bear+=/moonfire,cycle_targets=1,if=(buff.bear_form.up&(((!ticking&target.time_to_die>12)|(refreshable&target.time_to_die>12))&active_enemies<7&talent.fury_of_nature.enabled)|(((!ticking&target.time_to_die>12)|(refreshable&target.time_to_die>12))&active_enemies<4&!talent.fury_of_nature.enabled))&target.distance>10
 actions.bear+=/thrash_bear,if=refreshable|(dot.thrash_bear.stack<5&talent.flashing_claws.rank=2|dot.thrash_bear.stack<4&talent.flashing_claws.rank=1|dot.thrash_bear.stack<3&!talent.flashing_claws.enabled)
+actions.bear+=/moonfire,cycle_targets=1,if=buff.bear_form.up&(((!ticking&target.time_to_die>12)|(refreshable&target.time_to_die>12))&active_enemies<7&talent.fury_of_nature.enabled)|(((!ticking&target.time_to_die>12)|(refreshable&target.time_to_die>12))&active_enemies<4&!talent.fury_of_nature.enabled)
 actions.bear+=/bristling_fur,if=tanking&cooldown.rage_of_the_sleeper.remains>8
-actions.bear+=/barkskin,if=buff.bear_form.up
-actions.bear+=/lunar_beam
+actions.bear+=/lunar_beam,if=fight_remains>10
 actions.bear+=/convoke_the_spirits,if=(talent.wildpower_surge.enabled&buff.cat_form.up&buff.feline_potential.up)|!talent.wildpower_surge.enabled
 actions.bear+=/berserk_bear
-actions.bear+=/incarnation
-actions.bear+=/rage_of_the_sleeper,if=(((buff.incarnation_guardian_of_ursoc.down&cooldown.incarnation_guardian_of_ursoc.remains>60)|buff.berserk_bear.down)&rage>40&(!talent.convoke_the_spirits.enabled)|(buff.incarnation_guardian_of_ursoc.up|buff.berserk_bear.up)&rage>40&(!talent.convoke_the_spirits.enabled)|(talent.convoke_the_spirits.enabled)&rage>40)
+
+actions.bear+=/rage_of_the_sleeper,if=buff.lunar_beam.up&buff.lunar_beam.remains>4&fight_remains>10
 actions.bear+=/berserking,if=(buff.berserk_bear.up|buff.incarnation_guardian_of_ursoc.up)
 actions.bear+=/maul,if=buff.ravage.up&active_enemies<2
 actions.bear+=/raze,if=(buff.tooth_and_claw.stack>1|buff.tooth_and_claw.up&buff.tooth_and_claw.remains<1+gcd)&variable.if_build=1
 actions.bear+=/raze,if=variable.if_build=0&(buff.tooth_and_claw.stack>1|buff.tooth_and_claw.up&buff.tooth_and_claw.remains<1+gcd|buff.vicious_cycle_maul.stack=3)
 actions.bear+=/thrash_bear,if=active_enemies>=5&talent.lunar_calling.enabled
-actions.bear+=/ironfur,cycle_targets=1,if=!debuff.tooth_and_claw.up&!buff.ironfur.up&rage>50&tanking&variable.if_build=0&!buff.rage_of_the_sleeper.up|rage>90&variable.if_build=0|!debuff.tooth_and_claw.up&!buff.ironfur.up&rage>50&tanking&variable.if_build=0&!buff.rage_of_the_sleeper.up
-actions.bear+=/ironfur,if=!buff.ravage.up&((rage>40&variable.if_build=1&cooldown.rage_of_the_sleeper.remains>3&talent.rage_of_the_sleeper.enabled|(buff.incarnation.up|buff.berserk_bear.up)&rage>20&variable.if_build=1&cooldown.rage_of_the_sleeper.remains>3&talent.rage_of_the_sleeper.enabled|rage>90&variable.if_build=1&!talent.fount_of_strength.enabled|rage>110&variable.if_build=1&talent.fount_of_strength.enabled|(buff.incarnation.up|buff.berserk_bear.up)&rage>20&variable.if_build=1&buff.rage_of_the_sleeper.up&talent.rage_of_the_sleeper.enabled))
-actions.bear+=/ironfur,if=!buff.ravage.up&((rage>40&variable.if_build=1&!talent.rage_of_the_sleeper.enabled|(buff.incarnation.up|buff.berserk_bear.up)&rage>20&variable.if_build=1&!talent.rage_of_the_sleeper.enabled|(buff.incarnation.up|buff.berserk_bear.up)&rage>20&variable.if_build=1&!talent.rage_of_the_sleeper.enabled))
+actions.bear+=/ironfur,enabled=0,cycle_targets=1,if=!debuff.tooth_and_claw.up&!buff.ironfur.up&rage>50&tanking&variable.if_build=0&!buff.rage_of_the_sleeper.up|rage>90&variable.if_build=0|!debuff.tooth_and_claw.up&!buff.ironfur.up&rage>50&tanking&variable.if_build=0&!buff.rage_of_the_sleeper.up
+actions.bear+=/ironfur,enabled=0,if=!buff.ravage.up&((rage>40&variable.if_build=1&cooldown.rage_of_the_sleeper.remains>3&talent.rage_of_the_sleeper.enabled|(buff.incarnation.up|buff.berserk_bear.up)&rage>20&variable.if_build=1&cooldown.rage_of_the_sleeper.remains>3&talent.rage_of_the_sleeper.enabled|rage>90&variable.if_build=1&!talent.fount_of_strength.enabled|rage>110&variable.if_build=1&talent.fount_of_strength.enabled|(buff.incarnation.up|buff.berserk_bear.up)&rage>20&variable.if_build=1&buff.rage_of_the_sleeper.up&talent.rage_of_the_sleeper.enabled))
+actions.bear+=/ironfur,enabled=0,if=!buff.ravage.up&((rage>40&variable.if_build=1&!talent.rage_of_the_sleeper.enabled|(buff.incarnation.up|buff.berserk_bear.up)&rage>20&variable.if_build=1&!talent.rage_of_the_sleeper.enabled|(buff.incarnation.up|buff.berserk_bear.up)&rage>20&variable.if_build=1&!talent.rage_of_the_sleeper.enabled))
 actions.bear+=/ferocious_bite,if=(buff.cat_form.up&buff.feline_potential.up&active_enemies<3&(buff.incarnation.up|buff.berserk_bear.up)&!dot.rip.refreshable)
 actions.bear+=/rip,if=(buff.cat_form.up&buff.feline_potential.up&active_enemies<3&(!buff.incarnation.up|!buff.berserk_bear.up))|(buff.cat_form.up&buff.feline_potential.up&active_enemies<3&(buff.incarnation.up|buff.berserk_bear.up)&refreshable)
 actions.bear+=/raze,if=variable.if_build=1&buff.vicious_cycle_maul.stack=3&!talent.ravage.enabled
@@ -57,12 +58,15 @@ actions.bear+=/shred,if=cooldown.rage_of_the_sleeper.remains<=52&rage<40&active_
 actions.bear+=/rip,if=buff.cat_form.up&!dot.rip.ticking&active_enemies<3
 actions.bear+=/ferocious_bite,if=dot.rip.ticking&combo_points>4&active_enemies<3
 actions.bear+=/starsurge,if=talent.starsurge.enabled&rage<20
+actions.bear+=/moonfire,if=active_dot.moonfire<active_enemies&talent.elunes_chosen&talent.twin_moonfire
 actions.bear+=/swipe_bear,if=(talent.lunar_insight.enabled&active_enemies>4)|!talent.lunar_insight.enabled|talent.lunar_insight.enabled&active_enemies<2
 actions.bear+=/moonfire,if=(talent.lunar_insight.enabled&active_enemies>1)&buff.bear_form.up
 
-actions.mitigation+=/ironfur,if=tanking&!variable.if_build&incoming_damage_5s>ironfur_damage_threshold&buff.ironfur.remains<3*haste&buff.ironfur.stack<5
-actions.mitigation+=/regrowth,if=health.pct<65
-actions.mitigation+=/renewal,if=health.pct<65
-actions.mitigation+=/frenzied_regeneration,if=tanking&health.pct<65
-actions.mitigation+=/barkskin,if=tanking&health.pct<75&incoming_damage_5s>0.1*health.max
-actions.mitigation+=/survival_instincts,if=buff.survival_instincts.down&buff.barkskin.down&health.pct<60&incoming_damage_5s>0.25*health.max
+actions.mitigation=/rebirth
+actions.mitigation=/remove_corruption
+actions.mitigation+=/ironfur,if=buff.ironfur.stack<=9&rage>50&fight_remains>20|buff.ironfur.stack<=9&rage>=40&fight_remains>20&buff.ironfur.down|fight_remains<20&buff.ironfur.remains<3&buff.ironfur.stack<2|fight_remains<20&rage>90
+actions.mitigation+=/renewal,if=health.pct<renewal_damage_threshold
+actions.mitigation+=/frenzied_regeneration,if=health.pct<frenzied_regeneration_damage_threshold
+actions.mitigation+=/barkskin,if=(time<10&time>0&(buff.ironfur.down|buff.ironfur.remains<2)&rage<40&active_enemies>4|active_enemies>10&fight_remains>15)&buff.incarnation.down&cooldown.incarnation.remains>10&buff.survival_instincts.down&buff.rage_of_the_sleeper.down
+actions.mitigation+=/rage_of_the_sleeper,if=(time<10&time>0&(buff.ironfur.down|buff.ironfur.remains<2)&rage<40&active_enemies>4|active_enemies>10&fight_remains>15)&buff.incarnation.down&cooldown.incarnation.remains>10&buff.survival_instincts.down&buff.barkskin.down
+actions.mitigation+=/survival_instincts,if=(time<10&time>0&(buff.ironfur.down|buff.ironfur.remains<2)&rage<40&active_enemies>4|active_enemies>10&fight_remains>15)&buff.incarnation.down&cooldown.incarnation.remains>10&buff.barkskin.down&buff.rage_of_the_sleeper.down

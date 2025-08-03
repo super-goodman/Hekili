@@ -18,10 +18,10 @@ local tableCopy = ns.tableCopy
 local timeToReady = ns.timeToReady
 
 local GetItemInfo = ns.CachedGetItemInfo
-
+local FindUnitBuffByID = ns.FindUnitBuffByID
 local trim = string.trim
 
-
+local LSR = LibStub("SpellRange-1.0")
 local tcopy = ns.tableCopy
 local tinsert, tremove, twipe = table.insert, table.remove, table.wipe
 
@@ -41,7 +41,7 @@ local function EmbedBlizOptions()
     open:SetPoint( "CENTER", panel, "CENTER", 0, 0 )
     open:SetWidth( 250 )
     open:SetHeight( 25 )
-    open:SetText( "Open Hekili Options Panel" )
+    open:SetText( "打开Hekili设置界面" )
 
     open:SetScript( "OnClick", function ()
         ns.StartConfiguration()
@@ -97,15 +97,15 @@ function Hekili:OnInitialize()
 
         if p.toggles.essences.override then
             -- Don't show Essences here if it's overridden by CDs anyway?
-            return format( "|c%s%s|r %sCD|r %sInt|r %sDef|r", color,
-                m == "single" and "ST" or ( m == "aoe" and "AOE" or ( m == "dual" and "Dual" or ( m == "reactive" and "React" or "Auto" ) ) ),
+            return format( "|c%s%s|r %s爆发|r %s打断|r %s防御|r", color,
+                m == "single" and "单体" or ( m == "aoe" and "AOE" or ( m == "dual" and "双显" or ( m == "reactive" and "响应" or "自动" ) ) ),
                 p.toggles.cooldowns.value and "|cFF00FF00" or "|cFFFF0000",
                 p.toggles.interrupts.value and "|cFF00FF00" or "|cFFFF0000",
                 p.toggles.defensives.value and "|cFF00FF00" or "|cFFFF0000" )
         else
-            return format( "|c%s%s|r %sCD|r %smCD|r %sInt|r",
+            return format( "|c%s%s|r %s主爆|r %s次爆|r %s打断|r",
                 color,
-                m == "single" and "ST" or ( m == "aoe" and "AOE" or ( m == "dual" and "Dual" or ( m == "reactive" and "React" or "Auto" ) ) ),
+                m == "single" and "单体" or ( m == "aoe" and "AOE" or ( m == "dual" and "双显" or ( m == "reactive" and "响应" or "自动" ) ) ),
                 p.toggles.cooldowns.value and "|cFF00FF00" or "|cFFFF0000",
                 p.toggles.essences.value and "|cFF00FF00" or "|cFFFF0000",
                 p.toggles.interrupts.value and "|cFF00FF00" or "|cFFFF0000" )
@@ -115,8 +115,8 @@ function Hekili:OnInitialize()
     Hekili_OnAddonCompartmentEnter = function( addonName, button )
         GameTooltip:SetOwner( AddonCompartmentFrame )
         GameTooltip:AddDoubleLine( "Hekili", GetDataText() )
-        GameTooltip:AddLine( "|cFFFFFFFFLeft-click to make quick adjustments.|r" )
-        GameTooltip:AddLine( "|cFFFFFFFFRight-click to open the options interface.|r" )
+        GameTooltip:AddLine( "|cFFFFFFFF单击左键可进行快速调整。|r" )
+        GameTooltip:AddLine( "|cFFFFFFFF单击右键单开选项界面。|r" )
         GameTooltip:Show()
     end
 
@@ -143,8 +143,8 @@ function Hekili:OnInitialize()
             OnEnter = function( self )
                 GameTooltip:SetOwner( self )
                 GameTooltip:AddDoubleLine( "Hekili", ns.UI.Minimap.text )
-                GameTooltip:AddLine( "|cFFFFFFFFLeft-click to make quick adjustments.|r" )
-                GameTooltip:AddLine( "|cFFFFFFFFRight-click to open the options interface.|r" )
+                GameTooltip:AddLine( "|cFFFFFFFF单击左键可进行快速调整。|r" )
+                GameTooltip:AddLine( "|cFFFFFFFF单击右键单开选项界面。|r" )
                 GameTooltip:Show()
             end,
             OnLeave = Hekili_OnAddonCompartmentLeave
@@ -201,7 +201,7 @@ function Hekili:OnEnable()
     self:ForceUpdate( "ADDON_ENABLED" )
 
     if self.BuiltFor > self.CurrentBuild then
-        self:Notify( "|cFFFF0000WARNING|r: This version of Hekili is for a future version of WoW; you should reinstall for " .. self.GameBuild .. "." )
+        self:Notify( "|cFFFF0000WARNING|r: 当前版本的Hekili是为WOW的未来版本准备的。你应该重新安装 " .. self.GameBuild .. "。" )
     end
 end
 
@@ -783,7 +783,7 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                     if debug then self:Debug( "[---] %s ( %s - %d) not castable while casting a spell; skipping...", action, listName, actID ) end
 
                 elseif rWait <= state.cooldown.global_cooldown.remains and not state.spec.can_dual_cast and ability.gcd ~= "off" then
-                    if debug then self:Debug( "Only off-GCD abilities would be usable before the currently selected ability; skipping..." ) end
+                    if debug then self:Debug( "%s, Only off-GCD abilities would be usable before the currently selected ability; skipping... rWait = %d, gcd_remains = %d, state.spec.can_dual_cast = %d", action, rWait, state.cooldown.global_cooldown.remains) end
 
                 else
                     local entryReplaced = false
@@ -1058,7 +1058,7 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                 if not channelPass then
                                                     if debug then self:Debug( " - this entry cannot break the channeled spell." ) end
                                                     if action == state.channel then
-                                                        stop = scripts:CheckScript( scriptID )
+                                                        --stop = scripts:CheckScript( scriptID ) self
                                                     end
 
                                                 elseif not aScriptPass then
@@ -1180,6 +1180,55 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                 Timer:Track("Post Recheck")
 
                                                 if aScriptPass then
+                                                    if scripts:CheckFinding( scriptID, "find.lowest_hp" ) then
+                                                        ability.target = state.find.lowest_hp.unit or ability.target
+                                                    elseif scripts:CheckFinding( scriptID, "find.tank" ) then
+                                                        ability.target = state.find.tank.unit or ability.target
+                                                    elseif scripts:CheckFinding( scriptID, "find.health" ) then
+                                                        ability.target = "player"
+                                                    elseif not ability.target then
+                                                        ability.target = "none"
+                                                    end
+
+                                                    if ability.hot_id then
+                                                        if ability.target == "none" then
+                                                            aScriptPass = false
+                                                            self:Debug( "ability.target is none")
+                                                        else
+                                                            local name, _, _, _, _, _, caster = FindUnitBuffByID( ability.target, ability.hot_id )
+                                                            if name and caster == "player" then if debug then self:Debug( "target already has " .. state.this_action ) end aScriptPass = false end
+                                                        end
+                                                    end
+
+                                                    local conf = Hekili.DB.profile.displays[ "Primary" ]
+                                                    if Hekili.DB.profile.toggles.strictRange.value and conf.range.enabled and UnitCanAttack( "player", "target" ) then
+                                                        if conf.range.type == "ability" then
+                                                            local name = ability.rangeSpell or ability.itemSpellName or ability.actualName or ability.name
+                             
+                                                            local outOfRange = nil
+                                                      
+                                                            if name then 
+                                                                outOfRange = LSR.IsSpellInRange( name, "target" )  
+                                                                
+                                                                if outOfRange == 1 or outOfRange == nil then
+                                                                    aScriptPass = true
+                                                                else
+                                                                    aScriptPass = false
+                                                                end 
+
+                                                            end
+                                                        end
+                                                    end
+                                                end
+
+                                                if aScriptPass then
+                                                   local fightRemains = self.DB.profile.specs[ specID ].abilities[state.this_action].fightRemains or 0
+                                                   if  state.fight_remains <= fightRemains and not state.raid then self:Debug( "exceeds fight_remains: %.2f" .. state.fight_remains ) aScriptPass = false end
+                                                end
+
+
+                                                if aScriptPass then
+                 
                                                     --[[ if action == "potion" then
                                                         local item = class.abilities.potion.item
 
@@ -1354,8 +1403,10 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
 
                                                         slot.caption = ability.caption or entry.caption
                                                         slot.texture = ability.texture
-                                                        slot.indicator = ability.indicator
-
+                                                        slot.indicator = ability.indicator 
+                                                        slot.target = ability.target
+                                              
+                                                        slot.startsCombat = ability.startsCombat
                                                         if ability.interrupt and state.buff.casting.up then
                                                             slot.interrupt = true
                                                             slot.castStart = state.buff.casting.applied
@@ -1363,20 +1414,23 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                             slot.interrupt = nil
                                                             slot.castStart = nil
                                                         end
-
                                                         slot.wait = state.delay
                                                         slot.waitSec = nil
+                                                        slot.gcd = ability.gcd
+                                    
 
+                                                        local toggles = Hekili.DB.profile.toggles
+                                                        slot.terrain = ability.terrain or false
+                                                        slot.toggle_terrain = ability.toggle_terrain or "cursor"
+                                                        slot.cancelSpell = (ability.toggle == "defensives" and toggles.defensives.cancelSpell or ability.toggle == "interrupts" and toggles.interrupts.cancelSpell) and not UnitChannelInfo("player")
                                                         slot.resource = state.GetResourceType( rAction )
 
                                                         rAction = state.this_action
                                                         rWait = state.delay
-
                                                         state.selection_time = state.delay
                                                         state.selected_action = rAction
 
                                                         slot.empower_to = ability.empowered and ( state.args.empower_to or ability.empowerment_default or state.max_empower ) or nil
-
                                                         if debug then
                                                             -- scripts:ImplantDebugData( slot )
                                                             self:Debug( "Action chosen:  %s at %.2f!", rAction, state.delay )
@@ -1534,9 +1588,9 @@ local aoeDisplayRule = function( p )
 
     if mode == "dual" then return true end
     if mode == "reactive" and ns.getNumberTargets() < ( spec.aoe or 3 ) then
-        if HekiliDisplayAOE.RecommendationsStr then
-            HekiliDisplayAOE.RecommendationsStr = nil
-            HekiliDisplayAOE.NewRecommendations = true
+        if HekiliDisplay_AOE.RecommendationsStr then
+            HekiliDisplay_AOE.RecommendationsStr = nil
+            HekiliDisplay_AOE.NewRecommendations = true
         end
         return false
     end
@@ -1961,47 +2015,47 @@ function Hekili.Update()
                 if not action then
                     state.delay = 0
 
-                    if state.buff.empowering.up and not state:IsFiltered( state.buff.empowering.spell ) then
-                        state.delay = 0
-                        action = state.buff.empowering.spell
+--                     if state.buff.empowering.up and not state:IsFiltered( state.buff.empowering.spell ) then
+--                         state.delay = 0
+--                         action = state.buff.empowering.spell
 
-                        local ability = class.abilities[ action ]
-                        wait = ability.cast or 0
+--                         local ability = class.abilities[ action ]
+--                         wait = ability.cast or 0
+-- 
+--                         slot.scriptType = "simc"
+--                         slot.script = nil
+--                         slot.hook = nil
 
-                        slot.scriptType = "simc"
-                        slot.script = nil
-                        slot.hook = nil
+--                         slot.display = state.display
+--                         slot.pack = "Fallthrough"
+--                         slot.list = "Fallthrough"
+--                         slot.listName = "Empowerment"
+--                         slot.action = 1
+--                         slot.actionName = ability.key
+--                         slot.actionID = ability.id
 
-                        slot.display = state.display
-                        slot.pack = "Fallthrough"
-                        slot.list = "Fallthrough"
-                        slot.listName = "Empowerment"
-                        slot.action = 1
-                        slot.actionName = ability.key
-                        slot.actionID = ability.id
+--                         slot.caption = nil
+--                         slot.texture = ability.texture
+--                         slot.indicator = ability.indicator
 
-                        slot.caption = nil
-                        slot.texture = ability.texture
-                        slot.indicator = ability.indicator
+--                         slot.wait = 0
+--                         slot.waitSec = nil
 
-                        slot.wait = 0
-                        slot.waitSec = nil
+--                         slot.resource = state.GetResourceType( action )
 
-                        slot.resource = state.GetResourceType( action )
+--                         slot.empower_to = ability.empowerment_default or state.max_empower
 
-                        slot.empower_to = ability.empowerment_default or state.max_empower
+--                         slot.hook = nil
+--                         slot.script = nil
 
-                        slot.hook = nil
-                        slot.script = nil
-
-                        if debug then
-                            -- scripts:ImplantDebugData( slot )
-                            Hekili:Debug( "Fallthrough Empowerment:  %s at %.2f!", action, state.delay )
-                            Hekili:Debug( "Texture shown:  %s", slot.texture or "NOT SET" )
-                        end
-                    else
-                        state.delay = wait
-                    end
+--                         if debug then
+--                             -- scripts:ImplantDebugData( slot )
+--                             Hekili:Debug( "Fallthrough Empowerment:  %s at %.2f!", action, state.delay )
+--                             Hekili:Debug( "Texture shown:  %s", slot.texture or "NOT SET" )
+--                         end
+--                     else
+--                         state.delay = wait
+--                     end
                 end
 
                 if debug then
@@ -2030,7 +2084,7 @@ function Hekili.Update()
 
                     checkstr = checkstr and ( checkstr .. ':' .. action ) or action
 
-                    slot.keybind, slot.keybindFrom = Hekili:GetBindingForAction( action, display, i )
+                    --lot.keybind, slot.keybindFrom = Hekili:GetBindingForAction( action, display, i )
 
                     slot.resource_type = state.GetResourceType( action )
 
@@ -2150,7 +2204,7 @@ function Hekili.Update()
                                 resInfo = ( resInfo and ( resInfo .. ", " ) or "" ) .. string.format( "%s[ %.2f / %.2f || %s ]", k, res.current, res.max, final )
                             end
 
-                            if resInfo then resInfo = "Resources: " .. resInfo end
+                            if resInfo then resInfo = "资源：" .. resInfo end
                         end
 
                         if resInfo then
@@ -2158,7 +2212,7 @@ function Hekili.Update()
                         end
                     else
                         if i < 5 and not hasSnapped and profile.autoSnapshot and InCombatLockdown() and state.level >= 70 and ( dispName == "Primary" or dispName == "AOE" ) then
-                            Hekili:Print( "Unable to make recommendation for " .. dispName .. " #" .. i .. "; triggering auto-snapshot..." )
+                            Hekili:Print( "无法为" .. dispName .. " #" .. i .. "做出推荐；正在触发自动快照……" )
                             hasSnapped = dispName
                             UI:SetThreadLocked( false )
                             return "AutoSnapshot"
@@ -2176,7 +2230,8 @@ function Hekili.Update()
                 -- Recommendation(s) changed, let's force an update.
                 UI:OnUpdate( 1000 )
             end
-
+            Hekili.autocastAction = (Queue[ 1 ])
+            Hekili.autocastAction_check = true
             if WeakAuras and WeakAuras.ScanEvents then
                 if not UI.EventPayload then
                     UI.EventPayload = {
@@ -2232,7 +2287,7 @@ function Hekili.Update()
     end
 
     if snaps then
-        Hekili:Print( "Snapshots saved:  " .. snaps .. "." )
+        Hekili:Print( "快照已保存：  " .. snaps .. "." )
     end
 end
 Hekili:ProfileCPU( "ThreadedUpdate", Hekili.Update )
@@ -2307,7 +2362,7 @@ function Hekili:DumpCPUInfo()
         total = total + v
     end
 
-    print( "CPU Usage Data" )
+    print( "CPU使用数据" )
     for k, v in orderedPairs( ns.cpuProfile ) do
         print( format( "%-40s %6.2fms (%.2f%%)", k, v, v / total * 100 ) )
     end

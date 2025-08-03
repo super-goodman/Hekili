@@ -2,8 +2,9 @@
 -- August 2025
 -- Patch 11.2
 
+if not Hekili.check then return end
 if UnitClassBase( "player" ) ~= "SHAMAN" then return end
-
+SetCVar("autoSelfCast", 1)
 local addon, ns = ...
 local Hekili = _G[ addon ]
 local class, state = Hekili.Class, Hekili.State
@@ -453,6 +454,79 @@ end )
 
 -- Abilities
 spec:RegisterAbilities( {
+
+    totemic_projection = {
+        id = 108287,
+        cast = 0,
+        cooldown = 10,
+        gcd = "off",
+        school = "nature",
+        toggle_terrain = "player",
+        talent = "totemic_projection",
+        startsCombat = false,
+
+        handler = function ()
+        end,
+    },
+
+    earth_shield = {
+        id = 974,
+        hot_id = 974,
+        cast = 0,
+        cooldown = 0,
+        gcd = "spell",
+        school = "nature",
+
+        spend = 0.02,
+        spendType = "mana",
+
+        talent = "earth_shield",
+        startsCombat = false,
+
+        --This can be fine, as long as the APL doesn't recommend casting both unless elemental orbit is picked.
+        handler = function ()
+            applyBuff( "earth_shield", nil, class.auras.earth_shield.max_stack )
+            if not talent.elemental_orbit.enabled then removeBuff( "lightning_shield" ) end
+        end,
+    },
+
+    cleanse_spirit = {
+        id = 77130,
+        cast = 0,
+        charges = 1,
+        cooldown = 8,
+        recharge = 8,
+        gcd = "spell",
+        school = "nature",
+
+        spend = 0.06,
+        spendType = "mana",
+        target = function ()
+            if debuff.dispellable_magic.up then
+                return debuff.dispellable_magic.caster
+            elseif  debuff.dispellable_curse.up then
+                return debuff.dispellable_curse.caster 
+            elseif  Hekili:isMouseOverMemberDispelable("Magic") then
+                return "mouseover"
+            end
+        end,
+        startsCombat = false,
+
+        toggle = "defensives",
+        usable = function ()
+            return debuff.dispellable_magic.up or debuff.dispellable_curse.up and talent.improved_purify_spirit.enabled or Hekili:isMouseOverMemberDispelable("Magic"), "requires magic, dispellable curse"
+        end,
+
+
+        handler = function ()
+            removeBuff( "player", "dispellable_magic" )
+            if talent.improved_purify_spirit.enabled then
+                removeBuff( "player", "dispellable_curse" )
+
+            end
+        end,
+    },
+
     -- Summons a totem at the target location for 30 sec. All allies within 20 yards of the totem gain 10% increased health. If an ally dies, the totem will be consumed to allow them to Reincarnate with 20% health and mana. Cannot reincarnate an ally who dies to massive damage.
     ancestral_protection_totem = {
         id = 207399,
@@ -594,7 +668,7 @@ spec:RegisterAbilities( {
         cast = 0,
         cooldown = 60,
         gcd = "totem",
-
+        toggle_terrain = "player",
         spend = 0.11,
         spendType = "mana",
 
@@ -687,7 +761,7 @@ spec:RegisterAbilities( {
 
         spend = 0.03,
         spendType = "mana",
-
+        toggle = "defensives",
         startsCombat = true,
         texture = 451166,
         debuff = "dispellable_magic",
@@ -725,7 +799,7 @@ spec:RegisterAbilities( {
 
         spend = 0.22,
         spendType = "mana",
-
+        toggle_terrain = "player",
         startsCombat = false,
         texture = 136037,
         nobuff = "downpour",
@@ -1013,13 +1087,13 @@ spec:RegisterAbilities( {
         cast = 0,
         cooldown = 24,
         gcd = "totem",
-
+        toggle_terrain = "player",
         spend = 0.11,
         spendType = "mana",
         talent = "surging_totem",
         startsCombat = false,
         texture = 5927655,
-
+        terrain = true,
         handler = function ()
             summonTotem( "surging_totem" )
 
@@ -1146,7 +1220,7 @@ spec:RegisterAbilities( {
 
 spec:RegisterSetting( "experimental_msg", nil, {
     type = "description",
-    name = strformat( "%s %s supports a healing maintenance with the Totemic %s build.  It will recommend using %s and %s, keep %s / %s recharging, and use %s with to enhance particular spells.  Your %s will also be maintained.",
+    name = strformat( "%s：%s支持使用图腾和 %s 来构建治疗体系。它将推荐使用 %s 和 %s，保持 %s / %s 的重新充能，并使用 %s 来强化特定技能。你的 %s 也将得到监控。",
         select( 7, GetSpecializationInfoByID( spec.id ) ), ( UnitClass( "player" ) ), Hekili:GetSpellLinkWithTexture( spec.abilities.chain_heal.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.healing_rain.id ),
         Hekili:GetSpellLinkWithTexture( spec.abilities.surging_totem.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.riptide.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.healing_stream_totem.id ),
         Hekili:GetSpellLinkWithTexture( spec.abilities.unleash_life.id ), Hekili:GetSpellLinkWithTexture( spec.talents.earth_shield[2] ) ),
@@ -1154,16 +1228,16 @@ spec:RegisterSetting( "experimental_msg", nil, {
 } )
 
 spec:RegisterSetting( "healing_mode", false, {
-    name = "Healing Helper Mode",
-    desc = "If checked, healing abilities may be recommended using the default priority package.",
+    name = "治疗辅助模式",
+    desc = "如果勾选，可能会根据默认优先级推荐使用治疗技能。",
     type = "toggle",
     width = "full",
 } )
 
 spec:RegisterSetting( "second_shield", "earth_shield", {
-    name = strformat( "|T236224:0|t Preferred Second %s", _G.SHIELDSLOT ),
-    desc = strformat( "Specify which %s spell to use after %s when %s is talented.", _G.SHIELDSLOT, Hekili:GetSpellLinkWithTexture( spec.abilities.water_shield.id ),
-        Hekili:GetSpellLinkWithTexture( spec.talents.elemental_orbit[2] ) ),
+    name = strformat( "|T236224:0|t 选择 %s 技能", _G.SHIELDSLOT ),
+    desc = strformat( "当拥有 %s 天赋时，使用 %s 后使用哪个 %s 技能。", _G.SHIELDSLOT, Hekili:GetSpellLinkWithTexture( spec.talents.elemental_orbit[2] ),
+    	Hekili:GetSpellLinkWithTexture( spec.abilities.water_shield.id ) ),
     type = "select",
     values = function()
         return {
@@ -1182,8 +1256,8 @@ spec:RegisterOptions( {
     aoe = 3,
     cycle = false,
 
-    nameplates = false,
-    nameplateRange = 40,
+    nameplates = true,
+    nameplateRange = 20,
     rangeFilter = false,
 
     damage = true,
@@ -1192,7 +1266,8 @@ spec:RegisterOptions( {
 
     potion = "tempered_potion",
 
-    package = "Restoration Shaman",
+    package = "奶萨Simc",
 } )
 
-spec:RegisterPack( "Restoration Shaman", 20241020, [[Hekili:vJ1xVTTnq8plgdWnbjvZYojTDiopS9YAXqFyUa7njrlrBtejrpkQ4gad9zF3r9pskkn3HvmSxsKjpE)J397oEb(bFjytcrsd(8YflVZFXYfElxTWF1YGnYxpsd2CKe)mzp8rojd(7VtlKCbrY45vrBoqYi5inVMYjjiVk4LIyGUGnBlzPYpMhS1Paw(aq7rAmS8d3fS5aljHwtlTioyds7Bx8U3UAXpvf9Ld0QO)GiG)WKhyOaf8DSuqmKyutk8okOX8STe5nR)rkripKYEHLVp8eLCe00p5IojlHgtstPIIW9LerIBYobkViS4aJMMClB36TL725PVOx5XBulQeS9IPS9hK5OU0TXJ(3ijP0CPhnLMb)NKgYfBzspbj)5ZNVAMlzmVGkLaFk8oqjPidZ4j0RDR02sfv8R(ER5x3RIfGQKN0CW12CYToRRe)3QV6SFkDTJPUj6ixLM8PUDH1koYem5js6ZQWobjMEBghJvx7Jgn8TINEjScjjpM(0dvF6hQI(yo4geLhLvr8DvrXKczHNoJpXu6pOy6RIX3H1)mmf44Tyw86MaOBlKcwSSwWoJU0zvR10VszbnKjPzf6lUnLZtc3vkE1yvWAPINb(QV6oMGQOxFr0ObfdUPqL3GjK9H8DHOs)SHmlkf7rvwYbTbnMMlDsmljuqygADR9HRJ0oR29pFQZSlfCBG3Lh)8TXVgNsdLeXEQSO23He(cnKMtZy0Ihxnxq3jOfhiBtPQBpnVOGLXfjmW8orEXWbNsEHeUTua3sy0Vjtx7F(S1klNxh2Jhd9auiG)65jCPNM66jOzGXu8egXekzz05XCEAc)uEOGcCuxdglQ2aqzlpvPGa6neB14h8IpasjSJQhxE(8SgpQ1wgHNMB93Y2N8h7wPnhYyFbhSz797ZvBIeakr3XrOYvh(EzEkLuCaK8o0TE(SA1wYq0yZfA8YpU0f3HAKKqSAtFakUK3Xy5JV)ExNqrhlgUHWCa8aaUYlH7JtQH(O5q0d6Mq6CXGlJQAVl(7od)a4Qv6kyJopInGshgIczPXVnMF0fhnsEDrGEc7O2QwDJM0emrqFRPRfm3vDLlrAnfRTo5Luzz(iQdnhXnsUEkFb41PKmnap8dpdxjQfZQ)Y1PgX8eSJ4TpYZwCcVM1WKriRSy0ncZiF1fp1dc0qNvHsiE(bAynOpxu0A9Np3jLtaGqbGBMVVpndAsQBFtRULKvxAo7tRC6P7LQoKrJPObz4Ap9ZoC3gVwWMxGIIWE1DgV4d(qlXNiceNRiyJQPxw2rUak5VJdn)(Me6oszQ8nvrc6Fwc1otQIk4zaDKsjpdAucwaUlYH7cO3GFJLdB57dDq)l8CqyQ9FJDDoGDsUJ1BVjG9VY)Rx3ZWL)BZWhCZqlSFl2AT7qMx9PpQ8EilVRTeCvecAHENGnQVW3S01Zg8JpRErunXbBg(ucyTAbf8Zbs4MtN6bpOWI4viX9RSjg6eKkye8Tsd70Tk6MQiNOsDB4OJ3QOhbpQIKjq7QIoFgCuvrZA40azphcTC2ry019gS(Pqd8UrnWRgtoFpTXRnnddK4QO1ySGjV7TSb7aw39)pZ60fQviTMv9WG49(gaTIFFNoP1phWKcj8q(6yLUmPXd3TBnqfsAdzRSrNW2k30YE9PD)USsNsUTVl1PF)99h3QhTPtxNOzmn0aJE46spmC1wh1WBpE42Gg165AFhDD3Tx8nqWM6E5WBUEgA1VxnSzy9WGAyWGydJkYwM171juV1ol6(WO6(i93DP5nZDNtoEgI)IPs8Nnwk(LNCQOD6MbnGDhOGJNP5UVqLaNH1tNO7WH3s6eOK745zJ1IOY2NQ)XEP22MekOXtfVKEjRHwMOFYASKUIIt3zPI4vF7WvpPoL21OE6NYknWh61YbySn9b6cJT(ZW6x7Ab9zpzjLk9Gww7WrtPofYjqqoWvXz1QUMWJ7CcvA2t38PMgB1zxhF7qtT1HSHDDv2QgQT7APDQwwezuOSFkxtvJSFQxtbc2nfmxiGTezovmlkRrO6KQ(yYSPCcOIrAxFmy9Pbaa0L6qhDWTj4TrLaxP8DER(H(4OOqZSXAZrNJpvQBuCa96ZURjO23UR1wj1ppoRi9Ack8AYdhovpRse262AvDke)WXol7XqmMSxBdFJmFpvYC3m(uuAoNpLPE)L3SN)4npm5i60XsN1DZpYR10C2gZxuPaV7FQcaEcF7wI62wXAv(xp02qytNrBM(NpCX8OFmKdGYB7GY(HNDDZAk0LxsfIAWv7YOwsgKnPuEGds4xPpZszQ1c(R)]] )
+
+spec:RegisterPack( "奶萨Simc", 20250620, [[Hekili:TVX(VXrX5)wIqY6or0XEN957IuolbjQHAzJO6QeY(hU17T367249296U75hrwwHxfA4rtvPceGeTisjfvG(ckusc)XuFoo)e)l0VzMD35XoZS7zIcvTarb7DM579R5B(Ox9E)8EDhyf707zAy0OPXYnAwZWOr7gl2RB8btC61DIL9owdHFW3Am83ZU1xE6nVDx3X2OLoWlWAacerbtdTHL3lypVPw962FQRx8p1VxFzqVja8Ojo2WxxEPEDh5oyGdzRorayV)Z)fp4tFHh8BV3jV5TEW38oN(zF0Sx(V)G3(t)U786p49V(P)XN)KF1Rn7g3E2DU(SB(5F3DE(t(Yxh9RV39o9LVhz)N8w37(39Zo9LE3J)Qxdo1X393p7x)5h)n360x5tM9p)Rh)TF2jV1xJ((x)bCF)UF79FRe4CYn(DZ(lV0jV3)a25X39naObi6OvpA1zF0hF)p(DM9HV4Sp6pD6x8AN8M3(034Mvo(RELh8k)Mt(BFD1V7oVlABxA4p7jx7XDV8Ap9ZUA31U0JV82)I1xTD80(x6jr)ZvW)91w)ARV21IG)(QJ2CZOnUYgpvJHBgfSFJN8G1h9mJF6ng)tWRVXoBE1nhpz)1V8LJ2y9RfTXZDL1U2LUmahmj9EF4jV)FMLEMhIaa8MBo2B)1V6(haOYDZO1xdq6gJ2F9gJb0eT)oBEWgxD)1x752a264vV2bUyA5kxoA9RU5EBaedIsaZHWGTD9aJal7y3a)OAtcDSdg33k(X78eowHXJ8C311FO5Eowtc8pV72D6pD7TRLFPAdc2Z)OvLbNODoy7PHhKD4KFhFIdpeDIDDmheeNUWfhggmDI5yNX9DcJKdZ9al0qZOrUoEdYam7h1qpB7bUfXb(dN6us(AH5NPXBoLa9C9DmTh0PjcrB76pOwSL)o1C23nkEEpoLuy50fIT8C8JR545mg(VwEMbH9DHF33QVNZGfWiDKJLx8OAtSJVyN6gglWjNxPUCkj2DGJTLNhSfZHtTchizBDEcBphl)ihZOjUHUk4Pq3jiGLjd8c2Zjk2C0emf1UjY(NEYboBBn1dRRHnd8kWZYwfrBMKpB6bYZZJc61zSBS7ql0hpFuCORDCN6i8EUNDxNj7oX0EKJ9olCUql3bYGjw864BUhc2XbXoJrhUsIPQJVZyxNOvw6Wd7hefvDHZnoazuOesLXmGOH8dGDeBfo0j2Kt8SslJ5d8pentkGYAlLYKRwcTSDT8KTFSu212eIiDvh8QNpHO6yG4h861IMgoe5(r(TqNXwU(rR0qNgykyv6c7oIcpzBJdYY02ns12JT8TWmEdJuXjpzLkmtwey5bMGLMF2cAO2uXqi2Ndrh2bbEivhwTGqcyp7ynwqeuxktj7iyHjHYKTSzJAHGrzN6lypcPTJm3oKaylVv60qTptkWqCkw(LWLfB(SGshRmr9fmiiEHZDMK4vbaI8hS8TbmhcM9r75UDSVtuuTPtKA14db0IgbMUB7WiXKbaoFh(yAG3tzaUKt20iJv1Gtza3ZAxlZ(tdbxU0Wa4pHKyoa3UqIwWnkrExKcQPuEaNefcTeyVdr(ia0eLp57W5WecZHiHJ0JAC0hw3ns5d4umqO5DWPKaRthH8WmuzyaaT5LkPh6rdvkzVz6oRiBh)biBGc81LhW1Equ53mjWVPva1QujxJSTxOsLke3ssEJPHXM(thB23Dyn7GP(XRuh88QODhnQI2ImWOhe0JxDUzqIRrX8xPT7vAFZNRG34tkzpc0WabpCuSpyyIWGqSX66YEW77RM2GOaSuMgioj0DmkYdud1ooSafKPiJYlUyQpedaLsAP8Kz)aVy2c9atumNhgmgO0OyxiYgSPX9HqwUygHPGe2GrKdgcWeN3XnEkqPJNoOWJmemoSg6gayjogqwKt4UU2LXOVLbYy9hmJEEquLvks9DrctVGPdW2bm58XzkfxHRQWClIQeyLo1vGL9C88IMeMyNMad6hZsmIn)yZ5XLZLdK5QcRa9r7ckblTgKCw4CyLgJTeOCPMhEiJ11snvauX6HY8pw0OGQyWYlCaSGTnH7HysQaiimsTGRS6Ik6TQwcz3P36gm8kiHi4LuKapFjnLqYtv2LQKiom6BfpnekMDEW3YgQCVWrPrFklnDo4dQkTfDQSCXhtR10Ew76WKvyuqCTKRvd3ccJo4NbuH2hgn4VHIIheoWnzbDOxl2X1qkR0KuejGC5ir8oeCOIPjbsqYzJQfU9tXMzZvP3sXjIhyUlPEVUMpu86AMEhjr5gFzNfzjpcsuJjFwLQtFuueNqf6G2nFifyjliz95W3Re0Nbh9XF)MgcKg)Q1bQQsLm6QDIqgDMSpUKXc4VvvbnJuatcMgYLgyPImBttCOxTdxpRidJwgTPc2wn1N9PuIDjI4wm3bc3jVh7OTeGuuSKazsa1fmKPiyrqldPHBsB5qsGxzxbB6K8kPiDTkPaP)zlNuuzAhAcxWYJs9KJsRtNjcFXuoKDRi7gzrw5LvCPdevgvKWvjEkun5Y4yFYDzjoAvlTALsSK2mcuAFVGGbMOhvq2IwdXvyf6AVtKK1PAuuXyYaaqaoH7GRZHUmT1ZQBloDpiDhwmM292iN4yaIr1WF201M((gWLUMaL0HSPmhdxGXMREqoyoeSIrpgYeov0CaasRJZ6tSWDQgnXCO1K0mneR(rGvpZRLafScmu)PE7zfUJ4ROqbmzfi4me(2etDek7WdtSjhl85bbX8FG9OtgDqKSZM(D6HjFPQcUNJ4Pbd()ijalp9)QSEVU7cEWa)M8w3nnwSxxGIrTPiQx3tE1Bo7gFWSp)oZE5BD8)6x264V6to5gx)0x8UZE13(0)WT)3x)foA1EDTMgpkiK(m6OUnfHEF9SiMWV8m4hTpjDqVNk99wjBsmTd5r1XPhqB5)oZI2RlqHqegxGL1Nh5OTw5OTABC0wlC0wfNRSxmOmeewcysa6xeGEZJ26WdpAlPjmPc7KmUiuSOEuOHza0TmHzkXoHuOu0lKJgrglPKmKOzWiTc(pkKdlrim81Rq)qQQgRcwgesvjYj1qirpDUuGuf)hcEHpMCREQWwU1bCijM4OurathJSVXTfmZXiDR0x6LvQO1Iaik230LL671L80ViKKHcXgdtCynjtkdncOEBKkKABPTLflGxkrUeefLk1Yezuci)BllZqGB3jVGBoRuMHiOm2Jaj2YaXV4cn61TjcXnNteZegNDqlyCUv82YusKMkbm56GDskl93oh9VSc6xREMubh64TypEF6XZ)C0ScbnpgnMmBiO8be1M1op7nPzXnSPlmNwCnYBXX5Y3GlQR877Xgww8DtvzdZbjeHx3qjLxQ3VgtT1nYl)jVdogfIPqzuhf(C2hTfYodZo5FwBa5Dy0zKqhAtqJih1HK4dvwwd70OSLlWcNA(ccbTj)83dTEvMi8YBFzEbeccybJ6WMfN9NkUkixk7ZjGXQ6mPkaxtdbbLUIsuJxX4Ncrk5E69ePEi)ZawslKMmCp9D(W0GymqwjUeKXyzQ)5llfPXeaxwShLvjWxAgdQXSuRhwSKWB5)OKLOOgZsT1BPK)H(ZfuucoXqwmTrPYbApicxzL6i3fjMUivmvj9pSXGij7Z1OxcBXwlAPorJ0IrtoKoKnFisgsQwsPiTjPyHP6CuLtyoFyL4(3qDMOs4ElVEbExmLUPnuhRxsAS6QkNqyQhWqwD8C1mvsewzSKeSYheTH6a5PimzKhW6Qffd7iGu(B9LnbfymTmBPG8Zfb)1EIrNoz(zL1ebzvLNF(KfQPNBd6VBfjqhZ0AtCKsuTmtSnwKWnnXmbTiBr)fQWyk34BZCXqMLkX9MvnP2zrVluuLFgXplxws4wAL9Ul)aC3l(rUh7TksTTynBZnv48wU8x3HVl4c7u9DEu2ShkKPD0jMlwSwNfntcdRSu60WqURaB)ee2LEpkLdMb10uyqzy8bYoKEFPsKPPDjVxi)1ykZfblOmC9K1sjTXJZif9zkcPvjjZFKInUWXlkwQVAogRcun7nQV0JUkW1PXRu(6FwITqMYwMvdMo4vcfqlLjl5n(uxDEjqs5BfmvRNFtzbzoRKXYm5OZn9o6dmHnsKnXpfETzQIOOY)YEVDCf(Qlsx8Udj4qv7JvJ7unVI2FK08wDTHrbPug2LPZ8AASsj0QTpt3QxztE02c4Y6528rGNBZ8TasuDWxGtklthujmdxqHvSdheNDgZa4OtPJEOMhXH94YeuxTlwbnYzo4rdL8y(U60ql7LF)15FsMkc8NKNVjb2CBJ7DIeUTlVurDInbasHq60oHp)zptXkzg1fTtCIR25v2TAkelqAAF1j110XgfQ(wsAAutfYwOGvuly0wPQqHqn5SELpV86R)udaZph9FVlZejoODRzo8FlrtBEK1DiviIXNrX))equYmVPO4ZDQ9ErIkX0dHNONCHNKnzpmxGl)qfPx5QbMzmn7egPV0FbRoY8JWMJsygsOlLFosORjBwssJlMBIsikzPtvczjHjlH8X8txIC4WUM4uMWzPiqZ6VdZpk2YUMz(XXs)TU(rrh9cZuwLeqk5XVfdgrhvszbIY2f7mtkSXfz3i)WtkSZL4az2uuYVR0)T3)5]] )

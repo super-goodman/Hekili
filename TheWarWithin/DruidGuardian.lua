@@ -2,6 +2,7 @@
 -- August 2025
 -- Patch 11.2
 
+if not Hekili.check then return end
 if UnitClassBase( "player" ) ~= "DRUID" then return end
 
 local addon, ns = ...
@@ -1178,6 +1179,26 @@ end )
 
 -- Abilities
 spec:RegisterAbilities( {
+
+    rebirth ={
+        id = 20484,
+        charges = 5,
+        recharge = 600,
+        cast = 0,
+        cooldown = 600,
+        gcd = "spell",
+        spend = 30,
+        target = "mouseover",
+        spendType = "rage",
+        usable = function ()
+            return Hekili:isMouseOverMemberDead() and Hekili.resurrectionCount(20484) >= 1
+        end,
+
+        handler = function ()
+        end
+    },
+
+
     alpha_challenge = {
         id = 207017,
         cast = 0,
@@ -1206,14 +1227,6 @@ spec:RegisterAbilities( {
 
         toggle = "defensives",
         defensive = true,
-
-        usable = function ()
-            if role.tank then
-                if not tanking then return false, "player is not tanking right now"
-                elseif incoming_damage_3s == 0 then return false, "player has taken no damage in 3s" end
-            end
-            return true
-        end,
 
         handler = function ()
             applyBuff( "barkskin" )
@@ -1376,7 +1389,7 @@ spec:RegisterAbilities( {
         toggle = "cooldowns",
         pvptalent = "emerald_slumber",
 
-        startsCombat = false,
+        startsCombat = true,
         texture = 1394953,
 
         handler = function ()
@@ -1479,7 +1492,7 @@ spec:RegisterAbilities( {
         school = "nature",
 
         talent = "heart_of_the_wild",
-        startsCombat = false,
+        startsCombat = true,
 
         toggle = "cooldowns",
 
@@ -1533,7 +1546,7 @@ spec:RegisterAbilities( {
 
         toggle = "cooldowns",
 
-        startsCombat = false,
+        startsCombat = true,
         talent = "incarnation",
 
         handler = function ()
@@ -1553,7 +1566,7 @@ spec:RegisterAbilities( {
         school = "nature",
 
         talent = "innervate",
-        startsCombat = false,
+        startsCombat = true,
 
         toggle = "cooldowns",
 
@@ -1600,11 +1613,11 @@ spec:RegisterAbilities( {
         cast = 0,
         cooldown = 60,
         gcd = "spell",
-
+        usable = function () return not moving, "target must be nearby" end,
         talent = "lunar_beam",
         startsCombat = false,
         texture = 136057,
-
+        toggle = "essences",
         handler = function()
             applyBuff( "lunar_beam" )
         end,
@@ -1644,7 +1657,7 @@ spec:RegisterAbilities( {
 
         spend = function() return ( -10 - ( buff.gore.up and 4 or 0 ) - ( 5 * talent.soul_of_the_forest.rank ) ) * ( buff.furious_regeneration.up and 1.15 or 1 ) end,
         spendType = "rage",
-
+        usable = function () return target.minR < 6, "target must be 5- yards" end,
         startsCombat = true,
         form = function()
             if talent.fluid_form.enabled then return end
@@ -1867,9 +1880,9 @@ spec:RegisterAbilities( {
         school = "physical",
 
         talent = "rage_of_the_sleeper",
-        startsCombat = false,
+        startsCombat = true,
 
-        toggle = "cooldowns",
+        toggle = "essences",
 
         handler = function ()
             applyBuff( "rage_of_the_sleeper" )
@@ -1987,13 +2000,15 @@ spec:RegisterAbilities( {
         cooldown = 8,
         gcd = "spell",
         school = "arcane",
-
+        toggle = "defensives",
         spend = 0.10,
         spendType = "mana",
 
         talent = "remove_corruption",
         startsCombat = false,
-
+        target = function ()
+            return debuff.dispellable_poison.caster or debuff.dispellable_curse.caster
+        end,
         usable = function ()
             if buff.dispellable_poison.down and buff.dispellable_curse.down then return false, "player has no dispellable auras" end
             return true
@@ -2037,9 +2052,14 @@ spec:RegisterAbilities( {
             if talent.fluid_form.enabled then return end
             return buff.bear_form.up and "bear_form" or "cat_form" end,
         toggle = "interrupts",
-
-        debuff = "casting",
-        readyTime = state.timeToInterrupt,
+        target = function () 
+            if not UnitExists("focus") then
+                return debuff.casting_target.caster
+            else
+                return debuff.casting_focus.caster
+            end
+        end,
+        usable = function () return state.readyToInterrupt() and target.distance <= 5, "readyToInterrupt" end,
 
         handler = function ()
             if talent.fluid_form.enabled and buff.bear_form.down and buff.cat_form.down then shift( "cat_form" ) end
@@ -2054,7 +2074,7 @@ spec:RegisterAbilities( {
         cooldown = 10,
         gcd = "spell",
         school = "nature",
-
+        toggle = "defensives",
         spend = 0.056,
         spendType = "mana",
 
@@ -2152,12 +2172,6 @@ spec:RegisterAbilities( {
         toggle = "defensives",
         defensive = true,
 
-        usable = function ()
-            if not tanking then return false, "player is not tanking right now"
-            elseif incoming_damage_3s == 0 then return false, "player has taken no damage in 3s" end
-            return true
-        end,
-
         handler = function ()
             applyBuff( "survival_instincts" )
             if talent.matted_fur.enabled then applyBuff( "matted_fur" ) end
@@ -2206,7 +2220,7 @@ spec:RegisterAbilities( {
         gcd = "totem",
         school = "physical",
         form = "bear_form",
-
+        usable = function () return target.distance <= 10, "target must be nearby" end,
         startsCombat = true,
 
         handler = function ()
@@ -2231,7 +2245,7 @@ spec:RegisterAbilities( {
 
         spend = function() return -5 * ( buff.furious_regeneration.up and 1.15 or 1 ) end,
         spendType = "rage",
-
+        usable = function () return target.distance <= 10, "target must be nearby" end,
         talent = "thrash",
         form = "bear_form",
         startsCombat = true,
@@ -2363,7 +2377,7 @@ spec:RegisterOptions( {
     cycle = false,
 
     nameplates = true,
-    nameplateRange = 8,
+    nameplateRange = 10,
     rangeFilter = false,
 
     damage = true,
@@ -2371,24 +2385,25 @@ spec:RegisterOptions( {
 
     potion = "tempered_potion",
 
-    package = "Guardian",
+    package = "守护Simc",
 } )
 
 spec:RegisterSetting( "catweave_bear", false, {
-    name = strformat( "Weave %s and %s", Hekili:GetSpellLinkWithTexture( spec.abilities.cat_form.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.bear_form.id ) ),
-    desc = strformat( "If checked, shifting between %s and %s may be recommended based on whether you're actively tanking and other conditions. These swaps may occur "
-        .. "very frequently.\n\n"
-        .. "If unchecked, |W%s|w and |W%s|w abilities will be recommended based on your selected form, but swapping between forms will not be recommended.",
+    name = strformat( "切换 %s 和 %s（熊舞）", Hekili:GetSpellLinkWithTexture( spec.abilities.cat_form.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.bear_form.id ) ),
+    desc = strformat( "如果勾选，根据你是否是当前坦克或其他条件，可能会推荐你在 %s 和 %s 之间切换。"
+        .. "这个切换操作可能会非常频繁。\n\n"
+        .. "如果不勾选，将根据你当前的形态使用|W%s|w 或 |W%s|w 技能，但不会推荐在不同形态间切换。",
         Hekili:GetSpellLinkWithTexture( spec.abilities.cat_form.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.bear_form.id ),
         spec.abilities.cat_form.name, spec.abilities.bear_form.name ),
     type = "toggle",
     width = "full",
 } )
 
+
 spec:RegisterSetting( "maul_rage", 20, {
-    name = strformat( "%s (or %s) Rage Threshold", Hekili:GetSpellLinkWithTexture( spec.abilities.maul.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.raze.id ) ),
-    desc = strformat( "If set above zero, %s and %s can be recommended only if you'll still have this much Rage after use.\n\n"
-        .. "This option helps to ensure that %s or %s are available if needed.",
+    name = strformat( "%s (或 %s) 愤怒阈值", Hekili:GetSpellLinkWithTexture( spec.abilities.maul.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.raze.id ) ),
+    desc = strformat( "如果设置大于0，%s 和 %s 只会在使用后仍有对于设定值的愤怒时才会被推荐使用。\n\n"
+        .. "这个选项有助于确保在需求时，%s 或 %s 是可用的。",
         Hekili:GetSpellLinkWithTexture( spec.abilities.maul.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.raze.id ),
         Hekili:GetSpellLinkWithTexture( spec.abilities.ironfur.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.frenzied_regeneration.id ) ),
     type = "range",
@@ -2398,36 +2413,64 @@ spec:RegisterSetting( "maul_rage", 20, {
     width = 1.5
 } )
 
-spec:RegisterSetting( "vigil_damage", 50, {
-    name = strformat( "%s Damage Threshold", Hekili:GetSpellLinkWithTexture( class.specs[ 102 ].abilities.natures_vigil.id ) ),
-    desc = strformat( "If set below 100%%, %s may only be recommended if your health has dropped below the specified percentage.\n\n"
-        .. "By default, |W%s|w also requires the |cFFFFD100Defensives|r toggle to be active.",
-        class.specs[ 102 ].abilities.natures_vigil.name, class.specs[ 102 ].abilities.natures_vigil.name ),
+-- spec:RegisterSetting( "vigil_damage", 50, {
+--     name = strformat( "%s 伤害阈值", Hekili:GetSpellLinkWithTexture( class.specs[ 102 ].abilities.natures_vigil.id ) ),
+--     desc = strformat( "如果设置小于100%%，%s 可能只在你的生命值下降到指定百分比以下才会被推荐。\n\n"
+--         .. "默认情况下，|W%s|w 需要|cFFFFD100【防御】|r 开关处于激活状态。",
+--         class.specs[ 102 ].abilities.natures_vigil.name, class.specs[ 102 ].abilities.natures_vigil.name ),
+--     type = "range",
+--     min = 1,
+--     max = 100,
+--     step = 1,
+--     width = 1.5
+-- } )
+
+-- spec:RegisterSetting( "ironfur_damage_threshold", 5, {
+--     name = strformat( "%s 伤害阈值", Hekili:GetSpellLinkWithTexture( spec.abilities.ironfur.id ) ),
+--     desc = strformat( "如果设置大于0，除非你在过去5秒内受到占总生命值百分比的伤害，否则 %s 将不被推荐用于减伤。"
+--         .. "\n\n"
+--         .. "单人战斗时，这个数值将减半。\n\n"
+--         .. "采用 %s 和 %s 将导致 |W%s|w 被推荐用于输出。",
+--         Hekili:GetSpellLinkWithTexture( spec.abilities.ironfur.id ), Hekili:GetSpellLinkWithTexture( spec.talents.thorns_of_iron[2] ),
+--         Hekili:GetSpellLinkWithTexture( spec.talents.reinforced_fur[2] ), spec.abilities.ironfur.name ),
+--     type = "range",
+--     min = 0,
+--     max = 200,
+--     step = 0.1,
+--     width = 1.5
+-- } )
+
+spec:RegisterSetting( "frenzied_regeneration_damage_threshold", 60, {
+    name = strformat( "%s 生命值阈值", Hekili:GetSpellLinkWithTexture( spec.abilities.frenzied_regeneration.id ) ),
+    desc = "如果设置大于0，除非你的生命值低于该阈值，否则将不被推荐用于减伤。",
     type = "range",
-    min = 1,
+    min = 0,
     max = 100,
     step = 1,
     width = 1.5
 } )
 
-spec:RegisterSetting( "ironfur_damage_threshold", 5, {
-    name = strformat( "%s Damage Threshold", Hekili:GetSpellLinkWithTexture( spec.abilities.ironfur.id ) ),
-    desc = strformat( "If set above zero, %s will not be recommended for mitigation purposes unless you've taken this much damage in the past 5 seconds (as a percentage "
-        .. "of your total health).\n\n"
-        .. "This value is halved when playing solo.\n\n"
-        .. "Taking %s and %s will result in |W%s|w recommendations for offensive purposes.",
-        Hekili:GetSpellLinkWithTexture( spec.abilities.ironfur.id ), Hekili:GetSpellLinkWithTexture( spec.talents.thorns_of_iron[2] ),
-        Hekili:GetSpellLinkWithTexture( spec.talents.reinforced_fur[2] ), spec.abilities.ironfur.name ),
+spec:RegisterStateExpr( "frenzied_regeneration_damage_threshold", function()
+    return settings.frenzied_regeneration_damage_threshold or 1
+end )
+
+spec:RegisterSetting( "renewal_damage_threshold", 40, {
+    name = strformat( "%s 生命值阈值", Hekili:GetSpellLinkWithTexture( spec.abilities.renewal.id ) ),
+    desc = "如果设置大于0，除非你的生命值低于该阈值，否则将不被推荐用于减伤。",
     type = "range",
     min = 0,
-    max = 200,
-    step = 0.1,
+    max = 100,
+    step = 1,
     width = 1.5
 } )
 
-spec:RegisterSetting( "max_ironfur", 1, {
-    name = strformat( "%s Maximum Stacks", Hekili:GetSpellLinkWithTexture( spec.abilities.ironfur.id ) ),
-    desc = strformat( "When set above zero, %s will not be recommended for mitigation purposes if you already have this many stacks.",
+spec:RegisterStateExpr( "renewal_damage_threshold", function()
+    return settings.renewal_damage_threshold or 1
+end )
+
+spec:RegisterSetting( "max_ironfur", 9, {
+    name = strformat( "%s 最大层数", Hekili:GetSpellLinkWithTexture( spec.abilities.ironfur.id ) ),
+    desc = strformat( "当设置为大于0，如果已经有该层数，则不推荐使用 %s 来缓解压力。",
         Hekili:GetSpellLinkWithTexture( spec.abilities.ironfur.id ) ),
     type = "range",
     min = 0,
@@ -2440,4 +2483,5 @@ spec:RegisterStateExpr( "max_ironfur", function()
     return settings.max_ironfur or 1
 end )
 
-spec:RegisterPack( "Guardian", 20250314, [[Hekili:vZ1EVnUns8plcfqWUBIJEyhNDHDaUEa9WU4UEho3d9)STSmTTqKLm0JKMad9z)gskrrjskrNnB2TafBJnjhoZW5XpoCGxAV83xUyRxgA5V5y5mXY1E8ihxNjotxUi75tOLlo55)G3E4pI8oc)7)i3lzBGxeEGNdJ92IjqACEIpm4HSStPF6MB2hKDiFZi)4J3KgCmp0llioYpXBxg(Z(3SCXM8GWSphTCJ0D3E5cV8SdXjlxSi44FhiCW2Ti6SrP(lxGN91wUxBp(tfRXtb(3NJ8l(sXxGHgFTT1122Wq)AWFwS(ZjXr7YtkwN5f9qq0(I1(hq(pWMS1hV2bp5)l6rus2n7G1WnK9eyOFb5bR)xJtowSook85I1b7kwhfxSEh57cslw75Nf8iQEP3DTZ4RkwJ))tyCz(jS4wpPPx74cd(7hqfR)d8E8hGQla0UHbPzPyD7XGSG9efi8PFJCEHI82eI2U8xwUWpjidLe4bNwvcNzXAJI1p6bFlmRrb7wHv2BjdeebNjWSwT17iCOUAcW33dFnvdv9TzhsqPhIlxZM8D7gvoJrjOJEbrWQMvS2Ty9pxS(GxkiqctmndSBitBcCy6t4)fLdUmdoVvkihqEHzhgDYpJS8B5wFcAFs8tzhWeW91rGi0tEH41pwlnzh0AhqSxcqBxbCfq2e6zeq5jVgkpDsxhqwJSPkB6Io69N18XgVKhsbYI36BvU1KdN08KhdE0lCfCeMbBvw6OTXpfvF6vrR6VUTcWQB20zIs(uCZboodIJKGaITXlJzFxTIJa3SkEhypIw9eycZlAsmHIpbBckRE9v(aK)Afn(vL7qZJLquu2iCaNOu8gITthvszI8woJ8K0y)0vOOT5jEr(OQ5G3GWC0kuykSfwLFC5c7UnulPkOSsY4LZgBTbB3tcovVHvYOWI7X2o4i4SohoQkwF(mp13fMhSDfoCM4MSb2eYq0tSTODE5HINxPpKhgUAJx6bzNuSzfhd8ARz0wjvVZyBL0WyWAPT1myd5LerC7wTVmTewtqoLgLFIkHu7AuskcmMWccmsvYmEQlrTvXezXhrychgS)qw6QTOhJPdiWqqyaiCqAqyacBEuVtQiHKWfSDnji6bugKleZGCFwIFER140Ano41mvPrXa5Ajo9x)Q6H1mXjMODNc203dStOFyforhnDxPhkxcpGeFubjsYJusbm)tTuj)vNPnjIxI3JqumICywLih8Yrhdq0aB28bLYd7ob2aMp1RWZg0Ku9UwKGW97qHbrOvGAhwqaeG1popc4LQCWG3(TsfmCo8EIKOYV8ymKjpibjOkzHkQ0MdQ(pS4g4ZY)L5LShbbDHasRYIxTnar10omnaSMe0omue82RXIgQskNYhehaG8mwmbZ58eKGE)hb(DCl7dLSmO(F2peOnzFsXg6Dg(Vb)vYZBJXP(sGO2uhFoKBnuBHWmWP89d9EkfCzIOMwoucPMkJ1Hk29rf32QKMeIxLWcgwti9HL5hd4EbWpaRThv5nKgIqNqCOFHZW74ssLaXEcXmtj42EGHX7Jihh3u(eMH5rW8HfDSvsZ2HxLfcc7iFk(jiVeG)Apsm6HVxwd)vPHuOH4BdzqbT5IZhh9y8diQo8uaWEPSy61z4Rt60s(ST4NixoO2ZtD4DM3SgPXyyEz2aDpFERbmU4HQaCqjm1BhBwrwXyRQWJ1kuj6lzXN0qw6c9ZBjRO5SBVBCEPs8ZiNPDMF9TeUsjza3xY(QgUUgqfGavoIqfSvhqUswYWGIx5fTLepRkU39SaJYMeVdBRH4VMoqHpuSEV)w81XQonKuEG5nG5K49cIW7QdBkNgmBP3z5IrThd8dIZtxrZmIpd4ac52Y2RuivhWwam48w5fPrNXiAbliXqGTscz3gfol6wzPr42AWzClQdfKrRsUu(1mhTjwL8zD2TUoYQiNSeFvExmA)rRUPxzIIFC4F5iLSvNcTMC8o80KjTJCQWB6Yau4YBvjBYSaQksdCzb9D(UX66zezxDOwb4dFPgmDtZsqr7ZoOGO229tv9i57HkUtpon1PdBetJRgR2TV88BV1THES47L68VMSJYdqhREboOp8Dt5faO6G)vPmmOxzdx)IgxTKtC2HsIPjK3a8orQ6eU(BRuz0HGz0HS1cS9Bg)8Q0YQuTGANOpvdvU3qp9bwQLrmjyHagNkyuo9GDEFCsxiNTTVii8QogAx(RzvL)s3BTE0lAFivGudCxbsejkf1aO1l)6mmIth9Lxw5(muy8w5069aAu7cwP02vJxji9qcIu0qh1WP)ojYFnIfwprKk1fqx6EQbP5S0udeTlF4ML3497YwkQCj7Ur8XmErvnw)HGNBJj8hD(vlD8qjpxHASG9CpEfsUkplD4p(uR6r2EpMKiYUDIE6YzCZoU)zTqDzCUg0u380xQajrHPgyM0YGOSkhU9x8U2yGuiaJfSxKSWsHlnopSkLceVfLM1qpRq)0WfNcUh8fV7oLoGuGkkwMBpltpUDOSueUQrxjC60OuETpCu9m3NYdFeO3li51kXDcF145jAZQX72ZRFS3leteFgSUgXhfE)Ws11giJ)2quA6k8tpsEgDjgYvVkjMnuNU(IbHWoFlVrSs4egTkliqiEoLxGeXfqgf3jr7FMCeoLUzCq0ebL4Qg3WFTKY(QENaitx1j06e1lCvv(N1vMqkCdRXQZKiJM42zkgqRgeLrDghRXwjEp5XD1SF0yiGhQ4Z6XohD4UocBQekRtZlO(Svs4M6409ACGN0fVfnFyL0NcoHyb0gRoW4RuASRIIlessASgsRMaHotXdG7K1X2w2qa4NGevGnr6YfF(4P4Km8goMUHXrfRjT45OIVaYZjKp(5ohJFf4u02)DuJgTnjExa25)N(PI162ITBcJ3Cd4eb8WtKwk9M)gzB)pjbXG655)jEZVzBc29KfigVYIVG3M)h40KfdUm4UvDnMc0oy9tfR)xEj(WNUdBFHB3VRbdE)nt9N(rCBTsfU0rSU67dZVPDF8jFwv4GUc3epZRadDfPv6MBFvDh2n36QGDZlpxL30EMLJQQH9KZbcDad3(OSpCmnQWwX1epsjpZoIq2aqiToF2qDGYATjS46ERRX3s6Lo(VjpfTcS(ps1ICn4gEt1QYkNplTwuk3dfT2g3(j0vCsjgMlNx1KB9odh(zCITJdKX7LsuFc(qEs2Uf1OYADVPXp3w9IwLQ3lH3Ha)zIVqEit1WQ(UzZGq3BlSoP2MdEngNdpFU3LPrvxMFBlMEMROWwgJ8Qg4jbN5kfaFOvZbdgyuMg1uSXPU32b48bCOHumPHT5RPvrdK3gvyQ(nANhZ0)k2AbnghSASsIBpboqA3rnBct8e7TQ5oNplFvJ7Av2QwLBTajT)RefOg9gfnEk55Cn1bE693jsVYUKsQjKWSRBDkHHK0Yk8UukQsSzBSLYDvWrtQJTRQhSeKnUWwcdYf9symjQqISmyGgb(WhcMxwlpD)TwdLLMatHHMyU5(XwMdQK)o6oiSJLg8OQSsx(MPXSQOPeJzwRc92LR5IsmmZrYz)lOAUrw5jV3UKPek1MzhLKCM9h27dkdHYtnxm5ufpiox4G5BcFvUsvLfBUBVHwBLXDolmQ0g6r0DK(kTYYSzOQRxmnO2gS(DHAPnXYSkOOmfOrh3l(8zcf(OLSvcbGE)4eLkiScPLn9GbvETsmU0lXGRjRIMkFyDjHw6lqIZ3Cws95LDDUvv9Ls5YTTLV((x(BLcPddbn0cdfDoF1wlg9VDVDI9pABMefzZYivNyqhilca6nVezXqsNGiYFWe(QzkdPCLHu2IbW4vUxxGcOB5wzkYsVj1PY4Se47)cjiiWpvaddrz3w0wMST1eIIoxcC2TMxig3oGkimxsTEXtwN4VZMpXrhwgU3QHGbHHSgIq0AOJA1iiMpGEx48VcESL9cpvVeIqHTkZUU6(hV1G)eUNnaER2h5LM3S)DHdQt((9z)vQbuFpdPy1LYTIwzDOV1IakuxQz2b6XaYqTIzkD2DfRTVyZ6Xyx8Lr6Wzvwkjb2ySSlwZ5zR(1NfLiIzmo(1S7UtWWZ2MByxjd3)oEPxvt8(NSxUU91X6IYIQ4QQvYYGk5LQnlZ9Zv3YsbSJxO(Rp9ar)cqGfc3B04wRTEFl1XXnrKxG9(Pw8WwEdYa)nKrVORFwIZurM(6hST)IylIOUnj4FV37h3pfzVflTEOu3J2pLlvt6ibve7Xp5RxPC1AlpNXCfLu6cypnGoKtsXO4DHUioZEOOJf)RNu)WlnVSyv5kmeIEBgi8BuY9Q(DUHU3T(nUzM7pt(TTP5GL1CxbNv9dudM1Q)Ltz2TQNp53JgDNU0FYz4vd6qe(kOlzDtNitZznY(NR)rDrbLf)fEH5cQ4xEMYdD(F1zAidwY5fNjCmd553x()p]] )
+
+spec:RegisterPack( "守护Simc", 20250620, [[Hekili:TZ1AVTTrw7FlcfGXcjRSiLuSDHKbCBbs3G6SBxVxqYhKmf1ijUMIulVyV2qqizlsBA6DGI9AXUilsBZ2MMGIITnBAc2FmRLT7NYFH3ZWHxgYzgsQgh30xKGGerYzoxEMZCoNzMdzB52)Y2B0t1f1(ckvvAu9SknQixtzPgl1Ed3DhJAVXyvTTuha)WuDe8VZUZ1o463Cd9rA4hTRHLApmjCS8S1Ghp01DSZZV4Id0Dh61TIM1OfD0h5zO6QBzQzR23fFT2IT3ORNUH7p1SDxU8xzL2BO65o0YU9gaZErGY696Hinh5amF23E)JUZDMDZ)1r)73AHd(ORD4v(8dF9Rx(rp4Vo98tp)lo4CRTL3l34C9E1XVK9GlwtX24xFoZD)DVWAu)zV13B913B31)Txc(75EL13BhNlEPbxAVDSo)U47)kqd29INlO1N7LU4L6o6cRpY9xmy8AR9QRPSZ6R5CX1xhZW9V33E0NCLdV2Rp79(aqgM92)XJU)Np98hC7BqF7d(ZVliQN(Wp(Vp7VClC3MDZp9WV8Ro6UFZrVXNn7B(Y9V3BD0dFi(3x)wZEJ3B)hCZFZANz6MF3B8oavi347ETho7JU1SR(17FVV4rp4kVmAlDdDGahcS5dVfHVh8MVfMap4Yls(1bV7No7AFnTicpB27FxsRbQeFZR(vZUkUNZENVA27Dx4rT3Wq3X1bpips3vFG)ijC1f8nDu18VCdBuxDB3HT3azQ21a1R9l02fgst2KrwBJ6OzzB7nMCRenUgUXX3zdnBDxKTUk2uPF)k62wM99SR44cgKt3SzRPBUY0nLMUPnyDoDZvNUzJQ(x3xFWq3oa3u1nD8FGc8GjtMUzHOdCD9SiKuk60ZAhtc5t1(M8Bp9ZRX(4qXc6CounsVxPAmihqgmEwxiEoePA4oSYynxF6zJmr7OA0PN6iGKDChAJCgAz0JEOZVfyQ2OOuTp0P90r9arFa0DBF7Mm4b32J54zfYXfMUPR(iKp7KjGc5AauixUGWblHJjaSxMcFBgzoGfuW(fKTr6iI9qDcT48ezrMqYncPprcm1uTn911aHdEIMfGmWfjEAcIqzx54zVT(2WWh8qxOdUoXeYVby9OJvFaZrDCmqOXicoed9DvT3YzlDF0EPNH2pwODiwMcI5miGr7LFgANfANamNhlA2HjaTDblDKQDuSlU4oRwvJ29ASqhfFtCilB1TbjTI3yrySCmLhP6zKDuqSfHQbY0Tc4P12nea2r3OxLGo4ZNsrTZwFC8tktgplej8L((idDtuNXwUqh0bSuZYZeKLWquqGYZYvXWb2IvmgoXl2uekybgT62Ou6nXyaiuN(w2Jcb0fc)lwJ11a7KbK5jQ2dqUvWtx64A1PNozwJSseiSaoOxFCiiSeuGovwKIUuqN9bvy62Uynfmq8Srmq)tdYB9uMiziYLP5tpihqvtTaMaZi02vZa4S)tDWtOYm3GesFGg1Zce)H2Qod7GhAPY8Prcq1aAbavD0mu3XbMtzsS9cspsmvQxeQiNhvQLgWssOyal2iMIq8YFjlB9NzOFCjVf2qNVPS40GGPbrkuuWmErKOJHSmvYw2WujdSfuqE6IZbGtewQyrgEMGDcySmctLvkqCdS33Xw7GS7aXhhGyD5RP6MWWJBCa)hgmEvkpAhlUAwMBBTfIarJ1bXdht(cGgrTgXUiBhK9wK5ojxEOS4y2(IzmCKq6PUnnqsmpYgGfKZMS4O(XHQIvdFPjoRS4ei6mWt1UNUQjMhE2owAeKLbnaBfF(MZcKZoBdC2FSzBilErIH6IRLL7WoQM9894f6zC1ixN8Ae9aqQhrNokqHtpDZbA9Qms93hoxEBvG9G4urVFh8Ee1J4NMEyzpKVSloCdFAKmT5to9kIABRRPB550H4WbpgqLlvTed9rkP4v)YKpzRurojM(AQgyVnStitfMsoHlVUSBPafRHP99qzaqLsTgKGBNENAODLM1qwPmY7pC2f1UHKn9cCB90J8ZpaK8YZ1WbhpaKqWrYC9SWf55lCwnAZmEnokYsqqDM1dMWPiJ7YYjHBLFWe9IzvjNoxd8cLW01X1gzoWDOaIklNpvlgjpjG4mNcwqmfNXMV19kN8w3LkMiEsbN)4uCchavQMBIdfpzsj(7Hq4483lDVezrD4TajXkkOIX2hzBrci3fKDFTsCoMh7AvPmuSszOBLtAtCSjpFVqzrqla7(4P4uLZ1ttEjlLYM133atooHPrPKtUZdSSZkZzz55kfErddP3bTMH7Gwrxd1ivZbgefsCI7cYeHdOiob6IfofF2znukU(gTJHLey8goPvDluL07dGqB3OnMXtVhHAm4MZqBK)(oQioD6FGu5hh1cJt(AL4DRGlplaPPS0eV)eznhoApG8LGtUfBjydHIwBeTpJ9eT1vpviZPtb8PD5TqyCz29Gqr8wxLZ64fO5IMzve5Jo0AXiBUdtCu5AzM908l4szS(ZyLA(K8cqZIgNEEvioaM4eZ4Unic3LJA5V5DPZbsGcuNXEHthduohlpJWqkG)wKJBcCwa(KykE0j2U8YcNassurq3QLt3kM0wMxiIAIZUIz0jXw5LEWr0Xco2ZyBGE7H4Vxj1AqVhY0en5wixtC0FswGQgyIOfLwxc)JmhltaC1fI43Za540bFIog4TuMJHC4H9GfdXHRN7KqY7G85CcwKTfeieTKsRqS5f4)uGM2d21FiCjcZOsrJnPKAIZB4hxAzE7EhtsM1ehqlZSEHLQsFAz8usMvyvxCKeE0uZAuxliBvDtxhQZbjBwXUo56IDhh6dbMHYEitrJJkulhjQP(uwS)5aHeRwHZM8PvAHpEigbgbiiY0qlhKjpBa3D0n7esSSN0wVifMHyJoo(bJdGKRvlUrZnlsEIpo7Opgf5PTEMN7ZCZkssML57RKlE6IlJ3(q0D32CkhNWoerMSMdHlqvyjyAWaNIF(K0bdC2YZWOtxiGq6ybjAfotpuQwikyuxeUKICmSG4pPfR83Bar7Osy9vttD3uLur3Wg5AnY3vKFWgNo9qBBrKngXb8M1b8rRBOJm1qjgnerexXLSWjQQNZIA5KTfEEKTU5w4YfqUIUtfTH2Gs21dOlqLoDbVFDC80D53A4Ib4ZLh4JhSs(rE943obaxN61R1OwdM(OmxsIsbLeL8LK4Xnphuha8g5JRzwZH8gFMR9(IkbXXr2tIdigMka4KgPTvCFXNAzhYfDW1FoPk07qmuOQdD3WkiGJ1QTNPqse4ieU5yBeoQOASJOi3vQagyrv4Aj9pKosLfyi7GCJ7F4YN8)vaFdxjfNqM4x2bthmdXhccVWv(OSd42TNNnUySIJyTTQHh4p2Wbyr1GlBVHCKJUI6Bf783VktBrFwPzKXeLp)ixYKsXmHtzFKgsH3bZ6G30JQqkg7awtGHo4n5OV4tM9bxh)MtC3hm7QF8PcIoCQzx7pD0nU139rx(Op5k7FVlV)9)BK3oI9)V35Gp8)8)U8Fy65p823EPJUXBd99OhE7dEN)5PcNKKPpGtT)9U)PkM7It9OhCn5dU9nE0dEZcWq2jVCyfNgnxmj7z(CyyoDOOmptNzjzB2nDUyyEqQOgnxmzEG0I0HumF65p4AV)SR)pi237F)xV((37Zo46x(Ox7HeBC)wH9hz1xh7045EUPBw0xNQUgwDxe8tbZN2bAQU5IR5pn)NBRBb4XUVc(v4zXE24jWrlUf3ZPNhZMFf4421cwgIQlm3htHPBIFRRE(PBUUQTgC1Y4C2vGGB)eyreADxsBPvWQeXzItLiNONU1IPDBYVvHohpd2VyRq3INX3Zvl5Ze7qRv1ZO3VvM(iLYX)iFjiYb4zcCv1sbZPfWoaBvDYKscD7vwI1HhfAiM2ml)JQlXzQM4U(zMsFNWy5eGJkNPigKxq6jt4gLNhpcuyymWNBcS4P4mt(M)qj6CPj0wPsfk6qQMX6BjvdY2xqCJZ0PyQMLftlGdiAuzC040c8aWaynp0VmnjtNHgzqno1mmZsMDhDVtLBwOfHQnTxf81qBPelmrtu0MRwRkt7XBAC0OFuvJiHBv8IwxvMPFmVPce3beVacFHjKc9tq92wuEYKC7MV0L9Xh26SPe6M1yv2G1uFMeBmk4bLASoET4slSWcLc2qij2kREvzfq0xGAF9e0OYPfSLc9bZVoRXu9jeNRhnaiG1LLs9omSQmRnd1MgJrok5aKkUVDanBePYSVBbTuMmHFVQNvVKf1RAXkj33)GYZLDXZml4HyjkmFsoh(L3Pur2U6vxMHEXvEoRxlowGCQpEA)pcQneP0PuW3Vc25DCgnIEpayqeQOeC8lZboISUsun(sPVvimuxkxyjUg4p(IEnxbkAQWrX3dfln8o39vLdekMZqwI3Td0)MYNEGgKDjZ5U2InyvOmW22QspzKRGEk68EBvJfGt5vnve4wrEq5wP6S5bqQnuQKs54BRKOc7wQeXkjQKULW2VR2OQu48CEqzPaBdEh9ZKj(uyLQ86jmB7KtskauHHMu25lSGpFRZt(LlMxVAHJGzu0OG)Bo5HZpt(YeOq5jUijEKtooWHOAUoO7YY87F(D)4cqYWKOaOqz2jShd2nLYNXhFaWtBmJdKM80tJdBuKy2mP)lnp6sjofanR8bn4XwOkXvQkXvSkhoG89KxZbaKTElmaAW8kXb6OSeOl7yo5xGRqMOmmckY406KSCbtGPilzS5zLMZK8YircM26xId0lSplpXnB1qPiImSk3smgeL4vhWSwdIpzcw1Cl0jIK)yiJPSxOP68qessT8SRHfB5t5J7udzw9vRguZr2l569orKG4WW)WWFHiG4vHWntEUslRvwg4DHiGa4sSWUqXeaEzYIfQIWDb9npFZftWM7LQKXKvEHKyeJ6L5NisOMlUOlz1iFZyS)RMlVmJHNSm1JRX5X5ZX5DHCSRonQGntVeTSOS49WkkckNc0uki2p1UzfOGzuyMp(Hh8Xxifyg39LsSM2uvpLy)4si)cpC1LQsN2YXqe4NGc6CTK0G8mfePpUofZFlVzZOonjOlZXvRNpfJkbrY2(rMEKUcgjiPcNZBGYmnGv0fPyZKSpeztuCIH3mrbjYkMr1Wh9odYF8l1u06uB)h3oeDIffHCC2tmAqyUKm5YSZGP3SX4tucSHiFLjf9WuFFj51mQ14gAmM4lVyZwReTBmj3BsLQHPPZT9TQZ2bPeThpBDYKeTPz62eE)AsCyLcNEhSpgcu1GVBJyvn(RZytrFVhfqeUFygtrYI9XEuadc)kVrmD0hHAkxvc))RgUvMjHqUiMszbE6wT(KjPn5spuj3iWiKo2mMzsz95Qdth)Ej4JcO4TNHuWa8hYyB())exs(T9JpyWsGF0Ifju3STmWFqoDq9(zWpoxqEoT3WzmsdxRJ19RLU2)Fp]] )

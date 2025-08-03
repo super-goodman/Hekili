@@ -91,6 +91,7 @@ state.max_targets = 0
 
 state.action = {}
 state.active_dot = {}
+state.active_hot = {}
 state.args = {}
 state.azerite = {}
 state.essence = {}
@@ -99,6 +100,7 @@ state.auras = auras
 state.buff = {}
 state.consumable = {}
 state.cooldown = {}
+state.find = {}
 
 state.empowerment = {
     id = 0,
@@ -1228,10 +1230,30 @@ local function timeToInterrupt()
     local casting = state.debuff.casting
     if casting.down or casting.v2 == 1 then return 3600 end
     if casting.v3 == 1 then return 0 end
-    return max( 0, casting.remains - ( Hekili.DB.profile.toggles.interrupts.castRemainingThreshold or 0.25 ) )
+    return max( 0, casting.remains - ( Hekili.DB.profile.toggles.interrupts.castRemainingThreshold or 1 ) ) --self
 end
 state.timeToInterrupt = timeToInterrupt
 
+--self
+local function readyToInterrupt()
+    local casting_target = state.debuff.casting_target
+    local casting_focus = state.debuff.casting_focus
+    if UnitName("boss1") == "无堕者哈夫" then return false end
+    if not UnitExists("focus") then
+        if casting_target.down or casting_target.v2 == 1 then return false end
+        local cast_pect = casting_target.remains/casting_target.duration*100
+        if casting_target.v3 == 1 and cast_pect < Hekili.DB.profile.toggles.interrupts.channelRemainingThreshold then return true end
+
+        return casting_target.remains <= (Hekili.DB.profile.toggles.interrupts.castRemainingThreshold or 1)
+    else
+        if casting_focus.down or casting_focus.v2 == 1 then return false end
+        if casting_focus.v3 == 1 then return true end
+        return casting_focus.remains <= (Hekili.DB.profile.toggles.interrupts.castRemainingThreshold or 1)
+    end
+
+end
+
+state.readyToInterrupt = readyToInterrupt
 
 -- Pet stuff.
 local function summonPet( name, duration, spec )
@@ -2019,6 +2041,7 @@ do
             if class.knownAuraAttributes[ k ] then return 1 end
             if k:match( "^time_to_pct" ) then return 1 end
             if k:match( "^incoming_damage" ) then return 1 end
+            if k:match( "^incoming_party_damage" ) then return 1 end --self
             if k:match( "^incoming_physical" ) then return 1 end
             if k:match( "^incoming_magic" ) then return 1 end
             if k:match( "^incoming_heal" ) then return 1 end
@@ -2226,7 +2249,31 @@ do
             elseif k == "miss_react" then return false
             elseif k == "ranged" then return false
             elseif k == "wait_for_gcd" then return false
-
+            elseif k == "cooldown_check" then return true --self
+            elseif k == "group_enemy_health_pct" then
+                local total_group_health_max = 1
+                local total_group_health = 1
+                for unit, guid in pairs(Hekili.npGUIDs) do
+                    if UnitExists( unit ) and not UnitIsDead( unit ) and UnitCanAttack( "player", unit ) and UnitHealth( unit ) > 1 and not UnitIsPlayer( unit ) and UnitAffectingCombat(unit) then
+                        total_group_health_max = total_group_health_max + UnitHealthMax(unit)
+                        total_group_health = total_group_health + UnitHealth(unit)
+                    end
+                end
+                if total_group_health/total_group_health_max == 1 then
+                    return 100
+                end
+                return tonumber(total_group_health/total_group_health_max*100)
+            elseif k == "Pvepvp_check" then return  UnitName("boss1") == " 无堕者哈夫" 
+            elseif k == "pvepvp_check" then return  UnitName("boss1") == " 无堕者哈夫" 
+            elseif k == "range_spell_magic" then return Hekili:isTargetSpellingMagicRangeSpell()
+            elseif k == "target_me_spell_magic" then return Hekili:isTargetSpellingMagicTargetMeSpell()
+            elseif k == "dot_spell_magic" then return Hekili:isPlayerHasMagicDot()
+            elseif k == "range_spell_physic" then return Hekili:isTargetSpellingPhysicRangeSpell()
+            elseif k == "target_me_spell_physic" then return Hekili:isTargetSpellingPhysicTargetMeSpell()
+            elseif k == "dot_spell_physic" then return Hekili:isPlayerHasPhysicDot() 
+            elseif k == "hp_gap" then return Hekili.DB.profile.toggles.autoDefendence.hpRange
+            elseif k == "target_is_enemie" then return UnitCanAttack( "player", "target" )
+            elseif k == "damageSpell_mana" then return 1
             -- Specialization State Expressions
             elseif k == "effective_combo_points" then return 0
             elseif k == "prowling" then return t.buff.prowl.up or ( t.buff.cat_form.up and t.buff.shadowform.up )
@@ -2265,6 +2312,27 @@ do
                     t[k] = ns.damageInLast( time / 1000 )
                 else
                     t[k] = ns.damageInLast( min( 15, time ) )
+                end
+
+                return t[ k ]
+
+            elseif type(k) == "string" and k:sub(1, 21) == "incoming_party_damage" then
+             
+                local remains = k:sub(23)
+              
+                local time = remains:match("^(%d+)[m]?s")
+           
+                if not time then
+                    return 0
+                    -- Error("ERR: " .. remains )
+                end
+
+                time = tonumber( time )
+
+                if time > 100 then
+                    t[k] = ns.damagesInLast( time / 1000 )
+                else
+                    t[k] = ns.damagesInLast( min( 15, time ) )
                 end
 
                 return t[ k ]
@@ -2325,7 +2393,89 @@ do
                 end
 
                 return t[ k ]
+            elseif k == "health_party" then  --self
+                local totalHealth = 0
+                if IsInRaid() then
+                    for i = 1, GetNumGroupMembers() do
+                        local unit = "raid" .. i
+                        if UnitExists(unit) and not UnitIsDeadOrGhost(unit) and UnitIsFriend("player",unit) then
+                            totalHealth = totalHealth + UnitHealth(unit) + UnitGetTotalAbsorbs(unit)
+                            
+                        end
+                    end
+                    totalHealth = totalHealth + UnitHealth("player") + UnitGetTotalAbsorbs("player")
+                elseif IsInGroup() then
+                    for i = 1, GetNumGroupMembers() - 1 do
+                        local unit = "party" .. i
+                        if UnitExists(unit) and not UnitIsDeadOrGhost(unit) and UnitIsFriend("player",unit) then
+                            totalHealth = totalHealth + UnitHealth(unit) + UnitGetTotalAbsorbs(unit)
+                        end
+                    end
+                    totalHealth = totalHealth + UnitHealth("player") + UnitGetTotalAbsorbs("player")
+                else
+                    totalHealth = UnitHealth("player") + UnitGetTotalAbsorbs("player")
+                end
 
+                return totalHealth
+            elseif k == "health_party_max" then  
+                local totalMaxHealth = 0
+            
+                if IsInRaid() then
+                    for i = 1, GetNumGroupMembers() do
+                        local unit = "raid" .. i
+                        if UnitExists(unit) and not UnitIsDeadOrGhost(unit) and UnitIsFriend("player",unit) then
+                            totalMaxHealth = totalMaxHealth + UnitHealthMax(unit)
+                        end
+                    end
+                    totalMaxHealth = totalMaxHealth + UnitHealthMax("player")
+                elseif IsInGroup() then
+                    for i = 1, GetNumGroupMembers() - 1 do
+                        local unit = "party" .. i
+                        if UnitExists(unit) and not UnitIsDeadOrGhost(unit) and UnitIsFriend("player",unit) then
+                            totalMaxHealth = totalMaxHealth + UnitHealthMax(unit)
+                        end
+                    end
+                    totalMaxHealth = totalMaxHealth + UnitHealthMax("player")
+                else
+                    totalMaxHealth = UnitHealthMax("player")
+                end
+                return totalMaxHealth
+    
+
+            elseif k == "health_party_pct" then
+                local totalHealth = 0
+                local totalMaxHealth = 0
+        
+                if IsInRaid() then
+                    for i = 1, GetNumGroupMembers() do
+                        local unit = "raid" .. i
+                        if UnitExists(unit) and not UnitIsDeadOrGhost(unit) and UnitIsFriend("player",unit) then
+                            totalHealth = totalHealth + UnitHealth(unit) -- + UnitGetTotalAbsorbs(unit)
+                            totalMaxHealth = totalMaxHealth + UnitHealthMax(unit)
+                        end
+                    end
+                    totalHealth = totalHealth + UnitHealth("player") -- + UnitGetTotalAbsorbs("player")
+                    totalMaxHealth = totalMaxHealth + UnitHealthMax("player")
+                elseif IsInGroup() then
+                    for i = 1, GetNumGroupMembers() - 1 do
+                        local unit = "party" .. i
+                        if UnitExists(unit) and not UnitIsDeadOrGhost(unit) and UnitIsFriend("player",unit) then
+                            totalHealth = totalHealth + UnitHealth(unit) -- + UnitGetTotalAbsorbs(unit)
+                            totalMaxHealth = totalMaxHealth + UnitHealthMax(unit)
+                        end
+                    end
+                    totalHealth = totalHealth + UnitHealth("player") -- + UnitGetTotalAbsorbs("player")
+                    totalMaxHealth = totalMaxHealth + UnitHealthMax("player")
+                else
+                    totalHealth = UnitHealth("player") -- + UnitGetTotalAbsorbs("player")
+                    totalMaxHealth = UnitHealthMax("player")
+    
+                end
+            
+                if totalMaxHealth > 0 and totalHealth > 0 then
+                    return (totalHealth / totalMaxHealth) * 100
+ 
+                end
             end
 
             -- If we successfully calculated during the above, return it.
@@ -3088,8 +3238,7 @@ do
             elseif k == "token" then
                 for _, token in ipairs( { "focus", "mouseover", "target", "targettarget" } ) do
                     if UnitExists( token ) and
-                        not UnitIsDeadOrGhost( token ) and
-                        UnitCanAttack( "player", token ) then
+                        not UnitIsDeadOrGhost( token )  then --self
                         t[k] = token
                         break
                     end
@@ -4449,6 +4598,135 @@ do
     } )
 end
 
+local mt_default_find
+local mt_find
+
+do
+    local autoReset = {
+        unit = nil,
+        duration = 1,
+        expires = 1,
+        next_charge = 1,
+        recharge_began = 1,
+        true_expires = 1,
+        true_remains = 1,
+    }
+
+
+
+    -- Table of default handlers for specific ability cooldowns.
+    mt_default_find = {
+        __index = function( t, k )
+
+            --Hekili:Print(tostring(t.key))
+            if t.key == "lowest_hp" then
+                local unit = Hekili:findLowestHpUnit()
+
+                if unit == "none" or unit == nil then return "none" end
+                if k == "unit" then  return unit
+                elseif k == "pct" then return Hekili:getHealthPct(unit)
+                elseif k == "unit_name" then return UnitName(unit)
+                    
+                elseif k == "role" then return UnitGroupRolesAssigned(unit) end
+            end
+
+            if t.key == "none_target_lowest_hp" then
+                local unit = Hekili:findLowestHpUnit()
+
+                if unit == "none" or unit == nil then return "none" end
+                if k == "unit" then  return unit
+                elseif k == "pct" then return Hekili:getHealthPct(unit)
+                elseif k == "unit_name" then return UnitName(unit)
+                    
+                elseif k == "role" then return UnitGroupRolesAssigned(unit) end
+            end
+
+            if t.key == "health" then
+                if k == "pct" then return Hekili:getHealthPct("player")
+                elseif k == "role" then return UnitGroupRolesAssigned("player") end
+            end
+
+            if t.key == "group_hurt_num" then
+                if k == "count" then local damages, count = ns.damagesInLast( min( 15, 1 ) ) return count end
+            end
+
+            if t.key == "hurt_num_big"  then
+                if k == "count" then return Hekili:findInjuredGroupNumber(Hekili.DB.profile.toggles.autoHealing.hurt_num_big_gap) end
+                
+            end
+
+            if t.key == "hurt_num"  then
+                if k == "count" then return Hekili:findInjuredGroupNumber(Hekili.DB.profile.toggles.autoHealing.hurt_num_gap) end
+                
+            end
+            if t.key == "tank"  then
+                if k == "unit" then return Hekili:findTankUnit() 
+                elseif k == "exist" then return Hekili:findTankUnit() ~= "none" 
+                elseif k == "token" then return "tank" end
+                
+            end
+
+            if t.key == "player"  then
+                if k == "token" then return "player" end
+                
+            end
+
+            if t.key == "slowed" then
+                if k == "exist" then return GetUnitSpeed("player") < 6 and GetUnitSpeed("player") > 0  end
+                
+            end
+
+            if t.key == "easy_boss" then
+                if k == "exist" then return Hekili.isEasyTankingBoss() end
+                
+            end
+            if t.key == "player_casting" then
+                if k == "id" then return Hekili:getCurrentSpelling("player")  end
+                if k == "remains" then  local id, remains = Hekili:getCurrentSpelling("player") return remains end
+            end
+
+            if t.key == "one_button" then
+                if k == "next_id" then         
+                    local next_id_ = C_AssistedCombat.GetNextCastSpell()
+                    local next_id = FindBaseSpellByID(next_id_)
+                    return next_id
+                end
+            end
+            return
+
+        end,
+        __newindex = function( t, k, v )
+            if v == nil then return end
+            if autoReset[ k ] then Mark( t, k ) end
+            rawset( t, k, v )
+        end
+    }
+    ns.metatables.mt_default_find = mt_default_find
+
+
+    -- Table for gathering cooldown information. Some abilities with odd behavior are getting embedded here.
+    -- Probably need a better system that I can keep in the class modules.
+    -- Needs review.
+    mt_find = {
+        -- The action doesn't exist in our table so check the real game state, -- and copy it so we don't have to use the API next time.
+        __index = function( t, k )
+
+            -- if k ~= "lowest_hp" then
+            --     t[ k ] = t[ "lowest_hp" ]
+            --     return t[ k ]
+            -- end
+
+            t[ k ] = { key = k }
+            return t[ k ]
+        end,
+        __newindex = function(t, k, v)
+            rawset( t, k, setmetatable( v, mt_default_find ) )
+        end
+    }
+    ns.metatables.mt_find = mt_find
+end
+
+
 
 -- Table for counting active dots.
 local mt_active_dot = {
@@ -4487,6 +4765,44 @@ local mt_active_dot = {
     end
 }
 ns.metatables.mt_active_dot = mt_active_dot
+
+-- Table for counting active dots.
+local mt_active_hot = {
+    __index = function(t, k)
+        local aura = class.auras[ k ]
+
+        if aura then
+        
+            if rawget( t, aura.key ) then return t[ aura.key ] end
+            local id = aura.id
+            local count = Hekili:findActiveHotNumber( id )
+            if aura.copy then
+                if type( aura.copy ) == "table" then
+                    for _, v in ipairs( aura.copy ) do
+                        if type(v) == "number" and v > 0 and v ~= id then
+
+                            count = count + Hekili:findActiveHotNumber( v )
+                        end
+                    end
+                elseif type( aura.copy ) == "number" and aura.copy > 0 and aura.copy ~= id then
+                    count = count + Hekili:findActiveHotNumber( aura.copy )
+                end
+            end
+
+            t[ k ] = count
+            return t[ k ]
+        else
+            return 0
+
+        end
+    end,
+    __newindex = function( t, k, v )
+        if v == nil then return end
+        Mark( t, k )
+        rawset( t, k, v )
+    end
+}
+ns.metatables.mt_active_hot = mt_active_hot
 
 
 -- Table of default handlers for a totem. Under-implemented at the moment.
@@ -5259,7 +5575,7 @@ do
 
             else
                 if Hekili.PLAYER_ENTERING_WORLD and not debuffs_warned[ k ] then
-                    Hekili:Error( "WARNING: Unknown debuff in [" .. ( state.scriptID or "unknown" ) .. "]: " .. k .. "\n\n" .. debugstack() )
+                    Hekili:Error( "Unknown debuff in [" .. ( state.scriptID or "unknown" ) .. "]: " .. k .. "\n\n" .. debugstack() )
                     debuffs_warned[ k ] = true
                 end
 
@@ -5625,6 +5941,8 @@ local mt_empowering = {
 setmetatable( state, mt_state )
 setmetatable( state.action, mt_actions )
 setmetatable( state.active_dot, mt_active_dot )
+setmetatable( state.active_hot, mt_active_hot )
+setmetatable( state.find, mt_find )
 setmetatable( state.aura, mt_aura )
 setmetatable( state.buff, mt_buffs )
 setmetatable( state.cooldown, mt_cooldowns )
@@ -6626,7 +6944,7 @@ do
         local started = debugprofilestop()
 
         dispName = dispName or "Primary"
-        local displayFrame = _G[ "HekiliDisplay" .. dispName ]
+        local displayFrame = _G[ "HekiliDisplay_" .. dispName ]
 
         full = dispName == "Primary" or state.offset > 0
 
@@ -7691,12 +8009,12 @@ function state:TimeToReady( action, pool )
 
     -- Working variable.
     local z = ability.id
-
+    local g = ability.gcd --self
     -- Don't use before the GCD expires, unless:
     -- 1. The "use_off_gcd" flag is set in the priority.
     -- 2. The ability is flagged as an interrupt or defensive.
     local requires = ability.toggle
-    if requires ~= "interrupts" and requires ~= "defensives" and not self.safebool( self.args.use_off_gcd ) then
+    if requires ~= "interrupts" and requires ~= "defensives" and not self.safebool( self.args.use_off_gcd ) and g ~= "off" then
         wait = max( wait, self.cooldown.global_cooldown.remains )
     end
 
@@ -7926,4 +8244,4 @@ for k, v in pairs( state ) do
     ns.commitKey( k )
 end
 
-ns.attr = { "serenity", "active", "active_enemies", "my_enemies", "active_flame_shock", "adds", "agility", "air", "armor", "attack_power", "bonus_armor", "cast_delay", "cast_time", "casting", "cooldown_react", "cooldown_remains", "cooldown_up", "crit_rating", "deficit", "distance", "down", "duration", "earth", "enabled", "energy", "execute_time", "fire", "five", "focus", "four", "gcd", "hardcasts", "haste", "haste_rating", "health", "health_max", "health_pct", "intellect", "level", "mana", "mastery_rating", "mastery_value", "max_nonproc", "max_stack", "maximum_energy", "maximum_focus", "maximum_health", "maximum_mana", "maximum_rage", "maximum_runic", "melee_haste", "miss_react", "moving", "mp5", "multistrike_pct", "multistrike_rating", "one", "pct", "rage", "react", "regen", "remains", "resilience_rating", "runic", "seal", "spell_haste", "spell_power", "spirit", "stack", "stack_pct", "stacks", "stamina", "strength", "this_action", "three", "tick_damage", "tick_dmg", "tick_time", "ticking", "ticks", "ticks_remain", "time", "time_to_die", "time_to_max", "travel_time", "two", "up", "water", "weapon_dps", "weapon_offhand_dps", "weapon_offhand_speed", "weapon_speed", "single", "aoe", "cleave", "percent", "last_judgment_target", "unit", "ready", "refreshable", "pvptalent", "conduit", "legendary", "runeforge", "covenant", "soulbind", "enabled", "full_recharge_time", "time_to_max_charges", "remains_guess", "execute", "actual", "current", "cast_regen", "boss", "exists", "disabled", "fight_remains", "last_used", "time_since", "max" }
+ns.attr = { "serenity", "active", "active_enemies", "my_enemies", "active_flame_shock", "adds", "agility", "air", "armor", "attack_power", "bonus_armor", "cast_delay", "cast_time", "casting", "cooldown_react", "cooldown_remains", "cooldown_up", "crit_rating", "deficit", "distance", "down", "duration", "earth", "enabled", "energy", "execute_time", "fire", "five", "focus", "four", "gcd", "hardcasts", "haste", "haste_rating", "health", "health_max", "health_pct", "intellect", "level", "mana", "mastery_rating", "mastery_value", "max_nonproc", "max_stack", "maximum_energy", "maximum_focus", "maximum_health", "maximum_mana", "maximum_rage", "maximum_runic", "melee_haste", "miss_react", "moving", "mp5", "multistrike_pct", "multistrike_rating", "one", "pct", "rage", "react", "regen", "remains", "resilience_rating", "runic", "seal", "spell_haste", "spell_power", "spirit", "stack", "stack_pct", "stacks", "stamina", "strength", "this_action", "three", "tick_damage", "tick_dmg", "tick_time", "ticking", "ticks", "ticks_remain", "time", "time_to_die", "time_to_max", "travel_time", "two", "up", "water", "weapon_dps", "weapon_offhand_dps", "weapon_offhand_speed", "weapon_speed", "single", "aoe", "cleave", "percent", "last_judgment_target", "unit", "ready", "refreshable", "pvptalent", "conduit", "legendary", "runeforge", "covenant", "soulbind", "enabled", "full_recharge_time", "time_to_max_charges", "remains_guess", "execute", "actual", "current", "cast_regen", "boss", "exists", "disabled", "fight_remains", "last_used", "time_since", "max" ,"health_party", "health_party_pct", "health_party_max"}

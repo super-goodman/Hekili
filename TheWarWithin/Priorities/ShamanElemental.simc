@@ -1,4 +1,4 @@
-## https://github.com/simulationcraft/simc/blob/thewarwithin/ActionPriorityLists/default/shaman_elemental.simc
+## https://github.com/simulationcraft/simc/blob/thewarwithin/ActionPriorityLists/shaman_elemental.simc
 ## Up to date with SimC: April 21 2025 - 53f00ae
 
 # Ensure weapon enchant is applied if you've selected Improved Flametongue Weapon.
@@ -14,6 +14,7 @@ actions.precombat+=/variable,name=special_trinket2,value=(trinket.2.is.house_of_
 
 # Interrupt of casts.
 actions+=/wind_shear
+actions+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check&!raid
 # Enable more movement.
 actions+=/spiritwalkers_grace,moving=1
 actions+=/blood_fury,if=!talent.ascendance.enabled|buff.ascendance.up|cooldown.ascendance.remains>50
@@ -42,7 +43,7 @@ actions+=/natures_swiftness
 ## actions+=/invoke_external_buff,name=power_infusion,if=buff.ascendance.up|cooldown.ascendance.remains>30
 actions+=/potion,if=buff.bloodlust.up|buff.spymasters_web.up|buff.ascendance.remains>12|fight_remains<31&boss
 # [Hekili] Ascendance/trinket sync logic; revised to recover when a trinket is used *before* Ascendance.
-actions+=/variable,name=ascendance_trinket,value=buff.spymasters_web.up|(trinket.1.has_use_buff&!trinket.1.is.spymasters_web|trinket.1.is.funhouse_lens)&(trinket.1.ready_cooldown|trinket.1.cooldown.remains>20)|(trinket.2.has_use_buff&!trinket.2.is.spymasters_web|trinket.2.is.funhouse_lens)&(trinket.2.ready_cooldown|trinket.2.cooldown.remains>20)|equipped.neural_synapse_enhancer&(cooldown.neural_synapse_enhancer.remains=0|cooldown.neural_synapse_enhancer.remains>20)|equipped.best_in_slots&(cooldown.best_in_slots.remains=0|cooldown.best_in_slots.remains>20)|!trinket.1.has_use_buff&!trinket.2.has_use_buff
+actions+=/variable,name=ascendance_trinket,value=1
 actions+=/run_action_list,name=aoe,strict=1,if=spell_targets.chain_lightning>1
 actions+=/run_action_list,name=single_target
 
@@ -129,3 +130,11 @@ actions.single_target+=/lightning_bolt
 actions.single_target+=/flame_shock,moving=1,if=movement.distance>6|refreshable
 # Frost Shock is our movement filler.
 actions.single_target+=/frost_shock,moving=1
+
+
+actions.mitigation=/cleanse_spirit
+actions.mitigation+=/purge,line_cd=settings.purge_icd,if=buff.dispellable_magic.up
+actions.mitigation+=/greater_purge,if=buff.dispellable_magic.up
+actions.mitigation+=/earth_elemental,if=health.pct<hp_gap&buff.astral_shift.down&buff.stone_bulwark.down&buff.earth_elemental.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)
+actions.mitigation+=/stone_bulwark_totem,if=health.pct<hp_gap&buff.astral_shift.down&buff.stone_bulwark.down&buff.earth_elemental.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)
+actions.mitigation+=/astral_shift,if=health.pct<hp_gap&buff.astral_shift.down&buff.stone_bulwark.down&buff.earth_elemental.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)

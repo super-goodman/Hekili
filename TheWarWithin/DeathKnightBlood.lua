@@ -2,6 +2,7 @@
 -- August 2025
 -- Patch 11.2
 
+if not Hekili.check then return end
 if UnitClassBase( "player" ) ~= "DEATHKNIGHT" then return end
 
 local addon, ns = ...
@@ -1505,6 +1506,18 @@ end } ) )
 
 -- Abilities
 spec:RegisterAbilities( {
+
+    tank_combat_wait= {
+        name = "坦克战斗介入",
+        listName = '|T134376:0|t |cff00ccff[坦克战斗介入]|r',
+        indicator = "wait",
+        texture = 134376,
+        cast = 0,
+        cooldown = 0,
+        gcd = "spell",
+        essential = true
+    },
+
     -- Sprout an additional limb, dealing ${$383313s1*13} Shadow damage over $d to all nearby enemies. Deals reduced damage beyond $s5 targets. Every $t1 sec, an enemy is pulled to your location if they are further than $383312s3 yds from you. The same enemy can only be pulled once every $383312d.
     abomination_limb = {
         id = 315443,
@@ -1514,7 +1527,7 @@ spec:RegisterAbilities( {
 
         startsCombat = false,
 
-        toggle = "cooldowns",
+        toggle = "essences",
 
         handler = function ()
             applyBuff( "abomination_limb" )
@@ -1602,7 +1615,7 @@ spec:RegisterAbilities( {
         hasteCD = true,
         school = function() return talent.bind_in_darkness.enabled and "shadowfrost" or "physical" end,
         gcd = "spell",
-
+        usable = function () return target.distance <= 10, "target must be nearby" end,
         talent = "blood_boil",
         startsCombat = true,
 
@@ -1854,14 +1867,12 @@ spec:RegisterAbilities( {
         cooldown = 15,
         recharge = function () if talent.deaths_echo.enabled then return 15 end end,
         gcd = "spell",
-
+        toggle_terrain = "player",
         spend = function () return buff.crimson_scourge.up and 0 or 1 end,
         spendType = "runes",
-
+        usable = function () return target.distance <= 5 and not moving, "target must be nearby" end,
         startsCombat = true,
-
-        usable = function () return ( settings.dnd_while_moving or not moving ), "cannot cast while moving" end,
-
+        terrain = true,
         handler = function ()
             if buff.crimson_scourge.up then
                 if talent.perseverance_of_the_ebon_blade.enabled then applyBuff( "perseverance_of_the_ebon_blade" ) end
@@ -2254,9 +2265,15 @@ spec:RegisterAbilities( {
         startsCombat = true,
 
         toggle = "interrupts",
+        target = function () 
+            if not UnitExists("focus") then
+                return debuff.casting_target.caster
+            else
+                return debuff.casting_focus.caster
+            end
+        end,
 
-        debuff = "casting",
-        readyTime = state.timeToInterrupt,
+        usable = function () return state.readyToInterrupt() and target.distance <= 20, "readyToInterrupt" end,
 
         handler = function ()
             if conduit.spirit_drain.enabled then gain( conduit.spirit_drain.mod * 0.1, "runic_power" ) end
@@ -2302,24 +2319,26 @@ spec:RegisterAbilities( {
         end,
     },
 
-    --[[ Pours dark energy into a dead target, reuniting spirit and body to allow the target to reenter battle with $s2% health and at least $s1% mana.
     raise_ally = {
         id = 61999,
+        charges = 5,
+        recharge = 600,
         cast = 0,
         cooldown = 600,
         gcd = "spell",
 
         spend = 30,
         spendType = "runic_power",
-
-        startsCombat = false,
-
-        toggle = "cooldowns",
+        usable = function ()
+            return Hekili:isMouseOverMemberDead() and Hekili.resurrectionCount(61999) >= 1
+        end,
+        target = "mouseover",
+        startsCombat = true,
+        texture = 136143,
 
         handler = function ()
-            -- trigger voidtouched [97821]
-        end,
-    }, ]]
+        end
+    },
 
     -- Talent: Raises a $?s58640[geist][ghoul] to fight by your side.  You can have a maximum of one $?s58640[geist][ghoul] at a time.  Lasts $46585d.
     raise_dead = {
@@ -2346,7 +2365,7 @@ spec:RegisterAbilities( {
         cast = 0.0,
         cooldown = function() return 60.0 - ( 15 * talent.reapers_onslaught.rank ) end,
         gcd = "spell",
-
+        usable = function () return target.distance <= 5, "target must be nearby" end,
         spend = 2,
         spendType = 'runes',
 
@@ -2570,38 +2589,46 @@ spec:RegisterOptions( {
 
     potion = "tempered_potion",
 
-    package = "Blood",
+    package = "鲜血Simc",
 } )
 
-spec:RegisterSetting( "dnd_while_moving", true, {
-    name = strformat( "Allow %s while moving", Hekili:GetSpellLinkWithTexture( spec.abilities.death_and_decay.id ) ),
-    desc = strformat( "If checked, then allow recommending %s while the player is moving otherwise only recommend it if the player is standing still.", Hekili:GetSpellLinkWithTexture( spec.abilities.death_and_decay.id ) ),
-    type = "toggle",
-    width = "full",
-} )
 
-spec:RegisterSetting( "save_blood_shield", true, {
-    name = strformat( "Save %s", Hekili:GetSpellLinkWithTexture( spec.auras.blood_shield.id ) ),
-    desc = strformat( "If checked, the default priority (or any priority checking |cFFFFD100save_blood_shield|r) will try to avoid letting your %s fall off during "
-        .. "lulls in damage.", Hekili:GetSpellLinkWithTexture( spec.auras.blood_shield.id ) ),
-    type = "toggle",
-    width = "full"
-} )
-
-spec:RegisterSetting( "death_strike_pool_amount", 65, {
-    name = strformat( "%s %s", Hekili:GetSpellLinkWithTexture( spec.abilities.death_strike.id ), _G.POWER_TYPE_RUNIC_POWER ),
-    desc = strformat( "The default priority will (usually) avoid spending %s on %s unless you have pooled at least this much.", _G.POWER_TYPE_RUNIC_POWER, Hekili:GetSpellLinkWithTexture( spec.abilities.death_strike.id ) ),
+spec:RegisterSetting("combat_delay", 0, {
+    name = "战斗延迟介入",
+    desc = "如果该值不等于0, 则允许战斗后延迟该值-X秒后再推荐技能,推荐值为6\n\n它同样会在x/2秒后当玩家停止不动时开始推荐技能\n\n它也同样会在玩家站定不动时自动开始介入",
     type = "range",
-    min = 40,
-    max = 125,
+    min = 0,
+    max = 20,
     step = 1,
     width = "full"
 } )
 
-spec:RegisterSetting( "ibf_damage", 40, {
-    name = strformat( "%s Damage Threshold", Hekili:GetSpellLinkWithTexture( spec.abilities.icebound_fortitude.id ) ),
-    desc = strformat( "When set above zero, the default priority can recommend %s if you've lost this percentage of your maximum health in the past 5 seconds.\n\n"
-        .. "|W%s|w also requires the Defensives toggle by default.", Hekili:GetSpellLinkWithTexture( spec.abilities.icebound_fortitude.id ),
+spec:RegisterStateExpr( "combat_delay", function ()
+    return settings.combat_delay or 0
+end )
+
+local death_strike_damage = Hekili:GetSpellLinkWithTexture( spec.abilities.death_strike.id )
+
+spec:RegisterSetting("death_strike_damage", 85, {
+    name = format("%s 生命值阈值", death_strike_damage),
+    desc = format("当数值大于零时，若你的生命值低于该百分比，系统会推荐使用%s。", death_strike_damage),
+    type = "range",
+    min = 50,
+    max = 100,
+    step = 5,
+    width = "full"
+} )
+
+spec:RegisterStateExpr( "death_strike_damage", function ()
+    return settings.death_strike_damage 
+end )
+
+
+
+spec:RegisterSetting( "ibf_damage", 60, {
+    name = strformat( "%s 伤害阈值", Hekili:GetSpellLinkWithTexture( spec.abilities.icebound_fortitude.id ) ),
+    desc = strformat( "此项设置大于0时，如果你在5秒内受到超过最大生命值的该值百分比伤害，插件将会推荐使用 %s 。\n\n"
+        .. "|W%s|w 需要打开【防御】开关。", Hekili:GetSpellLinkWithTexture( spec.abilities.icebound_fortitude.id ),
         spec.abilities.icebound_fortitude.name ),
     type = "range",
     min = 0,
@@ -2610,10 +2637,10 @@ spec:RegisterSetting( "ibf_damage", 40, {
     width = "full",
 } )
 
-spec:RegisterSetting( "rt_damage", 30, {
-    name = strformat( "%s Damage Threshold", Hekili:GetSpellLinkWithTexture( spec.abilities.rune_tap.id ) ),
-    desc = strformat( "When set above zero, the default priority can recommend %s if you've lost this percentage of your maximum health in the past 5 seconds.\n\n"
-        .. "|W%s|w also requires the Defensives toggle by default.", Hekili:GetSpellLinkWithTexture( spec.abilities.rune_tap.id ), spec.abilities.rune_tap.name ),
+spec:RegisterSetting( "rt_damage", 60, {
+    name = strformat( "%s 伤害阈值", Hekili:GetSpellLinkWithTexture( spec.abilities.rune_tap.id ) ),
+    desc = strformat( "此项如果大于0时，如果你在5秒内受到超过最大生命值的该值百分比伤害，插件将会推荐使用 %s 。\n\n"
+        .. "|W%s|w 需要打开【防御】开关。", Hekili:GetSpellLinkWithTexture( spec.abilities.rune_tap.id ), spec.abilities.rune_tap.name ),
     type = "range",
     min = 0,
     max = 200,
@@ -2621,10 +2648,10 @@ spec:RegisterSetting( "rt_damage", 30, {
     width = "full",
 } )
 
-spec:RegisterSetting( "vb_damage", 50, {
-    name = strformat( "%s Damage Threshold", Hekili:GetSpellLinkWithTexture( spec.abilities.vampiric_blood.id ) ),
-    desc = strformat( "When set above zero, the default priority can recommend %s if you've lost this percentage of your maximum health in the past 5 seconds.\n\n"
-        .. "|W%s|w also requires the Defensives toggle by default.", Hekili:GetSpellLinkWithTexture( spec.abilities.vampiric_blood.id ),
+spec:RegisterSetting( "vb_damage", 35, {
+    name = strformat( "%s 伤害阈值", Hekili:GetSpellLinkWithTexture( spec.abilities.vampiric_blood.id ) ),
+    desc = strformat(  "此项设置大于0时，如果你在5秒内受到超过最大生命值的该值百分比伤害，插件将会推荐使用 %s 。\n\n"
+        .. "|W%s|w 需要打开【防御】开关。", Hekili:GetSpellLinkWithTexture( spec.abilities.vampiric_blood.id ),
         spec.abilities.vampiric_blood.name ),
     type = "range",
     min = 0,
@@ -2633,4 +2660,4 @@ spec:RegisterSetting( "vb_damage", 50, {
     width = "full",
 } )
 
-spec:RegisterPack( "Blood", 20250429, [[Hekili:DR1xVnoUr8plbfWNDsoxl7OSzlI8d3wuGDF4EO(U23SmTeDSqKLeOOIVuyOp7DiPSePejLCs2Rl6l5UvKZF4W5p)MHETZ6FB9QqefV(xNpBU7S7M)5PZND39U3VEf91m86vzOGNrpb)pjOdWF)L400q2xFnoffYOopTGeaRSk6qrmIgLM8fcAhD9QTfrX0VMSERgj44SWfindhaF2D26v7JcdXI9IZdwVIT3FE2D)88p)3k38pX5VMeuU5yeDF5gqqFz9Q4OCAot(7JEAVFgjk1hfWKE(0q8ourmfw8x5NpCcABmoC9VSEvajIIjrO1RgxUHuKGl38Ox5M5LBgj(3tPrhW(0u)fLBwwU5PGWPhq)bF5G9iYt4C)DeHGqXWwaIDM(q5MjRxj(kCUzMiFkkB9QICSF6UD(aBy6cfoSdtHC6vHgQaxWeyRpxtjbfbReIHBsjLcO6oJQ52ID7MUnnb7NVpchhoLGpGIsYb9ws7UgSPnIbeaDFUFaIGZZzS31o7dsrpveNMbu960ImUTO7cnc2ZUK9ZPKONXmbFVrbFvLieuGscbZsaIj(gUHsE1pmjKXOpzKrHP0PIBKSyqBXdXaj2)20OygVFWiVz7)fSpobFicdCS2tbCEOmVtAT7swa1FHlxOWFNW3vRTegH5(uaXmLgcKJ9jyugM0OZ3iroSpWkThts9PemEAokjg9As5MtNk3KbmoeLeeL8KpZV1)iWP0eLtVRIBRK8yN6pB8ulclafDHKNlte6D5HupHB9dcZRtautexy5(hqKNB5WpxEFAohT2(IHhFKtHmOImfUsMrkkgNag99ikJsqAmIMwXtHnTTVink4zyNQb)av50uYHlmSvsTE4dtTe5jttJdtpMy3DGj45UnNdA6HTW5ibBp)qDyQgEReQUn9qucVCKFC0HTv(fTQmCE3WwdH86y8)bRZVqstKuxMBhW7N2tZbdXlPIfAzYJssWeWlppkocNeG5kPOuQjwOX9Q(YgUQbRxCku6RIlkFQB6)7KpMSLbT7qERdzpPJ7ZwlYETRG8Q9uSdJzqakMW8NSNMDqmdwgmpeumu7jUNCRdIH7Iiy(X1EgRbXRS6RBNzg5efLiITGaROKaMt9t(HOdaKmF3QWOx2w9f(UUIhkBrdebXcVZa820cMVFkHgrlcX81LsV8c6qwejkWV(u70gtvkCMYXuzAavhwL9)fxa)hhxEHeqTCMXl9vLLHGbuC79JseCVjlZKZ7FHY2lsafHLykPGhzRHaaszCSVOqx(09yeHwv(xMt8VVfkh8muRRMjxZbcoHFa8frxKmiUCxuqe1NUhII3dP24gHbIJ7ppGLoMlj9DczPZDVjOLo9KT59IT0PNeqF)ax6yoB1fIU0XCAQ3p8shZ5T()z8LZBNK98(6Meu0ekjktSHFphohFTAxLB(hN3gKrEx5Mxtl(jcMD4fjQZH7ziHbKMbo2vPLrm6GnYmej)eSWE0lWN)7IZd0Glp88FZprLBsjLB(xv5Dl3W74UCtr20lTUq02DV1cdQP9RkkWmITt(3fpExtN409BOSVpgSB7yTUvyd1EL9gSJqjejZyt3iFew1(lfZS6MR2OjAzupqKzjScOQjRlsQMEIpBUkIPRuvce4RFi5ixpmxJPJEOvomuywfeRRnMGm3iZWeuphioDm5yTrJHjkRNPQgrzIY6OhgMOSDQ4vw2Y6yJNUdwmJGb)5TOUT7OwZ0Edp9JU7tYaMKQEd5E3XGm5l2hxNoFhBD0CVJE8(G7JVB56MWlDntFUf)b2cmuDvQd4b2jVOkP1eoJmI24CP2EpbcS2zPhHI1viGfjdxm7YoHM6XN2YL1QhHwTbk4F2xCQoC6NBjWeYbbyhowPfsDqu1Ia(fmjgX6TMpcKqL2ewOa0OnoqZzR5MD8Fa)lUJlwXD(aIqspsWciGx(eMa7X9NljXrjE2F68aAmjkZ(A9z6Qeg540Tz(DKIkSZEG9laQXMhcd3w(z)4H4NzeY3aM2R5iO2yHBANZs3cQdPKBacbh8Nf6ZN6Ke(SxJAwPhK3xqAsEXHk8ukBZmoEZDu6ASRaZZGOcXJOzagGfLUhNl35rd3LB9MZFLkqsYUv3HkjWvysRnAoarFUl42BMuTdsaIHynLarbuodV8HNcNBhhtLvRR3Xapzn72BTuJHshwhnrBV6MlvUKIlcEMfds3d9UtqhLkz8MYbBojP5RVbNr5Ub6Q4oWWU7hwy3NgIJmTbNz)39rj7IJ4muK)JLCwP0q7GPEQWu3NHGcRSY69W)dYrAok8d2b0k0FT1pTgqkRigbbBbALA6j1c03pqhyZZFQUPvhZEcxsvN(C)RkN0FWjpsbGALZ2N4xia8N1RoIijGjhQT)1dzqhXmGxpiC4yJiH)6)tl)giIc6(uc)NFWxy98KUlI1BIyJ5tRBc6gV)Qs(5YVPBlNVcVL1nJNX7XB5)17tLFRMnaXsVIK8Np)QlcEA4vFUnANxvUGopyKzMj94p3kniwphDKKl)XM3SPwYgIZLjQ(TzUaIuFdMlGW63A5cOjt1y2pbQJKHry1eHg1DAql9QFPLrxn2IaoDY8iDMOkDz3nD5VQ80CCVzSZSRT)UjtUz8IR77TsGnz(nsU2Y7JC98jDDGOOmvhpMfCmZA8O38rk4exSScJ4OUOtx65m9HlK9ogyVcBAEfcZXhkPfQDD08mepwjHRN3H8k7xn1TEKHrglh(ONwMw9wam(DLj4HDSwS0Wmkm9eb61FPEMyeRwshSYJ1o4)hDNmQ74(xo2WG(Vb2(4R6mLRtN6zS(Gyk)2FPCZpkJGx2W1n8UV0hndKFq5p6mUyjBXpAZuxjORq8wa9zoQNRopsE5I3MrzWjBjQtpvKZTQbTBftBvKGPJB6ObwmP9OGBerqyUDrmefLTVHZf9kJyG0kCPByzVkJ8K76LxniTec3t(NHv7fzju7AN1SRA05AZyZbLV0Zfs6y)x00Ptg(1mnrJmRNFPnz(W7qMJgY4Uw6n3vJY1EA4s1om44kXeP7tV2f000VYJw756MX2NB41laqiggZkSME1IHVUUPOA7V6SuVek7CZ949JUsFBFM4QAvx7NzG3kZ0WitBvoMRRDNn6GCuSR4v9C3NBYivabmyDgbZSCHrrk7uzCtsnDoqJUEOKUgPwgSBLVngO40jfSKZziLgGgmiXyCtQJG0qK2Y5ZSBtTcCv4y74ihR353lVx)yTF7q57kUpiW9AzCVW91sv)2rZaOnZWp0wc0kMlPjbl3dVH2g0YTF8BKWQRZzqRDCjfGtLdHQq05D5LCBXH(q70STUWD6EzpYaKe3bvTyPJRobRG5zS1kfguRjM1lDj88wmBy6ldfKQgdLy9ExgQoSttW842o2vnGO5PtMO7aAh7Konqnm1iqIgc0x(r)rs36ARdRtFADbWIe9AxIv0DM(x4Od1AkrR21x9lAOJ0)mW10iT3nozDmvfPQEaPgCFFS)3FqBaNmcd9NUHCnXZs6OBNM8MKV0AbNsVy4pwW6)l]] )
+spec:RegisterPack( "鲜血Simc", 20250730, [[Hekili:LRvBVTXXr4Fl5lrsjOx5lIwYa2gqvPqigrgfGfTv(d84E3TuCHUxy3BprjHacL26gBLMMuGcuGKa0QG0addNAKwuyxxz4FmvuL(t6VqND3JhV74TlpkPguJMaKiYD2zMDE5zMDh2QARFCRMoigU1DQvPwJkRwPMr1vRSs9QTAY2VhUvZEi7DqBd)HpYd(VV6V(fJo(WMepB(s77gGC4SimiIAdldle5IyKa)1POoSwnTIiUS31VLvgXSs9kTAIIyDdOI9SERMDjooyjD4qG5vRAuBWThC7rp5Pdp64HV8EdFYjdV3FE0h(OHh9Wx9L)QH3)Rg(HFYPN8v)01EdoDN9n)ZtF(XN(Ixo6W7D(jFg)Rwp4hTMT7pS563Pr07gwV)gB8tqo)SF(7vFVT24GnFNd2Y7UB8EVZbBEqLn3Ct4)T1A8)X7UY)1AZdGpb04TN8RHVztV9cRU1DTU7w7xRF)1x7GTVZAcL8tF4OF73o8Z)tFhj5nMi5)(tp7bFe3Q80V9Sp6bND4Jg(X)THFYto)KpOvtxsilu4Eq(UO99H)8ocpo2hz5IDA9dA10MsyykbXDvD6y4G8Tj(BBsJ8XM9XOEb(gr9g0(nh0wSUva89HDjyxhJqgeBmO9ng0UATbTF)3xpjCpUnpYOvtpeLg0NI9DAXGic9AeXVJlrSrZGoMHb8TcQ0eU1fJOmZqgLSdMZV6653UiVEekXoEhAz1Ykz1BeFy1yV4mDxSj2h7rWHGr4MdAxBIL0oaTDKBqpeR7(guShI4deDRbTRprFSCdcCCOe)DWuU(0qN(4eWe2(qwa1ZGrS3buSz552fbBhyx6LnP4ouCyxZDrUrybhGJhyX6f0htnCWDi2eMqxRP0REnLQk3uj2Cv1g(v47E8I2b(HrE9KFyclbYwnnzcJLPvaXnhvxpnvzKug6yI8etBNq95jloODhY2DzMPDAlxrMbqreNbTxAIz3bdoytKVJPd2gTFMWTccEkrcX0CuRt(w3KN8jizA1UUCHfNoALVyCsDqi85LszOhhKvISTlUYwCi3nt05ROddlWZcom(yzeaijuKlljcij4MahbiRaFqUOgnEl7GaxNG(qivxS9oPINrUUMYpyYHOLa1MYcSEegzBrfu9wxgXdlYGTHdaIbMxaHxC(9c2fcQsDcr(7ygtvFeHPhytnFvSY3FmQwzKRAaSySEFmf8PHexc23wcolTlGFcZla4YD7HGW3nqkMuoYcjymwuuiF5oMBB7W9TXS1cIKH4h3aOq5Ka80FzgN9k6aGzcGAMbRQbj0WUlf0iRiGva1aUKNLzyepigSvtrn8HTfqbeweY10lYPy6uCknxE56nQ3yQ9uBU0KALutQnBnzIXKB3bJKxycG9829rEi(or09tW1VemdtdXuErsoZG(tUuCdwgIAOGfJNEl44fQvRjCSdHIfhybZMvrHzWSEjjdvvJP0ftdmzaiNX4ggBYluAZejmLc(ACfu(w0290vGSCSsevECLa4OhIzty04(C4)f0udC)ciz5Tffl41BEli6g5I9zqNyGe6As8nf2EJyMkQPlPVEgYfvPqmg2psGAxWgc7HHtbdr3gZcns3asAoj(Elkgb96nHjVLaDDjXbi(yt7zgxp0K1L3NguLryekeMlBQdd1lxRmYUXM0Bk)ZgCOEtwGzDrPtGvgEO9elB3LFmcHsHsgJCJlABSQqnZGwwDLlNgvDMA0usunat2QXJ7uaS6USUg9SzIsBY2vKohthKhCZxzFdlMPHez7R1I75lhpUEJ89VijVsLXngUOMlpWvXXaUk7Gk5UwQ5Wsz6Yj95syNMb2z6wZsAX6gPm8qC5YP6kaoFns1ZRcTkN(ecqLq8RidUwE43I6QFIskURJyLEUW1OWkvYAjUV4EcZVtXoY3ViFljT7uRsI)q08yb(2LRKTN)lMFLdUbBastAwtytuxaPubha5EHaWzODqeK0MRC1(MoX3)wDPL82LKCYf5WwC8SKeti63K3aYnercsJrosCiYiLfL3vnmiYf61d1dW7sCFVDQTVOWynvHc5jShW4ISZPdeAKjhiL8eh75OoOExl3UwqTlGeTLjDO9f6H6YKLRg5mKJyFC5O9XdU8IsekAX7EuyFHf7rXY2)l6(0ZUc9kPl6P85jsUcMQYmWnYHvaTZzQR7N6UwAVX)0P75zp0MY(6VmiXhSf8ihzvfZ6HYcNXfpgJxTOid77nODfJkvfFtHLKKjixUsAxj1ZuxIrD6LktXUwj6NeNuxDYmiDeBSvqe)g6bugCVfhSy9Lsa)taZJFCH4QwGqLFopq3TgxEBSjwpwt5k)j1Mcev1SLpe7d6lAsndvhYSe4sS7Afq9X5k2M8INj3MqnKJkFdXQZf15Kv8V25yEZIEQPQnkJhl3jVCERPDZ6F4evEm4sgxqhMISPs4q)FeVzPZyUqoOXo7KxwAUClx5GC))MBjtU2eVsI3Qv874MQBKz9C(AT)JL7LyYxPAOTyOKeoG3d0kiSbXWPqM0W8RNPg8CnyT0Yk(GQvbJhTHkPPUEFMohUH82sjrlAgps5NgNgd01gNNPE8yFh7wudLR6onY8ZKdcTVHvpZ4tqH3uwlYKmlsCpi5evJCdhhauMeEL3Os7JJpRCS8yqxbtlnZ0bvper1pfI6h7QHkZUMNrMkExRBjVdDCd4tEyRAPF6c15avZmvkLJ8u(CXfYKCewQ0wLZ8frTrC44akeDlMWJMx9vhgzv1VneBY1LFD83VW8ob0SIQKZAT0WclxY4IgLl35ALjAKL8u9A9Ffmq3uvEsfFmVtnV4jfpnJLizHMG7Dh9M7lKJDYOTlSGt9c(femFJYotSYmsdV4kFXWc3m943)VXHl9C61)7Gzw4afj0uiAwbIc9eXBC5zjIFHi4DHidobP(bS1hr9bzafeh9nF9WF3rNFYNj)rQTq8VIGfgE))WOJF4R(Idh91FWPp7WtF(Nl)9RD6l)lN97)h)Rd)fdU9)(XpELrh)BG9o6fp(Sp(lxy8uw1oe5fo9zpFHYnV5fo)K7x9ShF85N8GsiWPN(BbIQaIMlHOF0XfiWzSHYkCTtdpRy1t6CjWzzsvr0CjK5XKwMnKt4dU9z3)thE0FugFF6Z)1RE6ZE0zhD4OF5lKX4cQGc19W28NAUc)1Fd6q4pNRi)P1)5d]] )

@@ -2,6 +2,7 @@
 -- August 2025
 -- Patch 11.2
 
+if not Hekili.check then return end
 if UnitClassBase( "player" ) ~= "WARRIOR" then return end
 
 local addon, ns = ...
@@ -778,8 +779,21 @@ spec:RegisterStateExpr( "victory_rush_health_pct", function ()
 	return ( settings.victory_rush_health or 0 )
 end )
 
+
 -- Abilities
 spec:RegisterAbilities( {
+
+    tank_combat_wait= {
+        name = "坦克战斗介入",
+        listName = '|T134376:0|t |cff00ccff[坦克战斗介入]|r',
+        indicator = "wait",
+        texture = 134376,
+        cast = 0,
+        cooldown = 0,
+        gcd = "spell",
+        essential = true
+    },
+
     avatar = {
         id = 107574,
         cast = 0,
@@ -790,9 +804,9 @@ spec:RegisterAbilities( {
         spendType = "rage",
 
         talent = "avatar",
-        startsCombat = false,
+        startsCombat = true,
         texture = 613534,
-
+        usable = function () return target.distance <= 10, "target must be nearby" end,
         toggle = "cooldowns",
 
         handler = function ()
@@ -890,7 +904,7 @@ spec:RegisterAbilities( {
         gcd = "off",
 
         talent = "bitter_immunity",
-        startsCombat = false,
+        startsCombat = true,
         texture = 136088,
 
         toggle = "cooldowns",
@@ -926,6 +940,7 @@ spec:RegisterAbilities( {
         cooldown = 120,
         gcd = "off",
 
+        talent = "challenging_shout",
         notalent = "disrupting_shout",
         startsCombat = true,
         texture = 132091,
@@ -943,10 +958,10 @@ spec:RegisterAbilities( {
         cast = 0,
         cooldown = 90,
         gcd = "spell",
-
+        toggle_terrain = "player",
         spend = function () return ( -10 * ( talent.piercing_challenge.enabled and 2 or 1 ) ) * ( 1 + conduit.piercing_verdict.mod * 0.01 ) end,
         spendType = "rage",
-
+        usable = function () return target.distance <= 10, "target must be nearby" end,
         startsCombat = true,
         toggle = "cooldowns",
         velocity = 30,
@@ -955,7 +970,7 @@ spec:RegisterAbilities( {
             applyDebuff( "target", "champions_spear" )
             if talent.champions_might.enabled or legendary.elysian_might.enabled then applyBuff( "champions_might" ) end
         end,
-
+        terrain = true,
         copy = { "spear_of_bastion", 307865, 376079 }
     },
 
@@ -1011,7 +1026,8 @@ spec:RegisterAbilities( {
         breakable = false,
         cooldown = 45,
         gcd = "spell",
-
+        usable = function () return target.distance <= 7, "target must be nearby" end,
+        toggle = "cooldowns",
         startsCombat = true,
 
         handler = function()
@@ -1026,10 +1042,10 @@ spec:RegisterAbilities( {
         cast = 0,
         cooldown = 45,
         gcd = "spell",
-
+        usable = function () return target.distance <= 10, "target must be nearby" end,
         spend = function () return ( talent.booming_voice.enabled and -20 or 0 ) * ( buff.unnerving_focus.up and 1.5 or 1 ) end,
         spendType = "rage",
-
+        toggle = "defensives",
         talent = "demoralizing_shout",
         startsCombat = false,
         texture = 132366,
@@ -1082,7 +1098,7 @@ spec:RegisterAbilities( {
         gcd = "off",
 
         talent = "disrupting_shout",
-        startsCombat = false,
+        startsCombat = true,
         texture = 132091,
 
         toggle = "cooldowns",
@@ -1235,7 +1251,7 @@ spec:RegisterAbilities( {
         cast = 0,
         cooldown = 25,
         gcd = "spell",
-
+        toggle = "defensives",
         spend = function() return buff.victorious.up and 0 or 10 end,
         spendType = "rage",
 
@@ -1380,12 +1396,17 @@ spec:RegisterAbilities( {
 
         startsCombat = true,
         texture = 132938,
-
+        target = function () 
+            if not UnitExists("focus") then
+                return debuff.casting_target.caster
+            else
+                return debuff.casting_focus.caster
+            end
+        end,
         toggle = "interrupts",
         interrupt = true,
 
-        debuff = "casting",
-        readyTime = state.timeToInterrupt,
+        usable = function () return state.readyToInterrupt() and target.distance <= 5, "readyToInterrupt" end,
 
         handler = function ()
             interrupt()
@@ -1420,7 +1441,9 @@ spec:RegisterAbilities( {
         cooldown = 90,
         recharge = 90,
         gcd = "spell",
-
+        terrain = true,
+        toggle_terrain = "player",
+        usable = function () return target.distance <= 7, "target must be nearby" end,
         talent = "ravager",
         startsCombat = true,
         toggle = "cooldowns",
@@ -1554,9 +1577,10 @@ spec:RegisterAbilities( {
         cast = 0,
         cooldown = 45,
         gcd = "spell",
-
+        usable = function () return target.distance <= 5, "target must be nearby" end,
         spend = -20,
         spendType = "rage",
+        toggle = "cooldowns",
 
         talent = "shield_charge",
         equipped = "shield",
@@ -1705,28 +1729,13 @@ spec:RegisterAbilities( {
         gcd = "off",
 
         talent = "spell_reflection",
-
+        startsCombat = false,
         toggle = "defensives",
         debuff = "casting",
+        --readyTime = state.timeToInterrupt,
 
         usable = function()
-            if not settings.spell_reflection_filter then return true end
-
-            local zone = state.instance_id
-            local npcid = target.npcid or -1
-            local t = debuff.casting
-
-            -- Only use on a reflectable spell targeted at the player.
-            if not t.up then
-                return false, "Target is not casting"
-            end
-            if not state.target.is_dummy and not class.reflectableFilters[ t.v1 ] then
-                return false, "spell[" .. t.v1 .. "] in zone[" .. zone .. "] by npc[" .. npcid .. "] is not reflectable"
-            end
-            if not UnitIsUnit( "player", t.caster .. "target" ) then
-                return false, "Player is not target of cast"
-            end
-            return true
+            return Hekili:isTargetSpellingPhysicTargetMeReflectableSpell()
         end,
 
         handler = function()
@@ -1776,7 +1785,7 @@ spec:RegisterAbilities( {
             * ( buff.violent_outburst.up and 1.5 or 1 )
             * ( buff.unnerving_focus.up and 1.5 or 1 ) end,
         spendType = "rage",
-
+        usable = function () return target.distance <= 10, "target must be nearby" end,
         talent = "thunder_clap",
         nobuff = "thunder_blast",
         startsCombat = true,
@@ -1856,7 +1865,7 @@ spec:RegisterAbilities( {
         cast = 0,
         cooldown = function() return talent.uproar.enabled and 90 or 45 end,
         gcd = "spell",
-
+        usable = function () return target.distance <= 6, "target must be nearby" end,
         spend = 0,
         spendType = "rage",
 
@@ -1919,46 +1928,63 @@ spec:RegisterAbilities( {
 
 local NewFeature = "|TInterface\\OptionsFrame\\UI-OptionsFrame-NewFeatureIcon:0|t"
 
-spec:RegisterSetting( "spell_reflection_filter", true, {
-    name = format( "%s Filter M+ |T132361:0|t Spell Reflection", NewFeature ),
-    desc = "If checked, then the addon will only suggest |T132361:0|t Spell Reflection on reflectable spells that target the player.",
+spec:RegisterSetting( "spell_reflection_filter", false, {
+    name = format( "%s|T132361:0|t 法术反射过滤器(地心S2)", NewFeature ),
+    desc = "如果勾选，插件只会在可反射的法术目标是你时，推荐使用 |T132361:0|t 法术反射。",
     type = "toggle",
     width = "full",
 } )
 
+
+
 spec:RegisterSetting( "shockwave_interrupt", true, {
-    name = "Only |T236312:0|t Shockwave as Interrupt",
-    desc = "If checked, |T236312:0|t Shockwave will only be recommended when your target is casting (and talented).",
+    name = "|T236312:0|t震荡波仅用于打断",
+    desc = "如果勾选，|T236312:0|t震荡波将只在你的目标施法时被推荐（拥有天赋）。",
     type = "toggle",
     width = "full"
 } )
 
-spec:RegisterSetting( "stack_shield_block", false, {
-    name = "Overlap |T132110:0|t Shield Block",
+
+spec:RegisterSetting( "stack_shield_block", true, {
+    name = "叠加|T132110:0|t盾牌格挡",
     desc = function()
-        return "If checked, the addon can recommend overlapping |T132110:0|t Shield Block usage. \n\n" ..
-        "This setting avoids leaving Shield Block at 2 charges, which wastes cooldown recovery time."
+        return "如果勾选，插件将会推荐叠加|T132110:0|t盾牌格挡。\n\n" ..
+        "此设置可避免在盾牌格挡有2层充能时被错误使用，浪费冷却恢复的时间。"
     end,
     type = "toggle",
     width = "full"
 } )
 
 spec:RegisterSetting( "stance_weaving", false, {
-    name = "Allow Stance Changes",
+    name = "允许改变姿态",
     desc = function()
-        return "If checked, custom priorities can be written to recommend changing between stances.  For example, Battle Stance could be recommended when "
-            .. "using offensive cooldowns, then Defensive Stance can be recommended when tanking resumes.\n\n"
-            .. "If left unchecked, the addon will not recommend changing your stance as long as you are already in a stance.  This choice prevents the addon "
-            .. "from endlessly recommending that you change your stance when you do not want to change it."
+        return "如果勾选，在自定义优先级中可以推荐在不同的姿态中转换。"
+            .. "比如在使用进攻型爆发技能时使用战斗姿态，想要使用防御型技能时使用防御姿态。\n\n"
+            .. "如果不勾选，你处于某个姿态时，插件就不会推荐你改变姿态。"
+            .. "这样能够避免你不想改变姿态时，插件无休止地推荐你改变姿态。"
     end,
     type = "toggle",
     width = "full"
 } )
 
-spec:RegisterSetting( "reserve_rage", 35, { -- Ignore Pain cost is 35, Shield Block is 30.
-    name = "|T135726:0|t Reserve Rage for Mitigation",
-    desc = "When set above zero, the addon will not recommend |T132353:0|t Revenge or |T135358:0|t Execute unless you'll be still have this much Rage afterward.\n\n"
-        .. "When set to |cFFFFD10035|r or higher, this feature ensures that you can always use |T1377132:0|t Ignore Pain and |T132110:0|t Shield Block when following recommendations for damage and threat.",
+spec:RegisterSetting("combat_delay", 4, {
+    name = "战斗延迟介入",
+    desc = "如果该值不等于0, 则允许战斗后延迟该值-X秒后再推荐技能,推荐值为6\n\n它同样会在x/2秒后当玩家停止不动时开始推荐技能\n\n它也同样会在玩家站定不动时自动开始介入",
+    type = "range",
+    min = 0,
+    max = 20,
+    step = 1,
+    width = "full"
+} )
+
+spec:RegisterStateExpr( "combat_delay", function ()
+    return settings.combat_delay or 0
+end )
+
+spec:RegisterSetting( "reserve_rage", 30, { -- Ignore Pain cost is 35, Shield Block is 30.
+    name = "|T135726:0|t保留怒气",
+    desc = "如果设置大于0，插件将不会推荐|T132353:0|t复仇和|T135358:0|t斩杀，除非施放之后怒气剩余量大于该值。\n\n"
+        .. "当设置为|cFFFFD10035|r或更高时，这个功能确保你总是可以使用|T1377132:0|t无视苦痛和|T132110:0|t盾牌格挡，来保证伤害和仇恨。",
     type = "range",
     min = 0,
     max = 100,
@@ -1967,10 +1993,10 @@ spec:RegisterSetting( "reserve_rage", 35, { -- Ignore Pain cost is 35, Shield Bl
 } )
 
 spec:RegisterSetting( "shield_wall_amount", 20, {
-    name = "|T132362:0|t Shield Wall Damage Required",
-    desc = "When set above zero, the priority can recommend |T132362:0|t Shield Wall if you have taken this much damage in the past 5 seconds, as a percentage of your maximum health.\n\n"
-        .. "If set to |cFFFFD10050%|r and your maximum health is 50,000, then Shield Wall can be recommended when you've taken 25,000 damage in the past 5 seconds.\n\n"
-        .. "By default, your Defensives toggle must also be enabled.",
+    name = "|T132362:0|t盾墙伤害阈值",
+    desc = "如果设置大于0，插件将不会推荐|T132362:0|t盾墙，除非你在5秒内受到大于此百分比最大生命值的伤害。\n\n"
+        .. "例如设置为|cFFFFD10050%|r，你最大生命值为50000，只有在5秒内你受到超过25000伤害时，插件才会推荐盾墙。\n\n"
+        .. "单人游戏时，该值会减少 50%。",
     type = "range",
     min = 0,
     max = 200,
@@ -1979,8 +2005,8 @@ spec:RegisterSetting( "shield_wall_amount", 20, {
 } )
 
 spec:RegisterSetting( "shield_wall_health", 75, {
-    name = "|T132362:0|t Shield Wall Health Percentage",
-    desc = "When set above zero, the priority can recommend |T132362:0|t Shield Wall if your current health has fallen below this percentage.",
+    name = "|T132362:0|t盾墙生命阈值",
+    desc = "如果设置小于100，当你的生命值小于此百分比，插件才会推荐使用|T132362:0|t盾墙。",
     type = "range",
     min = 0,
     max = 100,
@@ -1989,10 +2015,10 @@ spec:RegisterSetting( "shield_wall_health", 75, {
 } )
 
 spec:RegisterSetting( "rallying_cry_amount", 25, {
-    name = "|T132351:0|t Rallying Cry Damage Required",
-    desc = "When set above zero, the priority can recommend |T132351:0|t Rallying Cry if you have taken this much damage in the past 5 seconds, as a percentage of your maximum health.\n\n"
-        .. "If set to |cFFFFD10050%|r and your maximum health is 50,000, then Rallying Cry can be recommended when you've taken 25,000 damage in the past 5 seconds.\n\n"
-        .. "By default, your Defensives toggle must also be enabled.",
+    name = "|T132351:0|t集结呐喊伤害阈值",
+    desc = "如果设置大于0，插件将不会推荐|T132351:0|t集结呐喊，除非你在5秒内受到大于此百分比最大生命值的伤害。\n\n"
+        .. "例如设置为|cFFFFD10050%|r，你最大生命值为50000，只有在5秒内你受到超过25000伤害时，插件才会推荐集结呐喊。\n\n"
+        .. "单人游戏时，该值会减少 50%。",
     type = "range",
     min = 0,
     max = 200,
@@ -2001,8 +2027,8 @@ spec:RegisterSetting( "rallying_cry_amount", 25, {
 } )
 
 spec:RegisterSetting( "rallying_cry_health", 80, {
-    name = "|T132351:0|t Rallying Cry Health Percentage",
-    desc = "When set above zero, the priority can recommend |T132351:0|t Rallying Cry if your current health has fallen below this percentage.",
+    name = "|T132351:0|t集结呐喊生命阈值",
+    desc = "如果设置小于100，当你的生命值小于此百分比，插件才会推荐使用|T132351:0|t集结呐喊。",
     type = "range",
     min = 0,
     max = 100,
@@ -2011,10 +2037,10 @@ spec:RegisterSetting( "rallying_cry_health", 80, {
 } )
 
 spec:RegisterSetting( "last_stand_amount", 25, {
-    name = "|T135871:0|t Last Stand Damage Required",
-    desc = "When set above zero, the priority can recommend |T135871:0|t Last Stand if you have taken this much damage in the past 5 seconds, as a percentage of your maximum health.\n\n"
-        .. "If set to |cFFFFD10050%|r and your maximum health is 50,000, then Last Stand can be recommended when you've taken 25,000 damage in the past 5 seconds.\n\n"
-        .. "By default, your Defensives toggle must also be enabled.",
+    name = "|T135871:0|t破釜沉舟伤害阈值",
+    desc = "如果设置大于0，插件将不会推荐|T135871:0|破釜沉舟，除非你在5秒内受到大于此百分比最大生命值的伤害。\n\n"
+        .. "例如设置为|cFFFFD10050%|r，你最大生命值为50000，只有在5秒内你受到超过25000伤害时，插件才会推荐破釜沉舟。\n\n"
+        .. "单人游戏时，该值会减少 50%。",
     type = "range",
     min = 0,
     max = 200,
@@ -2023,8 +2049,8 @@ spec:RegisterSetting( "last_stand_amount", 25, {
 } )
 
 spec:RegisterSetting( "last_stand_health", 70, {
-    name = "|T135871:0|t Last Stand Health Percentage",
-    desc = "When set above zero, the priority can recommend |T135871:0|t Last Stand if your current health has fallen below this percentage.",
+    name = "|T135871:0|t破釜沉舟生命阈值",
+    desc = "如果设置小于100，当你的生命值小于此百分比，插件才会推荐使用|T135871:0|t破釜沉舟。",
     type = "range",
     min = 0,
     max = 100,
@@ -2032,9 +2058,31 @@ spec:RegisterSetting( "last_stand_health", 70, {
     width = "full",
 } )
 
-spec:RegisterSetting( "victory_rush_health", 75, {
-	name = "|T589768:0|t Victory Rush Health Threshold",
-	desc = "When set above zero, the addon may recommend |T589768:0|t Victory Rush when your health falls below this percentage.",
+spec:RegisterSetting( "spell_block_amount", 25, {
+    name = "|T132358:0|t 法术格挡伤害阈值",
+    desc = "如果设置大于0，如果在过去5秒内你受到的伤害达到了你最大生命值的该百分比，插件可能会推荐你使用 |T132358:0|t 法术格挡。\n\n"
+        .. "如果设置为 |cFFFFD10050%|r，并且你的最大生命值达到 50,000，那么当你在过去5秒内受到 25,000点伤害，插件会推荐你使用法术格挡。\n\n"
+        .. "默认情况下，你的【防御】快捷切换也必须启用。",
+    type = "range",
+    min = 0,
+    max = 200,
+    step = 1,
+    width = "full",
+} )
+
+spec:RegisterSetting( "spell_block_health", 75, {
+    name = "|T132358:0|t 法术格挡生命阈值",
+    desc = "如果设置大于0，你的当前生命值低于该百分比，插件可能会推荐你使用 |T132358:0|t 法术格挡。",
+    type = "range",
+    min = 0,
+    max = 100,
+    step = 1,
+    width = "full",
+} )
+
+spec:RegisterSetting( "victory_rush_health", 40, {
+	name = "|T589768:0|t 乘胜追击生命阈值",
+	desc = "如果设置大于0，插件只会在你生命低于该百分比时推荐使用 |T589768:0|t 乘胜追击。",
 	type = "range",
 	min = 0,
 	max = 100,
@@ -2042,9 +2090,11 @@ spec:RegisterSetting( "victory_rush_health", 75, {
 	width = "full",
 } )
 
+local LSR = LibStub( "SpellRange-1.0" )
+
 spec:RegisterRanges( "hamstring", "devastate", "execute", "storm_bolt", "charge", "heroic_throw", "taunt" )
 
-spec:RegisterRangeFilter( strformat( "Can %s but cannot %s (8 yards)", Hekili:GetSpellLinkWithTexture( spec.abilities.taunt.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.charge.id ) ), function()
+spec:RegisterRangeFilter( strformat( "使用%s在不能使用%s时（8码）", Hekili:GetSpellLinkWithTexture( spec.abilities.taunt.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.charge.id ) ), function()
     return LSR.IsSpellInRange( spec.abilities.taunt.name ) == 1 and LSR.IsSpellInRange( class.abilities.charge.name ) ~= 0
 end )
 
@@ -2062,7 +2112,8 @@ spec:RegisterOptions( {
 
     potion = "tempered_potion",
 
-    package = "Protection Warrior",
+    package = "防战Simc",
 } )
 
-spec:RegisterPack( "Protection Warrior", 20240926, [[Hekili:nV1wVnUUr4FlNxmIrZ64RXzpiopCoafyxGUTa(G23KeTeTTA0nqr5CsrG(T3HK6cjnj9LKnTal2KinCMV5cNzi9yVjE)H36ief79JPJNoF8xNE)Oj3pDXCV10xlWERlqHpJ2b)sgkf())bjNIdPX5z1b)leHeNty08AsokIXQY8ksiq3EkTO8xV7UDX09vBgfMNExzCAvcIT0qcAlL93H35TEtvCc9BzEBmIJjlaEwGd9(XYzaxJJIWcsXLHERzK(LXF9ltV)xRdwxGtsQd(TK8WNRdqaLr1FV(7D0mhO5VftJ3XXqjqswuDW3slWrXz7Qd(NXH0CYR1b)14)uEPp8LjlUToayX4VYetC6VxhuW08ykqDvbd2L90VuiQ)ypMBIG)dSbXzGzIKVnobmoiUbSCubbdgMni6Fz1DW)ttW(Luuwi(wA(UDj4vGv(7UiEFEfLj4gAG3uuLMItKFs4Eezh(24TROXP4vJF7T08d4uCgDuuSqCp9G8cQkX(XuCAP8drhqueHXLnvB3ocCQzryI)MeujWN8xYE7ndVayF4ZpUAQmNkzUj49Gx6wMOY3U1Fxy0QjCiIYEgCgdIZaDf(f)u0U4q)ie8tS)IYNKwD7tPONXzd2Jrj09JkcPpUsMiXZ9HNp4xUHdrXBj4TjIaz)i8wCwjEuvXqfGUpgNe5)ckj5maQee7xNdikrKbi2)wavnMwMfLhFe1)mcqXRmXhsET)Pf5mDqxFa7rEK)2kiex(PysjMW0ff3njeLb4oNqGaf53KeVBpT0)FxfTlv7vBJjyUqu4eeFvsbC6hcyvrYODGn1NsIdFwjwta)UynrOxV2193dOSiB6iz760XYCkExwob7xGIZeonn6FcOFWneWfncccIdJbomzXGW88ewmDRFOmbLoIGrrV(2BQepF8rel2VjihqycBJg8S0cgM83uL8cI88iCgAtcosNFtDZpDYNjrEeonhmZX)hw4apZGkg2KlcupKhhIph53yNnR3lENcEWXH0T0xLLHjhyRyBEyvPnOoZcuF)CE64ZWn3htie4H4CMm8b1FtfbY91lwiE7WRqcNcmbKAjpBERzOHKyOkugg2MapuST3c2w4k60osUyBYpdSpzPlSFAbEe)E4m4Nv0n8T3478FA1YXnzwkXyMHGGJevUwTCGGIzlgAtuPqULsaldKtCZl90(YNwnFqjM6VjpdSV0ymz2e)PfHQfvuYX25OUOcp9lZEDhjA(Kk7it7juazsTRcku9jPehe9g6tQk3Zucj8i)kz4ih)fXZ)jiK11fpauPqLovVxH0eKR6ioaguI8Joo1TWdzpVTwNLnv1GwQqkmwPnqgpfnDjkaxQ2LiueEGTEhvBDKb3KyHhGVIW8K8YsO3IuwxjILa7wnGK8QsFsUkivkWA4fIEuBLLPT2W(EL(nivz(I)YhWj9w2zMwHYX3wY6YHk2bB2ueMGk0GoRHPJz3oiDgWmP2(hbsWKnpkNvjgc57rRT1WK(fUKoXyTOJrfvONnEC5w5AQgvsZlk4jR3Mtme3zb4xdiMFPGORDoccIgGTgnSRVa1vaJ7VuuOBki4d4mXj8ARN1YJsCCzkC(jgjeOtF(jF70gvm1Wg5yWgbivWRvipU6(XxJ2cTsDkJOZ4nxHbN0UmRPVUNy9Z1MKdrG)bMiOdH4mao9WONFnB5mf8FJ9mxc)k3MWoNtr(lGs2CI4jxQtFOj0O5yUXQaDKHfWIDh5qHb7rPqQ2CWh7U6Xf(pXHvuLiYUMTS3knpHJnX065w4E5dB7KRIDrrWj7rqb0EZRYJDOasC(SIcooT5ul9IZaUlwApr81YX(qvhfEGyaNELFXAeY5OmFEswApFt82dJp(AcEAABYRg6TEzcdeH)2pPbhKNbZar2FGdJyA2IZGnWXEx8XHj2XAA2zKIG(OcjgkYC02Ah293DC4QtfoCrrdxsC4hRKJWhaTLDD2RHkVStX2FV2ERFbryLAk9w)T0ICcfm3bZRdeSPoG1Rx5O6V7TM)BSRvhQOb)4h8BRVXd59BERdjXuqIiV165lQdECvDWK27A2BTIBWJcW59ZlMHJXQzwzLnJwDWG6aRDjuh8eiWPCIuRtYF0PQv6qPN)tbPZVwKktK1(HcE7TgMFnWRo4(RfD2D4lSAgz5MegLLJLfIZornOeTju4SAwpsAEode3FcqWcAVF87Z89yN39eEPEekL7GHYL8TVgJhLapq4dMiKBWvP7RNHTFwJA3)K5kEdRD9AYqdaTjXM7uq30yMn0KzDG6(zt9O2KL5AdwRdgEvj7UXjKuHTrnRb1UJYgk7pE8ODh6D7AnAYEMw1nEmHDJb)VRkCUaKE40IZHDdLSkAnKRKAWqt59gGMMo6sEBYWOUbXEYjZf2KCWgBU2ryL9uqFuIQnJ7sxbW2BRHxaOj68K((FXzeSdZWd)Fi4AnC2txQS)4H29JA9iZX4u5Qi9DuBBfCpTGF9B4N8WzSJ5cesdSgAyVUtDz2IlsmmOZwYpBDHjJHYzf0pqIXwaMmwoLqBQc10btMitt7I1OXz9bNrWRo)q4lk(TBZ1e758)Ff2A3BnrjJS0zEKnUu2B2IQsODTp0UcXWQO5lS7kyZVcVKCZ2XJMJfEK0d98xCZ(D1nBFC3aUOj5tC4a1Q)8RDPpi3ARbt7LROHMUsusF0Em7IfDw8PLX9r2gkgUABBWy4RuFhT5bKPnpBBlrogugLWcjU1vu86von1Q)tZ7muljIDOwkFaHs(qLpKq5eyQFqHsVP7dlu1E0lGJobq)q44Q9)(HYXuZ)DXtkdPJEknLuJAtTJZuKDJXJXKKDcxzUE0jvz)MYG(Ot5j20jDiGoRU(bdSuawkpd3nXf3P251UePjhsnI94Ix9v7BQc3oHcnflx4Qyjk61(ERvxOLw2LNhi5cMwNXiB8F65WFZlDM2sTncqY4Z8hN8zIn5b8XQ9AXhgOgyoJWaPJHACQzox7LQ68rlTPJVWqk5yrN9c0djhJPJmzwN(gBiCXP3TCkeEL2YF(62KLNJUDoGWc)D2wUg)DGEtNPyP8rG0NtkEtzcLt6oO66O3DZNA36tdnkJzH8TSAAsQ4z2)qB7WYOuXxIELgJJufNYpZMo65d3Ay)(codT36Cyzu)TmpwF6waz652a7xlHIkuhyz6QoA7IXX4QhaYSHda739WhbaAzCFpl6KWpoLsFGnZaM(rUSFPUUQtkF0p9sTC2Q0WO20IPdb7NY1XOJD0huK17E2XbSNEIwqnnKzh95s0EHPCgUqwVBKx7aOPR33ltRsly6uAFlTJeN8SRJpscDhwBQ9njN6QfaTxmwB8mTDryQJaN4ZW0x8LhI9PyYKP((IUqeTbEtzXTFge8BuO7ldt3Dki(gZ4TMF2KUdEi9DQX01mOtipYv72lOSxxIJ(7zw(2pHQO7z)CD33VPFN99BIVuV)l]] )
+
+spec:RegisterPack( "防战Simc", 20250730, [[Hekili:nRvFpTrYz8pl9FsaPwh)cg4QYvjsOY6Yf4QoFsOWFSRND3X2ByFXANzHd0jlYDLecKCHO7AsuU0Exort4IijLsRoAG0(HPEno)fFf6ZmRT3x8URT5sukGG178mpp)MN551zqiJWNjuubrXcZMnD28PNmDUuPZMB8m5fksxUgwOynK8cOkWdgiD43V5b)9MR)GIQ6YSHwwZePWybX02sggUkLwJ8Bp35QOsRAlLs2u)CevDBnev10q2cvMY(S85ekkzRQr)idbPiLF6XbEwdllm7e5aUQQOGDjftabNjtQS1Vu9l58D)yZhTRZ2)uR)5MNC0dN7IxU1nEMZpVxZn(Jnoy1ghSjNOTF6X7TFZVENw3ERUKwVeFO92RXbpG9r4dxCHF)uFYhm9fU68R8XYxTO94F6LMMAM(tV4hxyk4l951NFMvMrF(50NhEuF2zkC1cRS8vku4YWRjSHUqHvMY9Rctp1vMxA6kx4YsRCL5MBUcZUYmZm9LxP40RuGl4)Xp18Up9DNGN6kF(mfM7JMgKz6LitXKYXF7on3)pbI0zT1DE5roR9x)SFdtBTXoo34onoA75M6xxVKZw3Q5p8ZT1vhTQZwVe2SBEV734WnHjmYBo8bTEX2oRT)BU)Zh9KJUL78B9V)gNB8kg5RTVZA7C8oB6ovNBVVZDE5)D1V05fFvJJEyBHT(2nV3ZB86FO5M3S5QpR5dEPZwp54d)MM)5VhyOZt(YM)Lh19Jno8Eo)T9G5Yy4t30ff(f6jhDn2AR5n3K9QR9qGJUt2zRV25632fhno4Wwp5AhV(1DUZDHja2TwMLv1aRvHIlITiGLzBRVjYLwO4sildvJkeHITE(tCU7gmvgxFDwfCzKTg9SoRF)wpEN38Ovb2YSZE135IPg)Nx08B)xWcg027UB20TE8TGj3617282)4zPwQglGPPYKsLKsUQLPowYMqvL0WIsM6sIeBv6zBCWR6sjnzsp5O1Z0C3hFYr3CqKi8Cf4hrlvQnstu3wjczfbrdNuOaufnllQPwPkLiQGx0K54lo2y5YNlFesSptyGLE2bxRMmPdNe7NwnoIgoPmmA1bzcHKo4)S(woB89Uw5nE11hRXbpR5gR26RETRLoNkHIiBAvtlHIf7gq)ISa6qOCebR8jgcf)dwMuSmBK6LMdzzPYixtLqjSCeitm8Nz5PCWgiqVRiCbHIYGEbBPIGG7M0uwydf4x6ivds9sN)dRxkt9sFXxuVKKD5YPGKkgkylrjneHMYUgWuU4GKv(hrGco0dRy6LxYAOAmwLlwwXb1IQMAydQOPnvY2IJR6Lot9sq(lnnrkYQcMs6aDgpRx63bcmlNiohqlIaY6mpkIXUu2geQzTAmPkw2eYUMQdeIFrp27eKo2PfP(jcs(tQYCdAZEpA6U7EAGx9sJFArx8B45JvnAbLc5AVmz6Fzi)8DvS9rb5btyySMIirdPZq549bLSTUCP9lccwLORklAHH8EsylUtCGnRGaMrNrxw5bK2VNbIj4E2rAp6dBaHtgfHCfEq6(GbCvX09EVzSaRtjKf8dSqPwGdoOt7vx6TeaGwbBaIqo5OtJezmicfQpUEPG(ZCBawa4AMlbBKTPPDWStNXA9sJEQc2nsIqkiSJCLfoeCKM6J6F)GnJjcSFOG1nH0av7RjD8rA92QNO9M)irS)lBAQPyUKrkF81lmF8akS5u(bHDJ6tRqSzDOazAr0QH2sdmupka8NJLTP4UbVJsXe0bj(GtrNyZ3gCp7DSfxcMvXhH5TLO6eXDIKmGJmkQy3eaTTo77E)Vkrl4eudt()HGRJIl(WLb8pMSJ)idMPQIrAGXynzkhJz9NkRDGrpJ4EMbFN2LFEo8zMCa8ygcH0gwJgHVEIRLC5hkXWGoBkVRxlmzmQ)Oc6icbjBfrXi(sUMjT)qcDcvemCqMm(PPZKdrtI5hs0c(dhCt4HY(TRZvM4J5)(cBD8TYeiIm0ffazu4nakBe(5c0T8HoZOMTUowl0Er8BfUjsCxasAMYlem46y9KCGtuYPnPQ6mJAMgsxcrHSqAOL5AeDZfHcJ8T4rgli2MQLqQ9PDI45BmJCUozhge5gFkUYSoAf7Qx4EwE8YTKQKZCXKhaaowunabZk5wbPdE)I5DzzB17siW0R9iu0cyd(Cch9WpXUJjYhZnMENYV8rf3QRB0dMBGiywbPsd8ElGYLzqt2A5GJuJ3lFyBxFcqOOnH1(FzXkYkmtYiYV2zAQvmmTWI1a1ze5oG6KkRkR2ELMjFsHfrkl7vfvWjgtXzYvzU1DMQxOr4961a0reLS1wczTqVvPfK)zhe(h9uZfAQScdbvV6kmvpPkePOx8jz6A0SOPQ)6ZhmS1UQ)K1x5FRbQZeTz2z81Wb06dZJeA3q2M0VLty9vWLZBBPLn9qAs53wmXO(Eqc8zxCziIsnOXCBc7WGjrD8fQ61GMeH(jzDMXDJ7d2Z3FVL(HWtPU8D)AlZedYABqarm8pXcWcX)eqFuvpoH)IDjym)KzXk(6i2DX570g6w7wYLzeQ)(OZK7DEAemvuY0a25OQyRCzeZwtoQq3X39XaKkZZ6P)zY8r77XezE8jkLr8T7makd)qP)QJau)EuH4NEVMcIuheyjuV0IQYuta8w2KQHxb(DEu4joCjoLIkXlaXiDQNJ1jBBhhgUwelc(C6Qycxqzday)I1RdL3za2FaTtfE7HLETm1HeWj2urSSnmwOoRYfGmSfbBTaV(2GKfOtcKLmYam9mTSGLuysZ7N023GZvTvQOhbTJ7N2YQwyoqdtvGZOfziJjq0snrzETIbjnWP0kHQWoXqQLQ8cKWugVNi3w23PB21(o8jEgZjl4RbkUdbVRP4n6JG1G75GDjQrtDVxyx00L81S1ZCs8IhJM6bajdWf(5Pqzbub9MoHRtJ3VS3678A4kJBPx92jwM890oIBj4CHfFFVj3tNfaHkyEtDzJVp3FXaUDV)M2erlt3EiZMq7V9RO7UrH83fS)ZsiCf9CbgW13RnisnmGOqhJq8D4g9zMWpWL6HV5XyVmJeoXMSXFyTCEkBQzsimZvMgVdt5vsfSkQHAVkDqTh7075Gj(YJ63zhLdiHfBJfnZN9MTHO7ZISBU29(RfD)NFIDd2mzgFSVKK55dEhAjiNo3hf)0LQzHDnIeI46P8ujLXgewEowfhS)tS0uHumqDtfhR7Po5fxNsHypU2DHoml3Vf(Fp]] )

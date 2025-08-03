@@ -1,4 +1,4 @@
-## https://github.com/simulationcraft/simc/blob/thewarwithin/ActionPriorityLists/default/hunter_survival.simc
+## https://github.com/simulationcraft/simc/blob/thewarwithin/ActionPriorityLists/hunter_survival.simc
 ## Up to date with SimC: April 26 2025 - 739316d
 
 actions.precombat+=/summon_pet
@@ -6,7 +6,10 @@ actions.precombat+=/use_item,name=imperfect_ascendancy_serum
 actions.precombat+=/hunters_mark,if=(settings.mark_any|target.is_boss)&active_dot.hunters_mark=0&target.time_to_pct_80>20
 actions.precombat+=/use_item,name=algethar_puzzle_box
 
+actions+=/feign_death_wait,if=buff.feign_death.up
 actions+=/muzzle
+actions+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check&!raid
+actions+=/revive_pet
 actions+=/tranquilizing_shot
 actions+=/hunters_mark,if=(settings.mark_any|target.is_boss)&active_dot.hunters_mark=0&target.time_to_pct_80>20
 actions+=/mend_pet,if=pet.health_pct<pet_healing
@@ -125,3 +128,11 @@ actions.sentst+=/explosive_shot
 actions.sentst+=/kill_shot
 actions.sentst+=/raptor_bite,cycle_targets=1,if=!talent.contagious_reagents
 actions.sentst+=/raptor_bite,cycle_targets=1
+
+
+# actions+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check,if=health.pct<hp_gap
+actions.mitigation=/misdirection,line_cd=2,if=time<10&buff.misdirection.down
+actions.mitigation=/feign_death,if=talent.emergency_salve&(buff.dispellable_poison.up|buff.dispellable_disease.up)
+actions.mitigation+=/exhilaration,if=health.pct<40
+actions.mitigation+=/survival_of_the_fittest,if=health.pct<hp_gap&buff.survival_of_the_fittest.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)
+actions.mitigation+=/aspect_of_the_turtle,if=health.pct<30&buff.survival_of_the_fittest.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)

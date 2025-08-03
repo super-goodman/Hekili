@@ -1,4 +1,4 @@
-## https://github.com/simulationcraft/simc/blob/thewarwithin/ActionPriorityLists/default/evoker_augmentation.simc
+## https://github.com/simulationcraft/simc/blob/thewarwithin/ActionPriorityLists/evoker_augmentation.simc
 ## Up to date with SimC: April 12 2025 - 72033f9
 
 actions.precombat+=/variable,name=spam_heal,default=1,op=reset
@@ -29,6 +29,7 @@ actions.precombat+=/blistering_scales,if=active_dot.blistering_scales=0
 actions.precombat+=/living_flame
 
 actions+=/quell
+actions+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check&!raid
 actions+=/unravel
 actions+=/variable,name=temp_wound,value=debuff.temporal_wound.remains
 actions+=/variable,name=eons_remains,op=set,value=cooldown.breath_of_eons.remains
@@ -100,3 +101,8 @@ actions.opener_filler+=/variable,name=opener_cds_detected,value=cooldown.breath_
 actions.opener_filler+=/eruption,if=variable.opener_delay>=3
 actions.opener_filler+=/living_flame,if=active_enemies=1|talent.pupil_of_alexstrasza|buff.leaping_flames.up
 actions.opener_filler+=/azure_strike
+
+actions.mitigation=/expunge
+actions.mitigation+=/renewing_blaze,if=health.pct<=hp_gap&buff.renewing_blaze.down&buff.obsidian_scales.down&buff.zephyr.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)
+actions.mitigation+=/obsidian_scales,if=health.pct<=hp_gap&buff.renewing_blaze.down&buff.obsidian_scales.down&buff.zephyr.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)
+actions.mitigation+=/zephyr,if=health.pct<=hp_gap&buff.renewing_blaze.down&buff.obsidian_scales.down&buff.zephyr.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)

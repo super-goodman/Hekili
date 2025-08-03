@@ -523,28 +523,27 @@ local spellFilters = {
         },
     },
 
-    [ 2552 ] = {
-        name = "Khaz Algar Surface",
-        [ 225977 ] = {
-            name = "Dungeoneer's Training Dummy",
-            [ 167385 ] = {
-                name = "Uber Strike",
-                spell_reflection = true, -- for testing
-				blessing_of_spellwarding = true, -- for testing
-            },
-        },
-    },
+    -- [ 2552 ] = {
+    --     name = "Khaz Algar Surface",
+    --     [ 225977 ] = {
+    --         name = "Dungeoneer's Training Dummy",
+    --         [ 167385 ] = {
+    --             name = "Uber Strike",
+    --             spell_reflection = true, -- for testing
+    --         },
+    --     },
+    -- },
 
-    [ 2601 ] = {
-        name = "Khaz Algar Underground",
-        [ 223469 ] = {
-            name = "Voidtouched Speaker",
-            [ 429545 ] = {
-                name = "Censoring Gear",
-                interrupt = true,
-            },
-        },
-    },
+    -- [ 2601 ] = {
+    --     name = "Khaz Algar Underground",
+    --     [ 223469 ] = {
+    --         name = "Voidtouched Speaker",
+    --         [ 429545 ] = {
+    --             name = "Censoring Gear",
+    --             interrupt = true,
+    --         },
+    --     },
+    -- },
 
     [ 2648 ] = {
         name = "The Rookery",
