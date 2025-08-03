@@ -14,17 +14,17 @@ Hekili.excludeDispelWarning = false
 
 local unitIDs = { "target", "targettarget", "focus", "focustarget", "boss1", "boss2", "boss3", "boss4", "boss5", "arena1", "arena2", "arena3", "arena4", "arena5" }
 
-local lowHealthRangeSpell_magic_dps = {167395,1215741,1215850,330716,339573,262347,258622,269429,427404,423305,440207,469981,465827,473070,469721,469811,425394,428266,448791,439524,430812,428169,1214628,1214631,442995,435622,430171,1215409,460156}
+local lowHealthRangeSpell_magic_dps = {465827,473070,468813,460156,448791,428169,323393,426787,1221532}
 
-local lowHealthRangeSpell_physic_dps = {448847,333241,267354,271456,1215102,428066,1218117,463206,448619,442995,44849,333839}
+local lowHealthRangeSpell_physic_dps = {427609,448492,349934,346742,438877,438476}
 
-local targetMeSpell_magic_dps = {167395,451261,473540,473576,1222949,1223804,259940,260811,430805,292264,446649,291928,448787,468813,427011,262794}
+local targetMeSpell_magic_dps = {473713,468815,446368,1236512,1236513,1236514,433740,461507,438618,431365,426735,451119,434441,1217439,1236126,1239487,1219704}
 
-local targetMeSpell_physic_dps = {427629,424426,446776,447439}
+local targetMeSpell_physic_dps = {453461,427621,427635}
 
-local dot_magic_dps = {440162,452932,430814,430834,333292,1214324,429493,1217821,421146,420696,427015,432182,439325,473713,468815,424739,448787,473576,324449,291928,292267}
+local dot_magic_dps = {446649,448787,319941}
 
-local dot_physic_dps = {330532,333861,291972,453461,427621,427635,424426,447272,441413}
+local dot_physic_dps = {427629,446776,352345}
 
 local lowHealthRangeSpell_magic = lowHealthRangeSpell_magic_dps
 
@@ -53,7 +53,7 @@ function Hekili.GetFullName(target)
 end
 
 function Hekili.isEasyTankingBoss()
-    local easyBossList = {"布雷炙孔", "蜡烛之王", "黑暗之主", "隐修院长穆普雷", "凯里欧斯", "艾泽洛克", "瑞克莎·流火", "商业大亨拉兹敦克", "首席机械师闪流"}
+    local easyBossList = {"艾谢朗", "高阶裁决官阿丽兹", "P.O.S.T.总管", "隐修院长穆普雷", "索·阿兹密", "索·莉亚", "收割者吉卡塔尔", "拉夏南", "布朗派克男爵", "阿兹希卡", "撰魂师"}
 
     local boss = UnitName("boss1")
     if boss then
