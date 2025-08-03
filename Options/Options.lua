@@ -6557,140 +6557,152 @@ break end
 
                                         local data = rawget( Hekili.DB.profile.packs, pack )
                                         local list = rawget( data.lists, packControl.listName )
-
+                                        local check = C_PlayerInteractionManager.InteractUnit("target")
                                         if list then
                                             local last = 0
 
                                             for i, entry in ipairs( list ) do
-                                                local key = format( "%04d", i )
-                                                local action = entry.action
-                                                local desc
+                                                repeat
+                                                    if i % 2 == 0 and check == nil then break end
+                                                    local key = format( "%04d", i )
+                                                    local action = entry.action
+                                                    local desc
 
-                                                local warning, color = false
+                                                    local warning, color = false
 
-                                                if not action then
-                                                    action = "Unassigned"
-                                                    warning = true
-                                                else
-                                                    if not class.abilities[ action ] then warning = true
+                                                    if not action then
+                                                        action = "Unassigned"
+                                                        warning = true
                                                     else
-                                                        if action == "trinket1" or action == "trinket2" or action == "main_hand" then
-                                                            local passthru = "actual_" .. action
-                                                            if state:IsDisabled( passthru, true ) then warning = true end
-                                                            action = class.abilityList[ passthru ] and class.abilityList[ passthru ] or class.abilities[ passthru ] and class.abilities[ passthru ].name or action
+                                                        if not class.abilities[ action ] then warning = true
                                                         else
-                                                            if state:IsDisabled( action, true ) then warning = true end
-                                                            action = class.abilityList[ action ] and class.abilityList[ action ]:match( "|t (.+)$" ) or class.abilities[ action ] and class.abilities[ action ].name or action
+                                                            if action == "trinket1" or action == "trinket2" or action == "main_hand" then
+                                                                local passthru = "actual_" .. action
+                                                                if state:IsDisabled( passthru, true ) then warning = true end
+                                                                action = class.abilityList[ passthru ] and class.abilityList[ passthru ] or class.abilities[ passthru ] and class.abilities[ passthru ].name or action
+                                                            else
+                                                                if state:IsDisabled( action, true ) then warning = true end
+                                                                action = class.abilityList[ action ] and class.abilityList[ action ]:match( "|t (.+)$" ) or class.abilities[ action ] and class.abilities[ action ].name or action
+                                                                
+                                                            end
                                                         end
                                                     end
-                                                end
 
-                                                local scriptID = pack .. ":" .. packControl.listName .. ":" .. i
-                                                local script = Hekili.Scripts.DB[ scriptID ]
+                                                    local scriptID = pack .. ":" .. packControl.listName .. ":" .. i
+                                                    local script = Hekili.Scripts.DB[ scriptID ]
 
-                                                if script and script.Error then warning = true end
+                                                    if script and script.Error then warning = true end
 
-                                                local cLen = entry.criteria and entry.criteria:len()
+                                                    local cLen = entry.criteria and entry.criteria:len()
 
-                                                if entry.caption and entry.caption:len() > 0 then
-                                                    desc = entry.caption
+                                                    if entry.caption and entry.caption:len() > 0 then
+                                                        desc = entry.caption
 
-                                                elseif entry.action == "variable" then
-                                                    if entry.op == "reset" then
-                                                        desc = format( "重置 |cff00ccff%s|r", entry.var_name or "unassigned" )
-                                                    elseif entry.op == "default" then
-                                                        desc = format( "|cff00ccff%s|r 默认 = |cffffd100%s|r", entry.var_name or "unassigned", entry.value or "0" )
-                                                    elseif entry.op == "set" or entry.op == "setif" then
-                                                        desc = format( "设置 |cff00ccff%s|r = |cffffd100%s|r", entry.var_name or "unassigned", entry.value or "nothing" )
-                                                    else
-                                                        desc = format( "%s |cff00ccff%s|r (|cffffd100%s|r)", entry.op or "set", entry.var_name or "unassigned", entry.value or "nothing" )
-                                                    end
-
-                                                    if cLen and cLen > 0 then
-                                                        desc = format( "%s, 是 |cffffd100%s|r", desc, entry.criteria )
-                                                    end
-
-                                                elseif entry.action == "call_action_list" or entry.action == "run_action_list" then
-                                                    if not entry.list_name or not rawget( data.lists, entry.list_name ) then
-                                                        desc = "|cff00ccff（未设置）|r"
-                                                        warning = true
-                                                    else
-                                                        desc = "|cff00ccff" .. entry.list_name .. "|r"
-                                                    end
-
-                                                    if cLen and cLen > 0 then
-                                                        desc = desc .. ", 是 |cffffd100" .. entry.criteria .. "|r"
-                                                    end
-
-                                                elseif entry.action == "cancel_buff" then
-                                                    if not entry.buff_name then
-                                                        desc = "|cff00ccff(未设置)|r"
-                                                        warning = true
-                                                    else
-                                                        local a = class.auras[ entry.buff_name ]
-
-                                                        if a then
-                                                            desc = "|cff00ccff" .. a.name .. "|r"
+                                                    elseif entry.action == "variable" then
+                                                        if entry.op == "reset" then
+                                                            desc = format( "重置 |cff00ccff%s|r", entry.var_name or "unassigned" )
+                                                        elseif entry.op == "default" then
+                                                            desc = format( "|cff00ccff%s|r 默认 = |cffffd100%s|r", entry.var_name or "unassigned", entry.value or "0" )
+                                                        elseif entry.op == "set" or entry.op == "setif" then
+                                                            desc = format( "设置 |cff00ccff%s|r = |cffffd100%s|r", entry.var_name or "unassigned", entry.value or "nothing" )
                                                         else
-                                                            desc = "|cff00ccff(未找到)|r"
+                                                            desc = format( "%s |cff00ccff%s|r (|cffffd100%s|r)", entry.op or "set", entry.var_name or "unassigned", entry.value or "nothing" )
+                                                        end
+
+                                                        if cLen and cLen > 0 then
+                                                            desc = format( "%s, 是 |cffffd100%s|r", desc, entry.criteria )
+                                                        end
+
+                                                    elseif entry.action == "call_action_list" or entry.action == "run_action_list" then
+                                                        if not entry.list_name or not rawget( data.lists, entry.list_name ) then
+                                                            desc = "|cff00ccff（未设置）|r"
                                                             warning = true
-                                                        end
-                                                    end
-
-                                                    if cLen and cLen > 0 then
-                                                        desc = desc .. ", 如果 |cffffd100" .. entry.criteria .. "|r"
-                                                    end
-
-                                                elseif entry.action == "cancel_action" then
-                                                    if not entry.action_name then
-                                                        desc = "|cff00ccff(未设置)|r"
-                                                        warning = true
-                                                    else
-                                                        local a = class.abilities[ entry.action_name ]
-
-                                                        if a then
-                                                            desc = "|cff00ccff" .. a.name .. "|r"
                                                         else
-                                                            desc = "|cff00ccff(未找到)|r"
+                                                            desc = "|cff00ccff" .. entry.list_name .. "|r"
+                                                        end
+
+                                                        if cLen and cLen > 0 then
+                                                            desc = desc .. ", 是 |cffffd100" .. entry.criteria .. "|r"
+                                                        end
+
+                                                    elseif entry.action == "cancel_buff" then
+                                                        if not entry.buff_name then
+                                                            desc = "|cff00ccff(未设置)|r"
                                                             warning = true
+                                                        else
+                                                            local a = class.auras[ entry.buff_name ]
+
+                                                            if a then
+                                                                desc = "|cff00ccff" .. a.name .. "|r"
+                                                            else
+                                                                desc = "|cff00ccff(未找到)|r"
+                                                                warning = true
+                                                            end
+                                                        end
+
+                                                        if cLen and cLen > 0 then
+                                                            desc = desc .. ", 如果 |cffffd100" .. entry.criteria .. "|r"
+                                                        end
+
+                                                    elseif entry.action == "cancel_action" then
+                                                        if not entry.action_name then
+                                                            desc = "|cff00ccff(未设置)|r"
+                                                            warning = true
+                                                        else
+                                                            local a = class.abilities[ entry.action_name ]
+
+                                                            if a then
+                                                                desc = "|cff00ccff" .. a.name .. "|r"
+                                                            else
+                                                                desc = "|cff00ccff(未找到)|r"
+                                                                warning = true
+                                                            end
+                                                        end
+
+                                                        if cLen and cLen > 0 then
+                                                            desc = desc .. ", 如果 |cffffd100" .. entry.criteria .. "|r"
+                                                        end
+
+                                                    elseif cLen and cLen > 0 then
+                                                        desc = "|cffffd100" .. entry.criteria .. "|r"
+                                                    end
+
+                                                    if not entry.enabled then
+                                                        warning = true
+                                                        color = "|cFF808080"
+                                                    end
+
+                                                    if desc then desc = desc:gsub( "[\r\n]", "" ) end
+
+                                                    if not color then
+                                                        color = warning and "|cFFFF0000" or "|cFFFFD100"
+                                                    end
+
+                                                    if entry.empower_to then
+                                                        if entry.empower_to == "max_empower" then
+                                                            action = action .. "(Max)"
+                                                        else
+                                                            action = action .. " (" .. entry.empower_to .. ")"
                                                         end
                                                     end
 
-                                                    if cLen and cLen > 0 then
-                                                        desc = desc .. ", 如果 |cffffd100" .. entry.criteria .. "|r"
-                                                    end
-
-                                                elseif cLen and cLen > 0 then
-                                                    desc = "|cffffd100" .. entry.criteria .. "|r"
-
-                                                end
-
-                                                if not entry.enabled then
-                                                    warning = true
-                                                    color = "|cFF808080"
-                                                end
-
-                                                if desc then desc = desc:gsub( "[\r\n]", "" ) end
-
-                                                if not color then
-                                                    color = warning and "|cFFFF0000" or "|cFFFFD100"
-                                                end
-
-                                                if entry.empower_to then
-                                                    if entry.empower_to == "max_empower" then
-                                                        action = action .. "(Max)"
+                                                    if desc then
+                                                        if check ~= nil then
+                                                            v[ key ] = color .. i .. ".|r " .. action .. " - " .. "|cFFFFD100" .. desc .. "|r"
+                                                        else
+                                                            v[ key ] = color .. "-" .. ".|r " .. action .. " - " .. "|cFFFFD100" .. desc .. "|r"
+                                                        end
+                                                       
                                                     else
-                                                        action = action .. " (" .. entry.empower_to .. ")"
+                                                        if check ~= nil then
+                                                            v[ key ] = color .. i .. ".|r " .. action
+                                                        else
+                                                            v[ key ] = color .. "-" .. ".|r " .. action
+                                                        end
                                                     end
-                                                end
 
-                                                if desc then
-                                                    v[ key ] = color .. i .. ".|r " .. action .. " - " .. "|cFFFFD100" .. desc .. "|r"
-                                                else
-                                                    v[ key ] = color .. i .. ".|r " .. action
-                                                end
-
-                                                last = i + 1
+                                                    last = i + 1
+                                                until true
                                             end
                                         end
 
