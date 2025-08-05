@@ -809,8 +809,9 @@ hekili_autocast:SetScript("OnUpdate", function()
                                     CastSpellByName(name, action.target)
                                     return
                                 end
+                                action.target = "cursor"
                             end
-                            action.target = "target"
+              
                         end
 
                         if Hekili.DB.profile.toggles.officialAuto.value and action.terrain then
@@ -965,9 +966,9 @@ hekili_autocast:SetScript("OnUpdate", function()
                                 Hekili.oneShotCast = false
                                 return  
                             end
-
-                        end
                         action.target = "target"
+                        end
+                    
                     end
 
                     local errorCast_state = errorCast(name)

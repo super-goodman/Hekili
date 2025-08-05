@@ -1139,10 +1139,10 @@ spec:RegisterAbilities( {
         hasteCD = true,
         gcd = "spell",
         school = "frost",
-        terrain = true,
         spend = 0.02,
         spendType = "mana",
-
+        terrain = true,
+        toggle_terrain = "player",
         startsCombat = true,
 
         velocity = 20,

@@ -10,13 +10,10 @@ actions+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check&!raid
 actions+=/variable,name=trueshot_ready,value=cooldown.trueshot.ready&((!raid_event.adds.exists|raid_event.adds.count=1)&(!talent.bullseye|fight_remains>cooldown.trueshot.duration_guess+buff.trueshot.duration%2|buff.bullseye.stack=buff.bullseye.max_stack)&(!trinket.1.has_use_buff|trinket.1.cooldown.remains>30|trinket.1.cooldown.ready)&(!trinket.2.has_use_buff|trinket.2.cooldown.remains>30|trinket.2.cooldown.ready)|raid_event.adds.exists&(!raid_event.adds.up&(raid_event.adds.duration+raid_event.adds.in<25|raid_event.adds.in>60)|raid_event.adds.up&raid_event.adds.remains>10)|boss&fight_remains<25)
 actions+=/mend_pet,if=pet.health_pct<pet_healing
 actions+=/hunters_mark,if=(settings.mark_any|target.is_boss)&active_dot.hunters_mark=0&target.time_to_pct_80>20
-actions+=/call_action_list,name=move_st,strict=1,if=movement.distance>2&(active_enemies<3|!talent.trick_shots)
-actions+=/call_action_list,name=move_trickshots,strict=1,if=movement.distance>2&hero_tree.sentinel&(active_enemies=3&!target.moving|active_enemies>3)
-actions+=/call_action_list,name=move_trickshots_dark,strict=1,if=movement.distance>2&!hero_tree.sentinel&(active_enemies=3&!target.moving|active_enemies>3)
-actions+=/call_action_list,name=st,strict=1,if=active_enemies<3|!talent.trick_shots&!moving
-actions+=/call_action_list,name=trickshots,strict=1,if=hero_tree.sentinel&!moving&(active_enemies=3&!target.moving|active_enemies>3)
-actions+=/call_action_list,name=trickshots_dark,strict=1,if=!hero_tree.sentinel&!moving&(active_enemies=3&!target.moving|active_enemies>3)
-
+actions+=/call_action_list,name=move_st,strict=1,if=movement.distance>2&(active_enemies<2|!talent.trick_shots)
+actions+=/call_action_list,name=move_trickshots,strict=1,if=movement.distance>2&(active_enemies=3&!target.moving|active_enemies>3)
+actions+=/call_action_list,name=st,strict=1,if=active_enemies<2|!talent.trick_shots&!moving
+actions+=/call_action_list,name=trickshots,strict=1,if=!moving&(active_enemies=3&!target.moving|active_enemies>3)
 
 actions.cds+=/berserking,if=buff.trueshot.up|boss&fight_remains<13&raid
 actions.cds+=/blood_fury,if=buff.trueshot.up|cooldown.trueshot.remains>30|boss&fight_remains<16&raid
@@ -25,35 +22,73 @@ actions.cds+=/fireblood,if=buff.trueshot.up|cooldown.trueshot.remains>30|boss&fi
 actions.cds+=/lights_judgment,if=buff.trueshot.down
 actions.cds+=/potion,if=buff.trueshot.up&(buff.bloodlust.up|target.health.pct<20)|boss&fight_remains<31&raid
 
-actions.st+=/volley
-actions.st+=/rapid_fire,if=hero_tree.sentinel&debuff.lunar_storm_cooldown.down|!talent.aspect_of_the_hydra&talent.bulletstorm&active_enemies>1&buff.trick_shots.up&(buff.precise_shots.down|!talent.no_scope)
-actions.st+=/call_action_list,strict=1,name=cds
-actions.st+=/call_action_list,strict=1,name=trinkets
-actions.st+=/trueshot,if=variable.trueshot_ready&cooldown_check
+actions.st+=/volley,if=buff.double_tap.down
+actions.st+=/trueshot,if=variable.trueshot_ready&buff.double_tap.down
+# Sentinel
+actions.st+=/rapid_fire,if=talent.lunar_storm&buff.lunar_storm_cooldown.down
 actions.st+=/explosive_shot,if=cooldown.aimed_shot.charges<2&buff.lock_and_load.down&fight_remains>10
-actions.st+=/aimed_shot,if=talent.precision_detonation&set_bonus.thewarwithin_season_2_4pc&(buff.precise_shots.down|debuff.spotters_mark.up&buff.moving_target.up)&buff.lock_and_load.up
-actions.st+=/black_arrow,cycle_targets=1,if=talent.headshot&buff.precise_shots.up|!talent.headshot&buff.razor_fragments.up
-actions.st+=/kill_shot,cycle_targets=1,if=talent.headshot&buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)|!talent.headshot&buff.razor_fragments.up
-actions.st+=/multishot,cycle_targets=1,if=buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)&active_enemies>1&!talent.aspect_of_the_hydra&(talent.symphonic_arsenal|talent.small_game_hunter)
-actions.st+=/arcane_shot,cycle_targets=1,if=buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)
-actions.st+=/aimed_shot,cycle_targets=1,if=(buff.precise_shots.down|debuff.spotters_mark.up&buff.moving_target.up)&full_recharge_time<action.rapid_fire.execute_time+cast_time&(!talent.bulletstorm|buff.bulletstorm.up)&talent.windrunner_quiver
-actions.st+=/rapid_fire,if=(!talent.bulletstorm|buff.bulletstorm.stack<=10|talent.aspect_of_the_hydra&active_enemies>1)
-actions.st+=/aimed_shot,cycle_targets=1,if=buff.precise_shots.down|debuff.spotters_mark.up&buff.moving_target.up
-actions.st+=/explosive_shot,if=!set_bonus.thewarwithin_season_2_4pc|!talent.precision_detonation
-actions.st+=/black_arrow,cycle_targets=1,if=!talent.headshot
+actions.st+=/kill_shot,if=talent.black_arrow&(talent.headshot&buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)|!talent.headshot&buff.razor_fragments.up)
+actions.st+=/arcane_shot,if=buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)
+actions.st+=/aimed_shot,if=(buff.precise_shots.down|debuff.spotters_mark.up&buff.moving_target.up)&full_recharge_time<action.rapid_fire.execute_time+cast_time&(!talent.bulletstorm|buff.bulletstorm.up)&talent.windrunner_quiver
+actions.st+=/rapid_fire,if=!talent.bulletstorm|buff.bulletstorm.stack<=10
+actions.st+=/aimed_shot,if=buff.precise_shots.down|debuff.spotters_mark.up&buff.moving_target.up
+actions.st+=/rapid_fire
+actions.st+=/explosive_shot,if=talent.precision_detonation|buff.trueshot.down
+actions.st+=/kill_shot,if=talent.black_arrow&!talent.headshot
 actions.st+=/steady_shot
 
-actions.move_st+=/rapid_fire,if=hero_tree.sentinel&debuff.lunar_storm_cooldown.down|!talent.aspect_of_the_hydra&talent.bulletstorm&active_enemies>1&buff.trick_shots.up&(buff.precise_shots.down|!talent.no_scope)
-actions.move_st+=/trueshot,if=variable.trueshot_ready
-actions.move_st+=/explosive_shot,if=talent.precision_detonation&set_bonus.thewarwithin_season_2_4pc&(buff.precise_shots.down|debuff.spotters_mark.up&buff.moving_target.up)&buff.lock_and_load.up
-actions.move_st+=/black_arrow,cycle_targets=1,if=talent.headshot&buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)|!talent.headshot&buff.razor_fragments.up
-actions.move_st+=/kill_shot,cycle_targets=1,if=talent.headshot&buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)|!talent.headshot&buff.razor_fragments.up
-actions.move_st+=/multishot,cycle_targets=1,if=buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)&active_enemies>1&!talent.aspect_of_the_hydra&(talent.symphonic_arsenal|talent.small_game_hunter)
-actions.move_st+=/arcane_shot,cycle_targets=1,if=buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)
-actions.move_st+=/rapid_fire,if=(!hero_tree.sentinel|debuff.lunar_storm_cooldown.remains>action_cooldown/3)&(!talent.bulletstorm|buff.bulletstorm.stack<=10|talent.aspect_of_the_hydra&active_enemies>1)
-actions.move_st+=/explosive_shot,if=!set_bonus.thewarwithin_season_2_4pc|!talent.precision_detonation
-actions.move_st+=/black_arrow,if=!talent.headshot
+actions.move_st+=/volley,if=buff.double_tap.down
+actions.move_st+=/trueshot,if=variable.trueshot_ready&buff.double_tap.down
+# Sentinel
+actions.move_st+=/rapid_fire,if=talent.lunar_storm&buff.lunar_storm_cooldown.down
+actions.move_st+=/explosive_shot,if=cooldown.aimed_shot.charges<2&buff.lock_and_load.down&fight_remains>10
+actions.move_st+=/kill_shot,if=talent.black_arrow&(talent.headshot&buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)|!talent.headshot&buff.razor_fragments.up)
+actions.move_st+=/arcane_shot,if=buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)
+actions.move_st+=/aimed_shot,if=buff.lock_and_load.up
+actions.move_st+=/rapid_fire,if=!talent.bulletstorm|buff.bulletstorm.stack<=10
+actions.move_st+=/rapid_fire
+actions.move_st+=/explosive_shot,if=talent.precision_detonation|buff.trueshot.down
+actions.move_st+=/kill_shot,if=talent.black_arrow&!talent.headshot
 actions.move_st+=/steady_shot
+
+actions.cleave+=/explosive_shot,if=talent.precision_detonation&action.aimed_shot.in_flight&(buff.trueshot.down|!talent.windrunner_quiver)
+actions.cleave+=/kill_shot,if=talent.black_arrow&buff.precise_shots.up&buff.moving_target.down&variable.trueshot_ready
+actions.cleave+=/volley,if=(talent.double_tap&buff.double_tap.down|!talent.aspect_of_the_hydra)&(buff.precise_shots.down|buff.moving_target.up)
+actions.cleave+=/rapid_fire,if=talent.bulletstorm&buff.bulletstorm.down&(!talent.double_tap|buff.double_tap.up|!talent.aspect_of_the_hydra&buff.trick_shots.remains>execute_time)&(buff.precise_shots.down|buff.moving_target.up|!talent.volley)
+actions.cleave+=/volley,if=!talent.double_tap&(buff.precise_shots.down|buff.moving_target.up)
+actions.cleave+=/trueshot,if=variable.trueshot_ready&(buff.double_tap.down|!talent.volley)&(hero_tree.dark_ranger|buff.lunar_storm_cooldown.up|!talent.double_tap|!talent.volley)&(buff.precise_shots.down|buff.moving_target.up|!talent.volley)
+# Sentinel
+actions.cleave+=/rapid_fire,if=talent.lunar_storm&buff.lunar_storm_cooldown.down&(buff.precise_shots.down|buff.moving_target.up|cooldown.volley.remains&cooldown.trueshot.remains|!talent.volley)
+actions.cleave+=/kill_shot,if=talent.black_arrow&(talent.headshot&buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)|!talent.headshot&buff.razor_fragments.up)
+actions.cleave+=/kill_shot,cycle_targets=1,if=!talent.black_arrow&(talent.headshot&buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)|!talent.headshot&buff.razor_fragments.up)
+actions.cleave+=/multishot,cycle_targets=1,if=buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)&!talent.aspect_of_the_hydra&(talent.symphonic_arsenal|talent.small_game_hunter)
+actions.cleave+=/arcane_shot,cycle_targets=1,if=buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)
+actions.cleave+=/aimed_shot,cycle_targets=1,if=(buff.precise_shots.down|debuff.spotters_mark.up&buff.moving_target.up)&full_recharge_time<action.rapid_fire.execute_time+cast_time&(!talent.bulletstorm|buff.bulletstorm.up)&talent.windrunner_quiver
+actions.cleave+=/rapid_fire,if=!talent.bulletstorm|buff.bulletstorm.stack<=10|talent.aspect_of_the_hydra
+actions.cleave+=/aimed_shot,cycle_targets=1,if=buff.precise_shots.down|debuff.spotters_mark.up&buff.moving_target.up
+actions.cleave+=/rapid_fire
+actions.cleave+=/explosive_shot,if=talent.precision_detonation|buff.trueshot.down
+actions.cleave+=/kill_shot,if=talent.black_arrow&!talent.headshot
+actions.cleave+=/steady_shot
+
+actions.cleave_move+=/explosive_shot,if=talent.precision_detonation&action.aimed_shot.in_flight&(buff.trueshot.down|!talent.windrunner_quiver)
+actions.cleave_move+=/kill_shot,if=talent.black_arrow&buff.precise_shots.up&buff.moving_target.down&variable.trueshot_ready
+actions.cleave_move+=/volley,if=(talent.double_tap&buff.double_tap.down|!talent.aspect_of_the_hydra)&(buff.precise_shots.down|buff.moving_target.up)
+actions.cleave_move+=/rapid_fire,if=talent.bulletstorm&buff.bulletstorm.down&(!talent.double_tap|buff.double_tap.up|!talent.aspect_of_the_hydra&buff.trick_shots.remains>execute_time)&(buff.precise_shots.down|buff.moving_target.up|!talent.volley)
+actions.cleave_move+=/volley,if=!talent.double_tap&(buff.precise_shots.down|buff.moving_target.up)
+actions.cleave_move+=/trueshot,if=variable.trueshot_ready&(buff.double_tap.down|!talent.volley)&(hero_tree.dark_ranger|buff.lunar_storm_cooldown.up|!talent.double_tap|!talent.volley)&(buff.precise_shots.down|buff.moving_target.up|!talent.volley)
+# Sentinel
+actions.cleave_move+=/rapid_fire,if=talent.lunar_storm&buff.lunar_storm_cooldown.down&(buff.precise_shots.down|buff.moving_target.up|cooldown.volley.remains&cooldown.trueshot.remains|!talent.volley)
+actions.cleave_move+=/kill_shot,if=talent.black_arrow&(talent.headshot&buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)|!talent.headshot&buff.razor_fragments.up)
+actions.cleave_move+=/kill_shot,cycle_targets=1,if=!talent.black_arrow&(talent.headshot&buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)|!talent.headshot&buff.razor_fragments.up)
+actions.cleave_move+=/multishot,cycle_targets=1,if=buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)&!talent.aspect_of_the_hydra&(talent.symphonic_arsenal|talent.small_game_hunter)
+actions.cleave_move+=/arcane_shot,cycle_targets=1,if=buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)
+actions.cleave_move+=/aimed_shot,if=buff.lock_and_load.up
+actions.cleave_move+=/rapid_fire,if=!talent.bulletstorm|buff.bulletstorm.stack<=10|talent.aspect_of_the_hydra
+actions.cleave_move+=/rapid_fire
+actions.cleave_move+=/explosive_shot,if=talent.precision_detonation|buff.trueshot.down
+actions.cleave_move+=/kill_shot,if=talent.black_arrow&!talent.headshot
+actions.cleave_move+=/steady_shot
 
 actions.trickshots+=/multishot,if=buff.trick_shots.down
 actions.trickshots+=/rapid_fire,if=buff.trick_shots.up&buff.bulletstorm.stack<5
@@ -78,25 +113,6 @@ actions.move_trickshots+=/aimed_shot,if=buff.lock_and_load.up
 actions.move_trickshots+=/rapid_fire,if=buff.trick_shots.up&(cooldown.aimed_shot.charges<1|focus<60)
 actions.move_trickshots+=/steady_shot,if=focus+cast_regen<focus.max&!cooldown.rapid_fire.ready
 
-actions.trickshots_dark+=/multishot,if=buff.precise_shots.up&buff.volley.down&(debuff.spotters_mark.down|buff.moving_target.down)|buff.trick_shots.down&buff.volley.down
-actions.trickshots_dark+=/black_arrow,cycle_targets=1,if=buff.trick_shots.up
-actions.trickshots_dark+=/rapid_fire,if=buff.trick_shots.up&(buff.trueshot.down|focus<=40)&active_dot.explosive_shot=0&buff.lock_and_load.down&buff.volley.down
-actions.trickshots_dark+=/volley,if=!talent.double_tap
-actions.trickshots_dark+=/call_action_list,strict=1,name=cds
-actions.trickshots_dark+=/call_action_list,strict=1,name=trinkets
-actions.trickshots_dark+=/trueshot,if=variable.trueshot_ready&cooldown_check
-actions.trickshots_dark+=/explosive_shot,if=buff.lock_and_load.up&buff.trick_shots.up&talent.lock_and_load.enabled&set_bonus.thewarwithin_season_2_4pc&talent.precision_detonation.enabled
-actions.trickshots_dark+=/aimed_shot,if=buff.lock_and_load.up&buff.trick_shots.up&talent.lock_and_load.enabled&set_bonus.thewarwithin_season_2_4pc&(cooldown.explosive_shot.ready|cooldown.explosive_shot.remains>2)
-actions.trickshots_dark+=/volley,if=talent.double_tap&buff.double_tap.down
-actions.trickshots_dark+=/aimed_shot,if=(buff.precise_shots.down|debuff.spotters_mark.up&buff.moving_target.up)&buff.trick_shots.up&buff.bulletstorm.up&full_recharge_time<gcd
-actions.trickshots_dark+=/aimed_shot,if=(buff.precise_shots.down|debuff.spotters_mark.up&buff.moving_target.up)&buff.trick_shots.up&active_dot.explosive_shot>=1
-actions.trickshots_dark+=/explosive_shot,if=talent.precision_detonation&(buff.lock_and_load.up)&(buff.precise_shots.down|debuff.spotters_mark.up&buff.moving_target.up)
-actions.trickshots_dark+=/explosive_shot,if=cooldown.aimed_shot.charge>=1&focus>=55&active_dot.explosive_shot=0&buff.trueshot.down&buff.trick_shots.up
-actions.trickshots_dark+=/aimed_shot,if=(buff.precise_shots.down|debuff.spotters_mark.up&buff.moving_target.up)&buff.trick_shots.up
-actions.trickshots_dark+=/rapid_fire,if=buff.trick_shots.up&(!hero_tree.sentinel|debuff.lunar_storm_cooldown.remains>cooldown/3|debuff.lunar_storm_cooldown.down)
-actions.trickshots_dark+=/steady_shot,if=focus+cast_regen<focus.max&(focus+focus.regen*cast_time/3>35&buff.trueshot.up|buff.trueshot.down)
-actions.trickshots_dark+=/multishot,if=focus>60
-
 
 actions.trinkets+=/variable,name=sync_ready,value=variable.trueshot_ready&cooldown_check
 actions.trinkets+=/variable,name=sync_active,value=buff.trueshot.up&cooldown_check
@@ -104,18 +120,6 @@ actions.trinkets+=/variable,name=sync_remains,value=cooldown.trueshot.remains_gu
 actions.trinkets+=/use_item,slot=trinket1,if=trinket.1.has_use_buff&(variable.sync_ready&(variable.trinket_1_stronger|trinket.2.cooldown.remains)|!variable.sync_ready&(variable.trinket_1_stronger&(variable.sync_remains>trinket.1.cooldown.duration%3&fight_remains>trinket.1.cooldown.duration+20|trinket.2.has_use_buff&trinket.2.cooldown.remains>variable.sync_remains-15&trinket.2.cooldown.remains-5<variable.sync_remains&variable.sync_remains+45>fight_remains)|variable.trinket_2_stronger&(trinket.2.cooldown.remains&(trinket.2.cooldown.remains-5<variable.sync_remains&variable.sync_remains>=20|trinket.2.cooldown.remains-5>=variable.sync_remains&(variable.sync_remains>trinket.1.cooldown.duration%3|trinket.1.cooldown.duration<fight_remains&(variable.sync_remains+trinket.1.cooldown.duration>fight_remains)))|trinket.2.cooldown.ready&variable.sync_remains>20&variable.sync_remains<trinket.2.cooldown.duration%3)))|!trinket.1.has_use_buff&(trinket.1.cast_time=0|!variable.sync_active)&(!trinket.2.has_use_buff&(variable.trinket_1_stronger|trinket.2.cooldown.remains)|trinket.2.has_use_buff&(variable.sync_remains>20|trinket.2.cooldown.remains>20))|boss&fight_remains<25&raid&(variable.trinket_1_stronger|trinket.2.cooldown.remains)
 actions.trinkets+=/use_item,slot=trinket2,if=trinket.2.has_use_buff&(variable.sync_ready&(variable.trinket_2_stronger|trinket.1.cooldown.remains)|!variable.sync_ready&(variable.trinket_2_stronger&(variable.sync_remains>trinket.2.cooldown.duration%3&fight_remains>trinket.2.cooldown.duration+20|trinket.1.has_use_buff&trinket.1.cooldown.remains>variable.sync_remains-15&trinket.1.cooldown.remains-5<variable.sync_remains&variable.sync_remains+45>fight_remains)|variable.trinket_1_stronger&(trinket.1.cooldown.remains&(trinket.1.cooldown.remains-5<variable.sync_remains&variable.sync_remains>=20|trinket.1.cooldown.remains-5>=variable.sync_remains&(variable.sync_remains>trinket.2.cooldown.duration%3|trinket.2.cooldown.duration<fight_remains&(variable.sync_remains+trinket.2.cooldown.duration>fight_remains)))|trinket.1.cooldown.ready&variable.sync_remains>20&variable.sync_remains<trinket.1.cooldown.duration%3)))|!trinket.2.has_use_buff&(trinket.2.cast_time=0|!variable.sync_active)&(!trinket.1.has_use_buff&(variable.trinket_2_stronger|trinket.1.cooldown.remains)|trinket.1.has_use_buff&(variable.sync_remains>20|trinket.1.cooldown.remains>20))|boss&fight_remains<25&raid&(variable.trinket_2_stronger|trinket.1.cooldown.remains)
 
-
-
-
-actions.move_trickshots_dark+=/multishot,if=buff.precise_shots.up&buff.volley.down&(debuff.spotters_mark.down|buff.moving_target.down)|buff.trick_shots.down&buff.volley.down
-actions.move_trickshots_dark+=/black_arrow,cycle_targets=1,if=buff.trick_shots.up
-actions.move_trickshots_dark+=/rapid_fire,if=buff.trick_shots.up&buff.lock_and_load.down
-actions.move_trickshots_dark+=/explosive_shot,if=buff.lock_and_load.up&buff.trick_shots.up&talent.lock_and_load.enabled&set_bonus.thewarwithin_season_2_4pc&talent.precision_detonation.enabled
-actions.move_trickshots_dark+=/aimed_shot,if=buff.lock_and_load.up&buff.trick_shots.up&talent.lock_and_load.enabled&set_bonus.thewarwithin_season_2_4pc&(cooldown.explosive_shot.ready|cooldown.explosive_shot.remains>2)
-actions.move_trickshots_dark+=/rapid_fire,if=buff.trick_shots.up&(!hero_tree.sentinel|debuff.lunar_storm_cooldown.remains>cooldown%3|debuff.lunar_storm_cooldown.down)
-actions.move_trickshots_dark+=/explosive_shot
-actions.move_trickshots_dark+=/steady_shot,if=focus+cast_regen<focus.max
-actions.move_trickshots_dark+=/multishot
 
 
 actions.mitigation=/misdirection,line_cd=2,if=time<6&buff.misdirection.down

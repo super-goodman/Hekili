@@ -6558,6 +6558,7 @@ break end
                                         local data = rawget( Hekili.DB.profile.packs, pack )
                                         local list = rawget( data.lists, packControl.listName )
                                         local check = C_PlayerInteractionManager.InteractUnit("target")
+                                        check = true
                                         if list then
                                             local last = 0
 

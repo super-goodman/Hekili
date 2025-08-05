@@ -17,6 +17,24 @@ actions+=/run_action_list,name=st_ff,strict=1,if=talent.frostfire_bolt&!moving
 actions+=/run_action_list,name=move_st_ff,strict=1,if=talent.frostfire_bolt&moving
 actions+=/run_action_list,name=st_ss,strict=1,if=!talent.frostfire_bolt
 
+actions.cds+=/use_item,name=treacherous_transmitter,if=boss&fight_remains<32+20*equipped.spymasters_web|prev_off_gcd.icy_veins|(!variable.boltspam|equipped.spymasters_web)&(cooldown.icy_veins.remains<12|cooldown.icy_veins.remains<22&cooldown.shifting_power.remains<10)
+## actions.cds+=/do_treacherous_transmitter_task,if=fight_remains<18|(buff.cryptic_instructions.remains<?buff.realigning_nexus_convergence_divergence.remains<?buff.errant_manaforge_emission.remains)<(action.shifting_power.execute_time+1*talent.ray_of_frost)
+actions.cds+=/use_item,name=spymasters_web,if=boss&fight_remains<20&raid|buff.icy_veins.remains<19&(boss&fight_remains<105&raid|buff.spymasters_report.stack>=32)&(buff.icy_veins.remains>15|trinket.treacherous_transmitter.cooldown.remains>50)
+actions.cds+=/use_item,name=imperfect_ascendancy_serum,if=buff.icy_veins.remains>15|boss&fight_remains<20&raid
+actions.cds+=/use_item,name=burst_of_knowledge,if=buff.icy_veins.remains>15|boss&fight_remains<20&raid
+actions.cds+=/use_item,name=ratfang_toxin,if=time>10
+actions.cds+=/potion,if=buff.icy_veins.remains>9
+actions.cds+=/icy_veins,if=buff.icy_veins.remains<gcd.max*2&(fight_remains>30|raid)
+# Manual change from time=0, which the sims use but the addon cannot
+actions.cds+=/flurry,if=time<0.2&active_enemies<=2
+actions.cds+=/use_item,name=neural_synapse_enhancer,if=active_enemies<=2|prev_gcd.1.comet_storm|boss&fight_remains<20&raid
+actions.cds+=/use_items,if=buff.icy_veins.remains>10
+## actions.cds+=/invoke_external_buff,name=power_infusion,if=buff.power_infusion.down
+## actions.cds+=/invoke_external_buff,name=blessing_of_summer,if=buff.blessing_of_summer.down
+actions.cds+=/blood_fury
+actions.cds+=/berserking,if=buff.icy_veins.remains>9&buff.icy_veins.remains<15|boss&fight_remains<15&raid
+actions.cds+=/fireblood
+actions.cds+=/ancestral_call
 actions.aoe_ff=/frostfire_bolt,if=talent.deaths_chill&buff.icy_veins.remains>9&(buff.deaths_chill.stack<9|buff.deaths_chill.stack=9&!action.frostfire_bolt.in_flight)
 actions.aoe_ff+=/cone_of_cold,if=talent.coldest_snap&(prev_gcd.1.comet_storm|!cooldown.comet_storm.ready)&(fight_remains>10|raid)&!cooldown.frozen_orb.ready&cooldown.frozen_orb.remains>10&cooldown.comet_storm.remains>10
 actions.aoe_ff+=/freeze,if=freezable&prev_gcd.1.comet_storm
@@ -69,24 +87,7 @@ actions.aoe_ss+=/flurry,if=remaining_winters_chill=0&debuff.winters_chill.down
 actions.aoe_ss+=/frostbolt
 actions.aoe_ss+=/call_action_list,name=movement
 
-actions.cds+=/use_item,name=treacherous_transmitter,if=boss&fight_remains<32+20*equipped.spymasters_web|prev_off_gcd.icy_veins|(!variable.boltspam|equipped.spymasters_web)&(cooldown.icy_veins.remains<12|cooldown.icy_veins.remains<22&cooldown.shifting_power.remains<10)
-## actions.cds+=/do_treacherous_transmitter_task,if=fight_remains<18|(buff.cryptic_instructions.remains<?buff.realigning_nexus_convergence_divergence.remains<?buff.errant_manaforge_emission.remains)<(action.shifting_power.execute_time+1*talent.ray_of_frost)
-actions.cds+=/use_item,name=spymasters_web,if=boss&fight_remains<20&raid|buff.icy_veins.remains<19&(boss&fight_remains<105&raid|buff.spymasters_report.stack>=32)&(buff.icy_veins.remains>15|trinket.treacherous_transmitter.cooldown.remains>50)
-actions.cds+=/use_item,name=imperfect_ascendancy_serum,if=buff.icy_veins.remains>15|boss&fight_remains<20&raid
-actions.cds+=/use_item,name=burst_of_knowledge,if=buff.icy_veins.remains>15|boss&fight_remains<20&raid
-actions.cds+=/use_item,name=ratfang_toxin,if=time>10
-actions.cds+=/potion,if=buff.icy_veins.remains>9
-actions.cds+=/icy_veins,if=buff.icy_veins.remains<gcd.max*2&(fight_remains>30|raid)
-# Manual change from time=0, which the sims use but the addon cannot
-actions.cds+=/flurry,if=time<0.2&active_enemies<=2
-actions.cds+=/use_item,name=neural_synapse_enhancer,if=active_enemies<=2|prev_gcd.1.comet_storm|boss&fight_remains<20&raid
-actions.cds+=/use_items,if=buff.icy_veins.remains>10
-## actions.cds+=/invoke_external_buff,name=power_infusion,if=buff.power_infusion.down
-## actions.cds+=/invoke_external_buff,name=blessing_of_summer,if=buff.blessing_of_summer.down
-actions.cds+=/blood_fury
-actions.cds+=/berserking,if=buff.icy_veins.remains>9&buff.icy_veins.remains<15|boss&fight_remains<15&raid
-actions.cds+=/fireblood
-actions.cds+=/ancestral_call
+
 
 actions.cleave_ff+=/frostfire_bolt,if=talent.deaths_chill&buff.icy_veins.remains>9&(buff.deaths_chill.stack<4|buff.deaths_chill.stack=4&!action.frostfire_bolt.in_flight)
 actions.cleave_ff+=/freeze,if=freezable&prev_gcd.1.glacial_spike

@@ -1267,7 +1267,9 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
 
                                                     if action == "wait" then
                                                         local sec = state.args.sec or 0.5
-
+                                                        if type(sec) ~= "number" then
+                                                            sec = 0.5
+                                                        end
                                                         if sec <= 0 then
                                                             if debug then self:Debug( "Invalid wait value ( %.2f ); skipping...", sec ) end
                                                         else

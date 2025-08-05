@@ -21,8 +21,9 @@ actions.default+=/surging_totem,if=(active_enemies>2|boss)&mana.pct>20&talent.su
 actions.default+=/totemic_recall,if=cooldown.healing_stream_totem.remains>10
 actions.default+=/healing_stream_totem,if=talent.healing_stream_totem_2.rank=1&charges_fractional>=2&!raid
 actions.default+=/healing_rain,if=(!moving&find.none_target_lowest_hp.pct>80&(active_enemies>4|boss)&mana.pct>90&!raid&!talent.surging_totem.enabled&talent.acid_rain.enabled)|buff.ancestral_swiftness.up
-actions.default+=/unleash_life,if=talent.ancestral_swiftness.enabled&find.lowest_hp.pct<100
+actions.default+=/unleash_life,if=talent.ancestral_swiftness.enabled&find.lowest_hp.pct<=100
 actions.default+=/unleash_life,if=find.lowest_hp.pct<50&!talent.ancestral_swiftness.enabled
+actions.default+=/ancestral_swiftness,if=talent.ancestral_swiftness.enabled
 actions.default+=/lava_burst,if=buff.lava_surge.up&target_is_enemie&find.none_target_lowest_hp.pct>50
 actions.default+=/flame_shock,if=target_is_enemie&moving&target.debuff.flame_shock.down&find.none_target_lowest_hp.pct=100&mana.pct>20&buff.spiritwalkers_grace.down
 actions.default+=/frost_shock,if=target_is_enemie&moving&target.debuff.frost_shock.down&find.none_target_lowest_hp.pct=100&mana.pct>20&buff.spiritwalkers_grace.down
@@ -46,7 +47,6 @@ actions.health_aoe+=/surging_totem,if=find.none_target_lowest_hp.pct<80&talent.s
 actions.health_aoe+=/ascendance,if=find.none_target_lowest_hp.pct<45|health.pct<45
 actions.health_aoe+=/healing_rain,if=mana.pct>30&!talent.surging_totem.enabled&buff.call_of_the_ancestors.up
 actions.health_aoe+=/wellspring,if=talent.wellspring.enabled&((raid&find.hurt_num_big.count>4)|(!raid&find.hurt_num_big.count>2))&find.none_target_lowest_hp.pct<70&!moving
-actions.health_aoe+=/ancestral_swiftness,if=find.none_target_lowest_hp.pct<80&talent.ancestral_swiftness.enabled
 actions.health_aoe+=/natures_swiftness,if=find.none_target_lowest_hp.pct<60
 actions.health_aoe+=/chain_heal,if=buff.natures_swiftness.up|buff.ancestral_swiftness.up&find.lowest_hp.pct<100
 #actions.health_aoe+=/healing_wave,if=active_hot.riptide>2&buff.tidal_waves.up&buff.primordial_wave.up&find.lowest_hp.pct<100

@@ -18,7 +18,7 @@ actions+=/cat_form,line_cd=2,if=(!buff.cat_form.up&!talent.fluid_form)&buff.bear
 actions+=/skull_bash
 actions+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check&!raid
 actions+=/call_action_list,name=variable
-actions+=/tigers_fury,if=fight_remains>15&((energy.deficit>35|combo_points=5|combo_points>=3&dot.rip.refreshable&buff.bloodtalons.up&hero_tree.wildstalker)&(boss&fight_remains<=15|(cooldown.bs_inc.remains>20&fight_remains>5)|(cooldown.bs_inc.ready&fight_remains>12|boss)))
+actions+=/tigers_fury,if=((energy.deficit>35|combo_points=5|combo_points>=3&dot.rip.refreshable&buff.bloodtalons.up&hero_tree.wildstalker)&(boss&fight_remains<=15|(cooldown.bs_inc.remains>20&fight_remains>5)|(cooldown.bs_inc.ready&fight_remains>12|boss)))
 actions+=/rake,cycle_targets=1,if=buff.shadowmeld.up|buff.prowl.up
 actions+=/natures_vigil,if=variable.regrowth&health.percent<70&(buff.bs_inc.up|buff.tigers_fury.up)
 actions+=/adaptive_swarm,cycle_targets=1,if=dot.adaptive_swarm_damage.stack<3&(!dot.adaptive_swarm_damage.ticking|dot.adaptive_swarm_damage.remains<2)&!action.adaptive_swarm.in_flight&(spell_targets=1|!talent.unbridled_swarm)&(dot.rip.ticking|hero_tree.druid_of_the_claw)

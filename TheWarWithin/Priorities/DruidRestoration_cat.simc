@@ -29,7 +29,7 @@ actions.default+=/tranquility,if=find.none_target_lowest_hp.pct<70&find.hurt_num
 actions.default+=/convoke_the_spirits,if=(buff.cat_form.down|buff.cat_form.up&buff.heart_of_the_wild.up)&(find.hurt_num_big.count>2|find.hurt_num.count>2)&find.none_target_lowest_hp.pct<80|buff.cat_form.up&(find.hurt_num_big.count>2|find.hurt_num.count>2)&find.none_target_lowest_hp.pct<90&(target.health.current>=3*health.max|active_enemies>3)
 actions.default+=/regrowth,if=find.lowest_hp.pct<80&!moving
 actions.default+=/rake,if=find.none_target_lowest_hp.pct>75&target.distance<5&target.debuff.rake.remains=0
-actions.default+=/cat_form,line_cd=2,if=find.none_target_lowest_hp.pct>75&target.distance<5&buff.cat_form.down
+# actions.default+=/cat_form,line_cd=2,if=find.none_target_lowest_hp.pct>75&target.distance<5&buff.cat_form.down
 actions.default+=/heart_of_the_wild,if=buff.cat_form.up
 actions.default+=/shred,if=buff.cat_form.up&buff.prowl_base.up&target.distance<5&combo_points<5
 actions.default+=/lunar_inspiration,if=buff.prowl_base.down&target.debuff.moonfire.remains=0&target.health.current>=3*health.max

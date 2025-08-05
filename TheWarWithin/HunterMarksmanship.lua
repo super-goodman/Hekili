@@ -1038,7 +1038,7 @@ spec:RegisterAbilities( {
 
         cycle_to = true,
         cycle = "spotters_mark",
-
+        velocity = 30, --self
         max_targets = trick_shots,
 
         spend = function ()
