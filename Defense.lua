@@ -14,7 +14,7 @@ Hekili.excludeDispelWarning = false
 
 local unitIDs = { "target", "targettarget", "focus", "focustarget", "boss1", "boss2", "boss3", "boss4", "boss5", "arena1", "arena2", "arena3", "arena4", "arena5" }
 
-local lowHealthRangeSpell_magic_dps = {465827,473070,468813,460156,448791,428169,323393,426787,1221532}
+local lowHealthRangeSpell_magic_dps = {465827,473070,468813,460156,448791,428169,323393,1241693,426787,1221532}
 
 local lowHealthRangeSpell_physic_dps = {427609,448492,349934,346742,438877,438476}
 
