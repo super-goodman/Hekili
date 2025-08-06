@@ -1424,7 +1424,9 @@ spec:RegisterAbilities( {
             end
         end,
 
-        bind = "black_arrow"
+        bind = "black_arrow",
+        copy = { "black_arrow", 466930, 53351 }
+
     },
 
     -- Your pet removes all root and movement impairing effects from itself and a friendly target, and grants immunity to all such effects for 4 sec.

@@ -25,7 +25,7 @@ local abs, ceil, floor, max, sqrt = math.abs, math.ceil, math.floor, math.max, m
 -- local GetPlayerAuraBySpellID = C_UnitAuras.GetPlayerAuraBySpellID
 local FindUnitBuffByID, FindUnitDebuffByID = ns.FindUnitBuffByID, ns.FindUnitDebuffByID
 -- local IsSpellOverlayed = C_SpellActivationOverlay.IsSpellOverlayed
--- local IsSpellKnownOrOverridesKnown = C_SpellBook.IsSpellInSpellBook
+local IsSpellKnownOrOverridesKnown = C_SpellBook.IsSpellInSpellBook
 -- local IsActiveSpell = ns.IsActiveSpell
 
 -- Specialization-specific local functions (if any)
@@ -903,7 +903,7 @@ do
             if sourceGUID == GUID then
                 if triggerEvents[ subtype ] then
                     spellID = spellChanges[ spellID ] or spellID
-                    if not IsSpellKnown( spellID, false ) then return end
+                    if not IsSpellKnownOrOverridesKnown( spellID ) then return end
 
                     local school = spellSchools[ spellSchool ]
                     if not school then return end
