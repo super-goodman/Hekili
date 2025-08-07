@@ -8,10 +8,11 @@ actions.precombat+=/blessed_hammer,if=holy_power<3&bless_out_combat&charges>=1&!
 actions.precombat+=/variable,name=trinket_sync_slot,value=1,if=trinket.1.has_cooldown&trinket.1.has_stat.any_dps&(!trinket.2.has_stat.any_dps|trinket.1.cooldown.duration>=trinket.2.cooldown.duration)|!trinket.2.has_cooldown
 actions.precombat+=/variable,name=trinket_sync_slot,value=2,if=trinket.2.has_cooldown&trinket.2.has_stat.any_dps&(!trinket.1.has_stat.any_dps|trinket.2.cooldown.duration>trinket.1.cooldown.duration)|!trinket.1.has_cooldown
 
+actions+=/avengers_shield_interrupt
 actions+=/rebuke
 actions+=/tank_combat_wait,if=time<combat_delay&moving
 actions+=/tank_combat_wait,if=time<combat_delay&time< combat_delay/2&moving
-actions+=/avengers_shield_interrupt
+
 actions+=/call_action_list,name=mitigation
 actions+=/call_action_list,name=cooldowns
 actions+=/call_action_list,name=trinkets
@@ -49,7 +50,7 @@ actions.aoe+=/hammer_of_the_righteous,if=buff.blessed_assurance.up&spell_targets
 actions.aoe+=/blessed_hammer,if=buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<3
 actions.aoe+=/crusader_strike,if=buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<2&!buff.avenging_wrath.up
 actions.aoe+=/consecration,if=buff.divine_guidance.stack=5
-actions.aoe+=/holy_armaments,line_cd=5
+actions.aoe+=/holy_armaments,line_cd=10
 actions.aoe+=/consecration,if=!consecration.up&!moving
 actions.aoe+=/blessed_hammer,if=set_bonus.tww3>=2
 actions.aoe+=/hammer_of_wrath

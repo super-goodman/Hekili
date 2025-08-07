@@ -14,7 +14,7 @@ actions.precombat+=/variable,name=treacherous_transmitter_precombat_cast,value=1
 actions.precombat+=/use_item,name=treacherous_transmitter
 actions.precombat+=/mirror_image
 actions.precombat+=/use_item,name=imperfect_ascendancy_serum
-actions.precombat+=/arcane_blast,if=!talent.evocation
+#actions.precombat+=/arcane_blast,if=!talent.evocation
 actions.precombat+=/evocation,if=talent.evocation
 
 actions+=/counterspell

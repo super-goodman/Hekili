@@ -39,7 +39,6 @@ actions+=/use_item,slot=trinket1,if=!variable.trinket_1_buffs&!variable.trinket_
 actions+=/use_item,slot=trinket2,if=!variable.trinket_2_buffs&!variable.trinket_2_manual&(variable.damage_trinket_priority=2|(!trinket.1.has_cooldown|trinket.1.cooldown.remains))&((trinket.2.cast_time>0&(!talent.breath_of_sindragosa|!buff.breath_of_sindragosa.up)&!buff.pillar_of_frost.up|!trinket.2.cast_time>0)&(!variable.trinket_1_buffs|cooldown.pillar_of_frost.remains>20)|!talent.pillar_of_frost)|raid&boss&fight_remains<15
 actions+=/use_item,slot=main_hand,if=buff.pillar_of_frost.up|(buff.breath_of_sindragosa.up&cooldown.pillar_of_frost.remains)|(variable.trinket_1_buffs&variable.trinket_2_buffs&(trinket.1.cooldown.remains<cooldown.pillar_of_frost.remains|trinket.2.cooldown.remains<cooldown.pillar_of_frost.remains)&cooldown.pillar_of_frost.remains>20)|raid&boss&fight_remains<15
 ## actions.high_prio_actions+=/invoke_external_buff,name=power_infusion,if=variable.cooldown_check
-actions+=/antimagic_shell,if=runic_power.deficit>40&death_knight.first_ams_cast<time
 # Choose Action list to run
 actions+=/call_action_list,name=cooldowns
 # Obliteration Active Rotation  Racial Abilities

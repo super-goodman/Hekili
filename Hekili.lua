@@ -792,7 +792,6 @@ hekili_autocast:SetScript("OnUpdate", function()
                 if type == 1 and action.empower_to == nil and (not ChannellingID or ChannellingID == 115175) and action.delay < 0.2 then
                     
                     local name = GetLocalizedSpellName(cast_ID)
-     
                     if Hekili.forceStealth == true  then
                         Hekili.forceStealth = false
                     end
@@ -1212,13 +1211,14 @@ function errorCast(name)
 
     elseif name == "圣洁武器"  then
         --CastSpellByID(433895)
-        CastSpellByName("圣洁武器")
-        CastSpellByName("神圣壁垒")
+        CastSpellByName("圣洁武器","player")
+        CastSpellByName("神圣壁垒","player")
         return true
     elseif name == "神圣壁垒"  then
         --CastSpellByID(433895)
-        CastSpellByName("圣洁武器")
-        CastSpellByName("神圣壁垒")
+        CastSpellByName("神圣壁垒","player")
+        CastSpellByName("圣洁武器","player")
+        
         return true
     elseif name == "回归"  or name == "深呼吸"  then
         if not Hekili:isPlayerAuraExist(433874) then

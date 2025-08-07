@@ -585,7 +585,7 @@ do
 
                     autocast = {
                         key = "F8",
-                        speedRange = 0.2,
+                        speedRange = 0.1,
                         value = false,
                         value2 = true,
                         cutoff = false,
@@ -6558,7 +6558,6 @@ break end
                                         local data = rawget( Hekili.DB.profile.packs, pack )
                                         local list = rawget( data.lists, packControl.listName )
                                         local check = C_PlayerInteractionManager.InteractUnit("target")
-                                        check = true
                                         if list then
                                             local last = 0
 

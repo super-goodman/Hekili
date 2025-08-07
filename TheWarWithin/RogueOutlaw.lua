@@ -1447,7 +1447,7 @@ spec:RegisterAbilities( {
             removeBuff( "deadshot" )
             removeBuff( "concealed_blunderbuss" ) -- Generating 2 extra combo points is purely a guess.
             removeBuff( "greenskins_wickers" )
-            removeBuff( "tornado_trigger" )
+            --removeBuff( "tornado_trigger" ) self
 
             if buff.opportunity.up then
                 removeStack( "opportunity" )

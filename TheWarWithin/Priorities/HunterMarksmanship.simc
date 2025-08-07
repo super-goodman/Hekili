@@ -15,7 +15,8 @@ actions+=/call_action_list,name=move_cleave,strict=1,if=movement.distance>2&acti
 actions+=/call_action_list,name=move_trickshots,strict=1,if=movement.distance>2&(active_enemies=3&!target.moving|active_enemies>3)&talent.trick_shots
 actions+=/call_action_list,name=st,strict=1,if=active_enemies<2|!talent.trick_shots&!moving
 actions+=/call_action_list,name=cleave,strict=1,if=active_enemies=2
-actions+=/call_action_list,name=trickshots,strict=1,if=!moving&(active_enemies=3&!target.moving|active_enemies>3)&talent.trick_shots
+actions+=/call_action_list,name=trickshots,strict=1,if=!moving&(active_enemies=3&!target.moving|active_enemies>3)&talent.trick_shots&hero_tree.sentinel
+actions+=/call_action_list,name=trickshots_dark,strict=1,if=!moving&(active_enemies=3&!target.moving|active_enemies>3)&talent.trick_shots&hero_tree.dark_ranger
 
 actions.cds+=/berserking,if=buff.trueshot.up|boss&fight_remains<13&raid
 actions.cds+=/blood_fury,if=buff.trueshot.up|cooldown.trueshot.remains>30|boss&fight_remains<16&raid
@@ -108,6 +109,23 @@ actions.trickshots+=/aimed_shot,if=buff.trick_shots.remains>cast_time
 actions.trickshots+=/rapid_fire,if=buff.trick_shots.up&(cooldown.aimed_shot.charges<1|focus<60)
 actions.trickshots+=/steady_shot,if=focus+cast_regen<focus.max&!cooldown.rapid_fire.ready
 actions.trickshots+=/multishot
+
+actions.trickshots_dark+=/explosive_shot,if=talent.precision_detonation&action.aimed_shot.in_flight&buff.trueshot.down&(!talent.shrapnel_shot|buff.lock_and_load.down)
+actions.trickshots_dark+=/volley,if=buff.double_tap.down&(!talent.shrapnel_shot|buff.lock_and_load.down)
+# Sentinel
+actions.trickshots_dark+=/rapid_fire,if=hero_tree.sentinel&buff.lunar_storm_cooldown.down&buff.trick_shots.remains>execute_time
+# Dark Ranger
+actions.trickshots_dark+=/kill_shot,if=talent.black_arrow&(!talent.headshot|buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)|buff.trick_shots.down)
+actions.trickshots_dark+=/multishot,cycle_targets=1,if=buff.precise_shots.up&(debuff.spotters_mark.down|buff.moving_target.down)|buff.trick_shots.down
+actions.trickshots_dark+=/trueshot,if=variable.trueshot_ready&buff.double_tap.down
+actions.trickshots_dark+=/volley,if=buff.double_tap.down&(!talent.salvo|!talent.precision_detonation|(buff.precise_shots.down|debuff.spotters_mark.up&buff.moving_target.up))
+actions.trickshots_dark+=/aimed_shot,if=(buff.precise_shots.down|debuff.spotters_mark.up&buff.moving_target.up)&buff.trick_shots.up&buff.bulletstorm.up&full_recharge_time<gcd
+actions.trickshots_dark+=/rapid_fire,if=buff.trick_shots.remains>execute_time
+actions.trickshots_dark+=/explosive_shot,if=talent.precision_detonation&talent.shrapnel_shot&buff.lock_and_load.down&(buff.precise_shots.down|debuff.spotters_mark.up&buff.moving_target.up)
+actions.trickshots_dark+=/aimed_shot,if=(buff.precise_shots.down|debuff.spotters_mark.up&buff.moving_target.up)&buff.trick_shots.up
+actions.trickshots_dark+=/explosive_shot,if=!talent.shrapnel_shot
+actions.trickshots_dark+=/steady_shot,if=focus+cast_regen<focus.max
+actions.trickshots_dark+=/multishot
 
 actions.move_trickshots+=/multishot,if=buff.trick_shots.down
 actions.move_trickshots+=/rapid_fire,if=buff.trick_shots.up&buff.bulletstorm.stack<5

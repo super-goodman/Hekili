@@ -19,9 +19,6 @@ actions.precombat+=/use_item,name=treacherous_transmitter
 actions.precombat+=/recklessness,if=!equipped.fyralath_the_dreamrender
 actions.precombat+=/avatar
 
-# Executed every time the actor is available.
-actions+=/charge,if=time<=0.5|movement.distance>5
-actions+=/heroic_leap,if=movement.distance>25
 actions+=/potion,if=boss&(fight_remains>300|boss&fight_remains<35&buff.recklessness.up|boss&fight_remains<25)
 actions+=/use_item,name=treacherous_transmitter
 actions+=/pummel
