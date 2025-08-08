@@ -8171,7 +8171,7 @@ do
                         },
                         pre = {
                             type = "description",
-                            name = "如需使用基于DBM的大秘境T自动减伤/驱散，请提前手动导入安装包中的自动减伤WA，否则无法使用！目前支持全治疗职业与DHT+FZ",
+                            name = "如需使用基于DBM的大秘境T自动减伤/驱散，请提前手动导入安装包中的自动减伤WA，否则无法使用！",
                             desc = "",
                             width = "full",
                             order = 2,

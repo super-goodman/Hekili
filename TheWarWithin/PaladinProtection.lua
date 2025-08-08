@@ -487,11 +487,6 @@ spec:RegisterAuras( {
         duration = 10,
         max_stack = 1,
     },
-    faith_barricade = {
-        id = 385724,
-        duration = 10,
-        max_stack = 1
-    },
     faith_in_the_light = {
         id = 379041,
         duration = 5,
@@ -1175,7 +1170,7 @@ spec:RegisterAbilities( {
             interrupt()
             removeBuff( "shield_of_virtue" )
 
-            if talent.barricade_of_faith.enabled then applyBuff( "barricade_of_faith" ) end
+            if talent.barricade_of_faith.enabled then  applyBuff( "barricade_of_faith" ) end
             if talent.bulwark_of_order.enabled then applyBuff( "bulwark_of_order" ) end
             if talent.crusaders_resolve.enabled then applyDebuff( "target", "crusaders_resolve" ) end
             if talent.first_avenger.enabled then applyBuff( "first_avenger" ) end
@@ -1827,38 +1822,55 @@ spec:RegisterAbilities( {
         end,
     }, ]]
 
-    -- [432496] While wielding a Holy Bulwark, gain an absorb shield for ${$s2/10}.1% of your max health and an additional ${$s4/10}.1% every $t2 sec. Lasts $d.
-    holy_armaments = {
-        id = function() return buff.holy_bulwark_ready.up and 432459 or 432472 end,
-        known = 432459,
+    --self
+    holy_bulwark = {
+        id = 432459,
+        --known = 432459,
         cast = 0.0,
         cooldown = function() return 60 * ( 1 - 0.2 * talent.forewarning.rank ) end,
-        charges = 2,
-        recharge = function() return 60 * ( 1 - 0.2 * talent.forewarning.rank ) end,
         gcd = "spell",
-
-        startsCombat = false,
-        buff = function()
-            if buff.holy_bulwark_ready.up then return "holy_bulwark_ready" end
-            return "sacred_weapon_ready"
-        end,
-        texture = function() return buff.holy_bulwark_ready.up and 5927636 or 5927637 end,
-
-        handler = function ()
-            if buff.holy_bulwark_ready.up then
-                applyBuff( "holy_bulwark" )
-                removeBuff( "holy_bulwark_ready" )
-                applyBuff( "sacred_weapon_ready" )
-            else
-                applyBuff( "sacred_weapon" )
-                removeBuff( "sacred_weapon_ready" )
-                applyBuff( "holy_bulwark_ready" )
-            end
-            removeStack( "masterwork" )
-        end,
-
-        copy = { "holy_bulwark", 432459, "sacred_weapon", 432472 }
     },
+    --self
+    sacred_weapon = {
+        id = 432472,
+        --known = 432459,
+        cast = 0.0,
+        cooldown = function() return 60 * ( 1 - 0.2 * talent.forewarning.rank ) end,
+        gcd = "spell",
+    },
+    --self
+    -- [432496] While wielding a Holy Bulwark, gain an absorb shield for ${$s2/10}.1% of your max health and an additional ${$s4/10}.1% every $t2 sec. Lasts $d.
+    -- holy_armaments = {
+    --     id = function() return buff.holy_bulwark_ready.up and 432459 or 432472 end,
+    --     --known = 432459,
+    --     cast = 0.0,
+    --     cooldown = function() return 60 * ( 1 - 0.2 * talent.forewarning.rank ) end,
+    --     charges = 2,
+    --     recharge = function() return 60 * ( 1 - 0.2 * talent.forewarning.rank ) end,
+    --     gcd = "spell",
+
+    --     startsCombat = false,
+    --     buff = function()
+    --         if buff.holy_bulwark_ready.up then return "holy_bulwark_ready" end
+    --         return "sacred_weapon_ready"
+    --     end,
+    --     texture = function() return buff.holy_bulwark_ready.up and 5927636 or 5927637 end,
+
+    --     handler = function ()
+    --         if buff.holy_bulwark_ready.up then
+    --             applyBuff( "holy_bulwark" )
+    --             removeBuff( "holy_bulwark_ready" )
+    --             applyBuff( "sacred_weapon_ready" )
+    --         else
+    --             applyBuff( "sacred_weapon" )
+    --             removeBuff( "sacred_weapon_ready" )
+    --             applyBuff( "holy_bulwark_ready" )
+    --         end
+    --         removeStack( "masterwork" )
+    --     end,
+
+    --     copy = { "holy_bulwark", 432459, "sacred_weapon", 432472 }
+    -- },
 
     -- Judges the target, dealing 2,824 Holy damage, and causing them to take 20% increased damage from your next Holy Power ability. Generates 1 Holy Power.
     judgment = {
@@ -2093,7 +2105,7 @@ spec:RegisterStateExpr( "bless_out_combat", function ()
     return settings.bless_out_combat or false
 end )
 
-spec:RegisterSetting("combat_delay", 2, {
+spec:RegisterSetting("combat_delay", 0, {
     name = "战斗延迟介入",
     desc = "如果该值不等于0, 则允许战斗后延迟该值-X秒后再推荐技能,推荐值为6\n\n它同样会在x/2秒后当玩家停止不动时开始推荐技能\n\n它也同样会在玩家站定不动时自动开始介入",
     type = "range",
@@ -2137,41 +2149,41 @@ spec:RegisterStateExpr( "loh_health", function ()
     return settings.loh_health or 0
 end )
 
--- local ad_str = Hekili:GetSpellLinkWithTexture( spec.abilities.ardent_defender.id )
+local ad_str = Hekili:GetSpellLinkWithTexture( spec.abilities.ardent_defender.id )
 
--- spec:RegisterSetting("ad_damage", 40, {
---     name = format("%s 伤害阈值", ad_str),
---     desc = format("当数值大于零时，若你在5秒内受到相当于最大生命值该百分比的伤害，系统可能会推荐使用%s。\n\n"
---     .. "建议优先学会在受伤前主动使用防御技能，但此设置可辅助学习使用时机（并避免死亡）。\n\n"
---     .. "默认需要同时启用|cFFFFD100防御技能|r开关。", ad_str),
---     type = "range",
---     min = 0,
---     max = 100,
---     step = 1,
---     width = "full",
--- } )
+spec:RegisterSetting("ad_damage", 70, {
+    name = format("%s 伤害阈值", ad_str),
+    desc = format("当数值大于零时，若你在5秒内受到相当于最大生命值该百分比的伤害，系统可能会推荐使用%s。\n\n"
+    .. "建议优先学会在受伤前主动使用防御技能，但此设置可辅助学习使用时机（并避免死亡）。\n\n"
+    .. "默认需要同时启用|cFFFFD100防御技能|r开关。", ad_str),
+    type = "range",
+    min = 0,
+    max = 100,
+    step = 1,
+    width = "full",
+} )
 
--- spec:RegisterStateExpr( "ad_damage", function ()
---     return ( settings.ad_damage or 0 ) * health.max * 0.01
--- end )
+spec:RegisterStateExpr( "ad_damage", function ()
+    return ( settings.ad_damage or 0 ) * health.max * 0.01
+end )
 
--- local goak_str = Hekili:GetSpellLinkWithTexture( spec.abilities.guardian_of_ancient_kings.id )
+local goak_str = Hekili:GetSpellLinkWithTexture( spec.abilities.guardian_of_ancient_kings.id )
 
--- spec:RegisterSetting("goak_damage", 40, {
---     name = format("%s 伤害阈值", goak_str),
---     desc = format("若设置大于零，当你在5秒内受到相当于最大生命值该百分比的伤害时，系统可能会推荐使用%s。\n\n"
---     .. "最佳做法是在受到伤害前主动使用防御技能，不过该设置可帮助你学习使用时机（并避免死亡）。\n\n"
---     .. "默认需要同时启用|cFFFFD100防御技能|r开关。", goak_str),
---     type = "range",
---     min = 0,
---     max = 100,
---     step = 1,
---     width = "full",
--- } )
+spec:RegisterSetting("goak_damage", 70, {
+    name = format("%s 伤害阈值", goak_str),
+    desc = format("若设置大于零，当你在5秒内受到相当于最大生命值该百分比的伤害时，系统可能会推荐使用%s。\n\n"
+    .. "最佳做法是在受到伤害前主动使用防御技能，不过该设置可帮助你学习使用时机（并避免死亡）。\n\n"
+    .. "默认需要同时启用|cFFFFD100防御技能|r开关。", goak_str),
+    type = "range",
+    min = 0,
+    max = 100,
+    step = 1,
+    width = "full",
+} )
 
--- spec:RegisterStateExpr( "goak_damage", function ()
---     return ( settings.goak_damage or 0 ) * health.max * 0.01
--- end )
+spec:RegisterStateExpr( "goak_damage", function ()
+    return ( settings.goak_damage or 0 ) * health.max * 0.01
+end )
 
 -- local ds_str = Hekili:GetSpellLinkWithTexture( spec.abilities.divine_shield.id )
 
@@ -2238,4 +2250,4 @@ spec:RegisterOptions( {
 } )
 
 
-spec:RegisterPack( "防骑Simc", 20250806, [[Hekili:TV1)VrXXv8)w8p0ITO64U98b0QyKmKkAqXO0Crczx1B9C7o3DlE)YPDM1hhk6euknanuruIAtttvfr0ekI2ifPQsPGYFm1(W8t8VqFZm73Vz2Dpd42uzKW(2BM5nV59LpV38EE70OZ71PTjII7CET6ATQFY6NOwJwnAvF5oTPJhI70EiYyluF4dUih4Np)t)MN)GpQTLJbBOX2EitgjiEb(gWWdO0HKF0XowFl6GGU1m8CogXYjWgrT8Cn8r9OSNnowN2DdSSPVLBNUs3)oTrb0bE(DAdB1za6AzAIftgtGTUrJAAto3KZT79(QN9vF6UFX129E)L9(7)6P)M7V3TVZlEYNXg75F8J2963CVRCD(ZN5T(XR6C06Dx9KT2(DRV(4J(tnENFYfPV72bBS26x4SV9Lx7IB4SXgDp7Lx7YKZF51o7QR2)0RY)xFTXRDzRbBmA9ZQHEZvxV)PhTA33eg4mJw7YJ1AdR9cRpA1r93y91wTtBBlcLWekowuR(8to8055IAKb)X2g2yKlbRt9UKLlPtBSlQRn2SZP7qbjbBMjFtBdFlk23cbIbmYMoO2qd6Knp1Knpr9ekA5cZXatiSNaI0ujr6g0RxnYalSTPUxpD6aSUVv)buSxaPMP3i3eIQywm6VSs6tTCWt28nMSzRjB(9NSP4rGBRZFKV7MwBB5I1fKNVNjJH8bnnv3e3d7AI9ZnA)ayClKlJNqUgwSPULLB)8CEoQW44wvsSc89iV(6IVIVVlozZbE2J1h6nIXo4EwgwWexHFIE)3p7rAyG)qpcUwWWuJbNtxGh1Tzcq9E(yX4lLv(CYeUFKNpxQ332ZFmJ3pEv5DBVbH8Ec1SrJ19C1hGCnzQokZjQhkWMoJzjABSBFSpjuZOZnQ8dgsLzHgTiFC3GTW5MHAZVyZdaCOlIPIa(JljC8ary)ectrUBPhoRrilAfn7MHUkg5yt2uRY7BEJNyhzKTTU4bDMJVW9xxawMcaqIoSsKWWZZMzzZ95oX(HcuFl3TWuoboPsP3cHMQgEaSeauZOf3iL545riznvBLAVtTa2w8dvUfSvSnwh7IDSWeoDAuXZaYdZODJ6vM4RuDItOcNIH(yHsp2TqIO2eVThNmOaF0mOQzgnerYMblyy2P9YLGThJXWTvBke92aIUUxan0EK)Lgdq(95sq2PK)vG6J4z7LWN8fInbNEhhb8xEpsVHWrhttwY2iGpGrzFYoa(vJmUxcZOA0g1gGi6r2Lc7ISJrOiAnK7yDZHKie0fsnlnjZIHvMImrKVMzGW0sCytrcjZyjbzMDRIMl)mM1TqNm21qNy7jfDPCzKMuzKwbYizN(zLrYKKzKrsLaNQmHOeruJ5serfoJs8qMJememrAdEGXBwP0ou7)eJY3qKOrpEWwFSdcYWsG2uxzKozoirt9IbM9DGKjsVzzCb1eNNEbaidGHWhspKDGH7BywZbDjyrJH0(0PSHb4yqawH4zNkknQfdbO5o2SKjaPJjAKBCMg5oVVbNVwkATMy(QJolzZprasWOODirqMJRLJuLmBWu1ylHyUG5gN7dBglYIihAIIhJ567X(z23M8JWsjkJCeS486ssTs4cISzhD(cj69dSmHmiX1IwA8EKWlff2wLrk)gk(wddJxeaor9H8YcyshVEaxma4jtF0OfFVlCbqUU87SeziYHbGtbpbeCWDcmgi(eKljXc2ziPu4gvqCa4dicLtsldt4PbyFCY8KfsxU(km2EKzfJ)IolmMl14lM1v9Ot2mYkspJl8kCt1LI1TlelXJfo6d99OydQNFKuxm7yZajZuhoNj2eISUxk0SOGCIQM6bKOeltSqZirh9dyIwpBHeG9z(rvLoI6bst43O4NWSeOLszMg1foZeHQLLfktrMAFMBDjePsVRNlaYc7YiKpJUwU6emIaPKOPV8qJ5vNMtLwP1SseK1(rRwAwQZXH81RbOiRRc1kLBnwycZPLQRKkoWcLfkyHYW6YaPwaVntc3fftKmedbaddVPk(ViuFY957gydkro0tIOVxGFsaLvIMF(eKLhqTHQm35lh57Gy8DECG3MlNC4oIJqW4c3xxVqaxMtTl4y6W(SpC9CGZ4mimrwEvc32WddaAybU6SIe4Tn2VNn3l3Ir0w1pwR6IHaq)rmdkeapWYvhovJWOHEUWYH01gW(ckCNDWE77XZ531id8Ul(s04Zd3aHGm8Hu(fuHllYNTKIBhuGSG)tUpflifj8gjmliXAtoQgigNt9hZdoXKEq(J97logG8tJreCVEywLkKJGMXAkXpF0OMXjALegp0Pd5Ac)FBl7444SdU6YpSqPgEHOPHBJ65f7lXGEROT)kzYZvssOnuNqyIppO5qecKupZLoc8VACq8nlJKdCEGbImIz0Lb0kbwBwGb1jD9kJnl6YSnuxqSxv7Vwvftg(beKjiOiGb)wIcvKpRK81jquSWyy5qSUvkSYknYhxufYwCfha4B26uhHzbwKVzl4ZcZwtS8mJM6sXi1ZTiLPwMAqMy1Xf1P3e2CvbPjlIKCnxLarKgBrtnSYSOXCTsi6r2Y2KvEKt7X2M8yasoJY4o1(KzU84lNBrZ48bdVMpAlmFAdWmjnPQiiAQ9G)Vf3kXYuTF8RqMuBEysjOnAQtyo3nGxm2W3Y1XJqf5RMjsMpYYuhVnBoittcmrHh8YTeSyfpwHPTfNNC28rnX2wqMrv563AQrVk2NRipSM1tJ4KtVNfWPPcWPC3Qm7AY0FK8ASCZT8g1jR3rzuMZAdM5Ynlw(1bsFBnXzShRK5QUKw8zBMgv1Scf06KV0gfnlj9dPcTI46c6Vw2BDKk(mYhs5L1cxFFgMmJmNiJEpDiZmkDAQUYuqVgOEo44lvYKpIMlmZP1Y1fSU8XelBlSabkQD9QibnxLu7wwyZm1rTve5dChZ8)ztZfZUYYqFlIdxuO6mjo3nYbLgvx9AZuZzrRCYuRkjr0LvaugOv90vVOKnrlDDdKuMD(T6JVGTkozP0fzVODe8IyFGKsMqNTEW5KBAZNCt7GqU1qMCRXbNCtt4rrK23Uzbgoy7kX317cXHTDixC)Q02Hd7Zq)d7ZWH9zyo0Ph2NHd7ZqvJ6v1BGEyFgoi6ZqEeHuL8JEyhiuaUuIj5HDGO86hEyhikSMGVg7aHkGU0v441zthM14qAJcuHpFG0Oa1xi8vAJcQWLfLXDv86EVCwVZvP3lQrb)VxBnMfn4GPBgV0nkqnOW)h0Oa1PZV)BuGO7dQsAjdGttfGtf2OGSVuqf3Oa1ykrL267unkOS3qKxnnkOKKzM7gfuWlr080OGJNrVxuJcsEbqkS6Mz92cfurHbYuGWfM11fFj2RSMyyPU1t28eTKpCAPvUDL7)OKHLvy0qGJmVidzJkZfEV00CyCtqkpsOQ(GW(dnVvIBtKjBJ4QgjC8kMLY4I44XRXrAZn1wBZh6QkErRvgErKWJK3hTWSfPE22m2Q8GDkA1qm0HsPkJFRV)KFDzfS0ZnU8imoTKSGlOjxPo99S8XDT98m7e(gqaGp8xZYO3z1JdifiFgqcaWV3F9l39JU1lEYNT7x)KDV(F(iXVwrhz3B8727U3)5F(v27lV6op6k784)WEFWd29w3FNV9Vn9t(N)7R8lMCUN9Wh2CV7(HWQ37PpC6T)IJe1qLSVLghzNh94JO4n44iV4j3OX0hE3x8KBwfsM(vmrgzZmEvj9SVJlzjTKXRkPL8ATKNTNDcVwjoq4YKgLqvztOQS8(I4vGLvBUPvM52YhSK8L0mtoPFL4COIR3hASxRepL5GkPX(WVOQS8(I4vGL3VaMtoxEi8WfsQicUMGH25r3E6N81t)WR(Sp7xUZt)2N9j3)5x9J396)JPF4hSZ)6E)SjBk)VEIF(0B8BN(n3D6NFZP)XR98F)DkZrnBF2vQSfJUpqvQczRG2Oi6nZO7dtNQq2i2CY5MEJ7S7T(tc17op(xDIDE0dMERRS31EQqdZNf7nc2RNfROW88TmGeFoopbGo)Np]] )
+spec:RegisterPack( "防骑Simc", 20250807, [[Hekili:TVvFVTTXz8pl(pwTnYGSeTvJZGDbCshYAqDqxDbcShMOorEsIXK8e4lwrgfcjTnRjzTdTibDDPDVKUS0SG0wGcmS0mN1pmZs2(VYxH9C3rsXJIhjLJt26MlqJL8D3Z9887517UhxRsT3Q2A6ipCTZRuwPA5flFYskkkLRuBnVEDW1wRdsBtul4d2il4Fp4t)2dEWhVMHLgDOEMeKoLcUeFhny42EEDC)jZnxldV2(nkPrSMZ1WY3e5zqS1Cqn9OFxBUAR1W3W071SR1y8TVs1tPCQARH89AtCQTgSzNbOSHUoMpDSlS5vQusP)56FUb39l37l)0bFX7o4U)19)B)6H)M7V)h(rpDNBth7GB(Obx967F5RY((zETF6kwNOCJvwS6wVz517DIFU2B8ZUO3BUL)gRU(fo7RV9QxCdRn2OXz3E1TDp)2RE2vwP1PxH9FTu6T62gT3O76Nvb9QRSERt3DLgVkmWz6U629uwdw7fwV7kDBTX6RUcDN3DNBV)7)Gb34(7UZNo4Qx7G)8FyVp7Fo3WRFZHFYxT37DV9ENVBVp7Rh(NE)ARzA465sHqebd)48mfc2g1WeRx701wtZXWd7yGOiwZMLCBBGn1vjnv9AJvDmA12dt8DlPt6A3V(B)29R3My2tTdPl2PF9xPF95bkRrrFqjL(AR5bGV0D1ZWc3V(s9RxPC)6Vu)6nPlt1bBHmSDz7qLYJ2c0wy7wyhxv(Erj98sjTwBKtlmLil3VUcN7B6BAcuNpKAWMdd3stVKf6sJ2Pl6R3YcB7bKPNMjmv6caKeaqytxih5by7QmXzM(1z4kmrxxd7wu0rh11UKFNagsuExIXPZgUwDmB1Hmt0Qy)22illSdLIMbebP3RucsLZSD9a)pomNXCB6GXr7nWwAeIj1IOeUhMPV75iSVZZeHzhHMjiifcRMpeUidg8qMurNTqx1w(g6iBnCPWLgThJ4fk5FzPKFQmbeQugtVz6RTzOfTUdQBSXNr0x4e9RhQMuf8rwMzlmBe4nvKif5IO2XH4H18ioHIfF2r4CkZu1amzJaDytkZbDbCxMljliNJrh(S09DatZ(1PcB)6KMad2g0au5DM36cxaSIw4nM1TdYQFDxIhitiyhT81AZ)uhcyAdmD)6DHWYeFp4dixpgjbMe(wBSdE08OQNt(SPECXEQni2qGjGt7ICOBSHTQlg5sSvvuxOJ2KQMsOLk0Awo0n)WOOMuTeaSUg6yUckfv1pMIWetoRt)mJhLPQ8iaod)ef9nq6OlifktvS2G45Y1Wabju9zS9HQsxmlv6eOWE(6F8sSnitlS8vmG0EkPsBClKLJLhyQ8sfmvEX6kKrdWBqgtzmNBhmKamizMSS98e7m(MZX(MGkJfhCeq303zu6JLdNFCHFjHQdYoHAf51LWHUoo4TuPzPRuIThb8eh5SiBXI2W1Vr5pIx5GlsZbRR2fJ6Wc5f3Z61zWTfZ0UlY2ZL7qytcIKrDtSbtDl6ND6sOBltYHjsSdDec4iWn0aCEmG1s2c700K53yqjA1YZvTmFiiAAxQDjcC4aZbkCXzny5oiqB4q9)qaXl)Ja782uZagojVsQXWjbrUWavC0LTJYlWkMtD3UZhvN1OC2bEyiBD4)3YWC8K2mNbGj5Zml9c7FzHjOzIaOlyPa8Zw7iyxdrrrpNEmrLQj9aZ2wCifeyfkrWnBcHjKfFKj4YlYBQCDmcYtfGdYNxKNnnPwb9nxwWVkLsIRiV2QrrGaqh5667WcWeMwTyCWsHE7H4aJhOH06sTDfcHoki74HPKxJ2rgBk1sJU)Ylc5OA)vkkmP547I0bGYfSv3KB)jpHkJA6gGVmEusIGyX0uoXOlX2fdhmM9nkrLN3AkA(0rZouyNkmQHCIQKr(M0crKLsrHLiyCRhgKfFtOZvEWW0X7jl2u2zSusgxSGltEufHZk(Sz3nFuPSbNQhTjMnT2ykO4wuxuf5rs(pf3MIjJ84ihHmPYKWKP4oRipAtId8otKnQHTfX1JxEQqQchKHUkEl6Cq66UWe5UwluLZIfuScQBlQSyXYp1XMgqfmf502klg3RnzsDrN2tLUdEIJ(iSM5lhFnjb3eZn)B4YMgtiXnBiG7JBUiCSJzYVq94NjKlJnrGgj3JccfxYuuTmjo9yItExDwKzZZI(BE5f5jh0YIRLhLlXjeILRc5avUb(uehhA4tkzQkO3JN2rqP7rlCSjY30Rw4vCkP8ivd6PCD874L0Sm(ICWn8h3WkhfXsuvUvdKhf4r9y6KKzo9q2BQgmRUidMqM3DjMgDLmYCHvCuK9nzO9iyMAOY)Ik92J53HSk)(5HIXnAfL4pzG3crIq)cwcMKbflefa3E7nPPu9Y5why2UPvutdOoFXJaLrntjlzsopoAZP)6TWQyBSLbo4ESfKb61X7LYr1pmeF5Ke31J7uahgKR0RL)n)RJ3IW2neeYJDF)JygHXO7e4MQbbtwiYZPiU6b3Oan2QkX3lWEKhRm(v1xjmCMlXKKvI)KEKKoScohTKTqaFaJs)KPp8JkSFNOzKQBpBnvxtIaghmyjVkq8Bx1qJwUrJ4yqH3qAy7EQ6DCdtKmvSzPKYSOPrIrMOCf6(C7ooseJePmJzhDTrIBv4Ctl6s(yKYKJrkzGrPj9JJrPHKcyuQiWRKhiMcevjje5fpKuM(jIvvfKLnSCFHNzAQXlrdFj6lXXho1Y36x)KvtF44PAtSRz7aM2JPfuGOGRL4bLYozxrPzhsy8Z8pXtIdQf)PKQuDunxJUUQWN6GBiLnljuFLfHDl(XRvjZJ4moPvQgN0HQRXUsTfJf9KFqDpIPzAjnZfocVF4i7BPWfTC(YhoGPb9fBGi8XFIUCUFezSHO030aQMYKq05UAr5UtXtliKdOIIydAvS8CpXkMr2esWFg22WHeCWUgMgy(z(gZDPXKivvQgYJ(29OvtsNMnMEBTDCmCTsZXHgZ0nsSRetkI(ncgaHHJlnwKxEE(qvBwgkjFtz6bdlh)XTYztuspl2OxBH(qjrb6KXjZgp8Bw74SPfKqe3ugd3uMmCt5fbUvj9mBppXnpwXE5xD3l8(64h69XXm59ADh34gJFE1J7uJj4LOpm9aWXDQr)J7uJJ7uJJ7uJwh3Pgh3Pgh3Pgh3Pg5(ULh3PgfA)))Po1yCnEQDxrohP85B3vKm6zbxM8qGZC01katu)kKv3vuWJF(cKBh337ftlG8m3DfYJq9)aDxXjJ71MmrSOt7IP7GNv3vi2rg50DfYlyn8EM(bv3vipg3rz3vKtFQnXDxH8OCtu3vSGGEpRURi2Z(NSblGGWiyLaHVeG7jnTKZOyKjK1OdTYoGrnjTv5)Qru2e1tfoYjurTolCzgsTiX6sAfqSqlVrWsjDCtdndVqdKOqobjP747aLwIfVWojw1YFYNXuzz0pmX4D6BagRaFwVQOrpdkp7DE)jtTu4zyJyPYJoAyG8XJwvk6DA5PYD0P3ycanyBDkgjmAlFyCde7THaZDd6u3eGd3rZJYXcT7qIkFfPpvwYiEnYEt25ba6AyRrSOiVoYc1cRwLFIxKEWVi01CgjcIGwuUCimnrGsyi(BAY19zkDz0RF5lDTiOn)Vj5tkDRf0MjqyqMjA0FJTGdaYXMnL12)RU3Gp(gpDNBp4B2zWv)lth1tktp4A)29VZ9p4ZV8(37k7(OlV7J)SG)Mw)(VE4T(U)1LFN(NBVh(W53)oFaS69FYdh(HFX0HpRI4R4p9Up6Xtl5f(N(P7CTkdF4DE6oxViKmEliKgzfgVOKE8EGqK0PmErjDkT9qs2E8j8CL4aHZdnYHQPnHIYYhkIxawwU5MsEMBl8ILKpJMzPt6JeNdzC9HqJ9CL4XmhKHghc)IIYYhkIxaw(WgWS)5sgcpyHUfmcUcNH29rF4WB9nd)GRS3TFVDFY3V3TU)bx5MdU6FF4h8(7(pU7VOF90BQIF5WR9jd)27m8ZV(WF)7EWV7JYZrv812LQS5JEiIQueYwaTrw0BSrpeMofHSHSz)Zn8AF0GB8h5Q3DF8V6K7(Ohm8gxE)39jCnmBw02jL00G2PGSxNqdkI7Lzfau7Fd]] )

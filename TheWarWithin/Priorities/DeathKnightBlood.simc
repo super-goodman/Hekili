@@ -7,6 +7,7 @@ actions+=/call_action_list,name=mitigation,if=cooldown_check
 actions+=/tank_combat_wait,if=time<combat_delay&moving
 actions+=/tank_combat_wait,if=time<combat_delay&time<combat_delay/2&moving
 actions+=/use_item,name=tome_of_lights_devotion,if=buff.inner_resilience.up
+actions+=/use_item,name=unyielding_netherprism,if=cooldown.dancing_rune_weapon.remains<1|raid&boss&fight_remains<=20,use_off_gcd=1
 actions+=/use_item,name=bestinslots,use_off_gcd=1
 actions+=/use_items,if=!trinket.1.is.chromebustible_bomb_suit&!trinket.1.is.ringing_ritual_mud&!trinket.1.is.tome_of_lights_devotion_443535&!trinket.2.is.chromebustible_bomb_suit&!trinket.2.is.ringing_ritual_mud&!trinket.2.is.tome_of_lights_devotion_443535
 actions+=/blood_fury,if=buff.dancing_rune_weapon.up

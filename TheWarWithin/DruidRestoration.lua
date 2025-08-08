@@ -1347,6 +1347,10 @@ spec:RegisterSetting( "raid_rejuvenation_num", 8, {
     width = "full"
 } )
 
+spec:RegisterStateExpr( "raid_rejuvenation_num", function ()
+    return settings.raid_rejuvenation_num or 8
+end )
+
 -- spec:RegisterSetting("combat_forbidden", false, {
 --     name = format("禁用伤害技能"),
 --     desc = "开启后则不再推荐伤害性技能",
