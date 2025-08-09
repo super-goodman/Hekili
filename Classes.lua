@@ -2661,7 +2661,7 @@ all:RegisterAuras( {
             local name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( "player", i)
 
             while( name ) do
-                if debuffType == "Poison" or spellId == 440313 then break end
+                if debuffType == "Poison" and not Hekili.isExcludedDespelAura(spellId) or spellId == 440313 then break end
 
                 i = i + 1
                 name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( "player", i)
@@ -2682,7 +2682,7 @@ all:RegisterAuras( {
                     name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( unit, i)
 
                     while( name ) do
-                        if debuffType == "Poison" or spellId == 440313 then break end
+                        if debuffType == "Poison" and not Hekili.isExcludedDespelAura(spellId) or spellId == 440313 then break end
 
                         i = i + 1
                         name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( unit, i)
@@ -2991,9 +2991,14 @@ do
             items = { 191907, 191906, 191905, 191389, 191388, 191387 }
         },
         {
+            name = "invigorating_healing_potion",
+            items = { 244835, 244838, 244839 }
+        },
+        {
             name = "algari_healing_potion",
             items = { 211878, 211879, 211880 }
         },
+        
         {
             name = "cavedwellers_delight",
             items = { 212242, 212243, 212244 }

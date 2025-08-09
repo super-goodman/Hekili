@@ -596,7 +596,7 @@ do
                         hurt_num_gap = 95,
                         hurt_num_big_gap = 85,
                         tank_gap = 70,
-                        excludeList = "473713,"
+                        excludeList = "461487,461507,"
                     },
                     
                     oneshot = {

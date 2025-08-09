@@ -101,6 +101,7 @@ state.buff = {}
 state.consumable = {}
 state.cooldown = {}
 state.find = {}
+state.target_focus = {}
 
 state.empowerment = {
     id = 0,
@@ -1238,22 +1239,47 @@ state.timeToInterrupt = timeToInterrupt
 local function readyToInterrupt()
     local casting_target = state.debuff.casting_target
     local casting_focus = state.debuff.casting_focus
-    if UnitName("boss1") == "无堕者哈夫" then return false end
+    --if UnitName("boss1") == "无堕者哈夫" then return false end
     if not UnitExists("focus") then
         if casting_target.down or casting_target.v2 == 1 then return false end
         local cast_pect = casting_target.remains/casting_target.duration*100
-        if casting_target.v3 == 1 and cast_pect < Hekili.DB.profile.toggles.interrupts.channelRemainingThreshold then return true end
+        if casting_target.v3 == 1 and cast_pect < Hekili.DB.profile.toggles.interrupts.channelRemainingThreshold or 90 then return true end
 
         return casting_target.remains <= (Hekili.DB.profile.toggles.interrupts.castRemainingThreshold or 1)
     else
         if casting_focus.down or casting_focus.v2 == 1 then return false end
         if casting_focus.v3 == 1 then return true end
+        local cast_pect = casting_focus.remains/casting_focus.duration*100
+        if casting_focus.v3 == 1 and cast_pect < Hekili.DB.profile.toggles.interrupts.channelRemainingThreshold or 90 then return true end
         return casting_focus.remains <= (Hekili.DB.profile.toggles.interrupts.castRemainingThreshold or 1)
     end
 
 end
 
 state.readyToInterrupt = readyToInterrupt
+
+--self
+local function readyToInterrupt_spec()
+    local casting_target = state.debuff.casting_target
+    local casting_focus = state.debuff.casting_focus
+    --if UnitName("boss1") == "无堕者哈夫" then return false end
+    if not UnitExists("focus") then
+        if casting_target.down or casting_target.v2 == 1 then return false end
+        local cast_pect = casting_target.remains/casting_target.duration*100
+        if casting_target.v3 == 1 and cast_pect < Hekili.DB.profile.toggles.interrupts.channelRemainingThreshold or 90 then return true end
+
+        return casting_target.remains <= 3
+    else
+        if casting_focus.down or casting_focus.v2 == 1 then return false end
+        if casting_focus.v3 == 1 then return true end
+        local cast_pect = casting_focus.remains/casting_focus.duration*100
+        if casting_focus.v3 == 1 and cast_pect < Hekili.DB.profile.toggles.interrupts.channelRemainingThreshold or 90 then return true end
+        return casting_focus.remains <= 3
+    end
+
+end
+
+state.readyToInterrupt_spec = readyToInterrupt_spec
 
 -- Pet stuff.
 local function summonPet( name, duration, spec )
@@ -4727,6 +4753,31 @@ do
 end
 
 
+local mt_target_focus
+do
+    mt_target_focus = {
+        __index = function(t, k)
+            if k == "distance" then
+                local minR, maxR = RC:GetRange("focus")
+                minR = minR or 5
+                maxR = maxR or 10
+
+                if UnitCanAttack("player", "focus") then
+                    return (minR + maxR) / 2
+                else
+                    return 7.5
+                end
+            elseif k == "exist" then
+                return UnitExists("focus")
+            end
+            
+            return rawget(t, k)
+        end
+    }
+
+    ns.metatables.mt_target_focus = mt_target_focus
+end
+
 
 -- Table for counting active dots.
 local mt_active_dot = {
@@ -5982,6 +6033,7 @@ setmetatable( state.action, mt_actions )
 setmetatable( state.active_dot, mt_active_dot )
 setmetatable( state.active_hot, mt_active_hot )
 setmetatable( state.find, mt_find )
+setmetatable( state.target_focus, mt_target_focus )
 setmetatable( state.aura, mt_aura )
 setmetatable( state.buff, mt_buffs )
 setmetatable( state.cooldown, mt_cooldowns )

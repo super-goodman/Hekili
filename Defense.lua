@@ -385,7 +385,7 @@ function Hekili:isMouseOverGroupMember()
     local mouseover = GetMouseFoci()[1]
     if not mouseover then return false end
     if not mouseover.unit then return false end
-    if string.find(mouseover.unit, "raid") or string.find(mouseover.unit, "party") then return true end
+    if string.find(mouseover.unit, "raid") or string.find(mouseover.unit, "party") or string.find(mouseover.unit, "player") then return true end
     return false
 end
 
@@ -394,7 +394,7 @@ function Hekili:isMouseOverMemberDispelable(type)
     local name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( "mouseover" , i )
 
     while( name ) do
-        if debuffType == type and UnitIsFriend("player","mouseover") and not Hekili.isExcludedDespelAura(spellId) then if Hekili:isMouseOverGroupMember() then return true  end end
+        if debuffType == type and UnitIsFriend("player","mouseover")  then if Hekili:isMouseOverGroupMember() then return true  end end
         i = i + 1
         name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( "mouseover" , i )
     end

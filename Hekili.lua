@@ -789,7 +789,7 @@ hekili_autocast:SetScript("OnUpdate", function()
                     Hekili.cycle_state = true
                 end
 
-                if type == 1 and action.empower_to == nil and (not ChannellingID or ChannellingID == 115175) and action.delay < 0.2 then
+                if type == 1 and action.empower_to == nil and (not ChannellingID or isSkippingChannelLock(ChannellingID)) and action.delay < 0.2 then
                     
                     local name = GetLocalizedSpellName(cast_ID)
                     if Hekili.forceStealth == true  then
@@ -948,7 +948,7 @@ hekili_autocast:SetScript("OnUpdate", function()
                 Hekili.cycle_state = true
             end
             
-            if type == 1 and action.empower_to == nil and (not ChannellingID or ChannellingID == 115175) and action.delay < 0.5   then
+            if type == 1 and action.empower_to == nil and (not ChannellingID or isSkippingChannelLock(ChannellingID)) and action.delay < 0.5   then
                 local name = GetLocalizedSpellName(cast_ID)
                 if Hekili.cycle_state and action.indicator == "cycle" or action.indicator ~= "cycle"  then
                     if action.target then
@@ -1080,12 +1080,12 @@ function autoCooldowns()
 end
 
 function autoHPPotion()
-    if UnitHealth("player")/UnitHealthMax("player")*100 <= Hekili.DB.profile.toggles.autoHPPotion.autoHPPotion_threshold and Hekili.DB.profile.toggles.autoHPPotion.value and UnitName("boss1") ~= "无堕者哈夫" then
-        if Hekili.State.action.algari_healing_potion.known and Hekili.State.cooldown.algari_healing_potion.up then
-            C_Item.UseItemByName("阿加治疗药水")
-            C_Item.UseItemByName(211880)
-            C_Item.UseItemByName(211879)
+    if UnitHealth("player")/UnitHealthMax("player")*100 <= Hekili.DB.profile.toggles.autoHPPotion.autoHPPotion_threshold and Hekili.DB.profile.toggles.autoHPPotion.value then
+        if Hekili.State.action.invigorating_healing_potion.known and Hekili.State.cooldown.invigorating_healing_potion.up then
+            C_Item.UseItemByName("焕生治疗药水")
             C_Item.UseItemByName(211878)
+            C_Item.UseItemByName(211879)
+            C_Item.UseItemByName(211880)
             return
         end
         local item = Hekili.State.talent.pact_of_gluttony.enabled and 224464 or 5512
@@ -1171,7 +1171,13 @@ function quickStopSpelling(action)
     
 end
 
-local last_scorch_time = 0
+function isSkippingChannelLock(channelID)
+    if channelID == 115175 or channelID == 263165 then
+        return true
+    else
+        return false
+    end
+end
 
 function isOfficialOpen()
    return ( Hekili.DB.profile.toggles.oneButtonRaotaion.value2 and Hekili.DB.profile.toggles.oneButtonRaotaion.value or not Hekili.DB.profile.toggles.oneButtonRaotaion.value)
@@ -1183,6 +1189,11 @@ function errorCast(name)
     --rint(spec)
     if name == "剑刃风暴" then
         CastSpellByID(227847)
+        return true
+        
+    elseif name == "圣言祭礼"  then
+        CastSpellByName("圣言祭礼")
+        UseInventoryItem(16)
         return true
     elseif name == "顺劈斩"  then
         CastSpellByName("顺劈斩")
