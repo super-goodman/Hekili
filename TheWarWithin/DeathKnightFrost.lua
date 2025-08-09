@@ -1011,6 +1011,10 @@ spec:RegisterCombatLogEvent( function( _, subtype, _, sourceGUID, sourceName, so
 
 end )
 
+local BreathOfSindragosaExpire = setfenv( function()
+    gain( 2, "runes" )
+end, state )
+
 spec:RegisterHook( "reset_precast", function ()
     local control_expires = action.control_undead.lastCast + 300
     if talent.control_undead.enabled and control_expires > now and pet.up then
@@ -1025,7 +1029,14 @@ spec:RegisterHook( "reset_precast", function ()
         end
     end
 
+    -- Queue aura event for Breath of Sindragosa rune generation
+    if buff.breath_of_sindragosa.up then
+        state:QueueAuraEvent( "breath_of_sindragosa", BreathOfSindragosaExpire, buff.breath_of_sindragosa.expires, "AURA_EXPIRATION" )
+    end
+
 end )
+
+
 
 local KillingMachineConsumer = setfenv( function ()
 
@@ -1146,7 +1157,7 @@ spec:RegisterAbilities( {
     breath_of_sindragosa = {
         id = 1249658,
         cast = 0,
-        cooldown = 90, --bug
+        cooldown = 90,
         gcd = "off",
         usable = function () return target.distance <= 10, "target must be nearby" end,
         spend = 60,
@@ -1406,8 +1417,6 @@ spec:RegisterAbilities( {
         cooldown = 0,
         gcd = "spell",
 
-        known = function() if talent.frost_strike.enabled then return true end end,
-
         spend = 35,
         spendType = "runic_power",
         school = function() if talent.dark_talons.enabled and buff.icy_talons.up then return "shadowfrost" end return "frost" end,
@@ -1446,7 +1455,7 @@ spec:RegisterAbilities( {
             }
         },
 
-        copy = { 1228436, 49143 },
+        copy = { 1228433, 49143 },
         bind = "frost_strike",
     },
 
@@ -1521,7 +1530,7 @@ spec:RegisterAbilities( {
         startsCombat = true,
 
         handler = function ()
-            applyDebuff( "target", "razorice", nil, min( 5, buff.razorice.stack + 1 ) )
+            applyDebuff( "target", "razorice", nil, min( 5, debuff.razorice.stack + 1 ) )
             if active_enemies > 1 then active_dot.razorice = active_enemies end
             if talent.obliteration.enabled and buff.pillar_of_frost.up then addStack( "killing_machine" ) end
             if talent.unleashed_frenzy.enabled then addStack( "unleashed_frenzy", nil, 3 ) end
@@ -1553,7 +1562,7 @@ spec:RegisterAbilities( {
             if buff.rime.up then
                 removeBuff( "rime" )
                 if talent.rage_of_the_frozen_champion.enabled then gain( 8, "runic_power") end
-                if talent.avalanche.enabled then applyDebuff( "target", "razorice", nil, min( 5, buff.razorice.stack + 1 ) ) end
+                if talent.avalanche.enabled then applyDebuff( "target", "razorice", nil, min( 5, debuff.razorice.stack + 1 ) ) end
                 if legendary.rage_of_the_frozen_champion.enabled then gain( 8, "runic_power" ) end
                 if set_bonus.tier30_2pc > 0 then addStack( "wrath_of_the_frostwyrm" ) end
                 if talent.frostbound_will.enabled then reduceCooldown( "empower_rune_weapon", 6 ) end
@@ -1803,6 +1812,9 @@ spec:RegisterAbilities( {
             removeBuff( "cryogenic_chamber" )
 
             if active_enemies > 2 and legendary.biting_cold.enabled then
+                applyBuff( "rime" )
+            end
+            if active_enemies > 2 and talent.biting_cold.enabled then
                 applyBuff( "rime" )
             end
 
