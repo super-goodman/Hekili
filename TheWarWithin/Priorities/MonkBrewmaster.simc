@@ -15,11 +15,14 @@ actions+=/call_action_list,name=racial,if=cooldown_check
 actions+=/call_action_list,name=aoe,if=cooldown_check&active_enemies>1
 actions+=/call_action_list,name=st,if=cooldown_check&active_enemies<2
 
+actions.combo+=/rushing_jade_wind,if=buff.rushing_jade_wind.remains<=1
 actions.combo+=/purifying_brew,if=stagger.heavy&!settings.combo_max_damage
 actions.combo+=/celestial_brew,if=health.pct<=60&!settings.combo_max_damage&buff.celestial_brew.down
 actions.combo+=/celestial_infusion,if=health.pct<=60&!settings.combo_max_damage&buff.celestial_infusion.down
+actions.combo+=/keg_smash,if=time<15
 actions.combo+=/keg_smash,if=(talent.celestial_brew&!cooldown.celestial_brew.ready|talent.celestial_infusion&!cooldown.celestial_infusion.ready)&cooldown.purifying_brew.charges<2|incoming_damage_3s>health.max*(0.2+(0.2*group))
 actions.combo+=/tiger_palm
+actions.combo+=/keg_smash
 
 actions.aoe+=/rushing_jade_wind,if=buff.rushing_jade_wind.remains<=1
 actions.aoe+=/weapons_of_order

@@ -2132,9 +2132,9 @@ spec:RegisterAbilities( {
         cooldown = 0,
         gcd = "spell",
 
-        spend = function()
+        spend = function ()
             if buff.dark_succor.up then return 0 end
-            return ( level > 27 and 35 or 45 ) - ( talent.improved_death_strike.enabled and 10 or 0 ) - ( buff.blood_draw.up and 10 or 0 )
+            return ( talent.improved_death_strike.enabled and 35 or 45 ) - ( buff.blood_draw.up and 10 or 0 )
         end,
         spendType = "runic_power",
 

@@ -1143,7 +1143,6 @@ spec:RegisterAbilities( {
         spend = 0.02,
         spendType = "mana",
         terrain = true,
-        toggle_terrain = "player",
         startsCombat = true,
 
         velocity = 20,

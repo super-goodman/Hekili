@@ -1243,14 +1243,14 @@ local function readyToInterrupt()
     if not UnitExists("focus") then
         if casting_target.down or casting_target.v2 == 1 then return false end
         local cast_pect = casting_target.remains/casting_target.duration*100
-        if casting_target.v3 == 1 and cast_pect < Hekili.DB.profile.toggles.interrupts.channelRemainingThreshold or 90 then return true end
+        if casting_target.v3 == 1 and cast_pect < Hekili.DB.profile.toggles.interrupts.channelRemainingThreshold  then return true end
 
         return casting_target.remains <= (Hekili.DB.profile.toggles.interrupts.castRemainingThreshold or 1)
     else
         if casting_focus.down or casting_focus.v2 == 1 then return false end
         if casting_focus.v3 == 1 then return true end
         local cast_pect = casting_focus.remains/casting_focus.duration*100
-        if casting_focus.v3 == 1 and cast_pect < Hekili.DB.profile.toggles.interrupts.channelRemainingThreshold or 90 then return true end
+        if casting_focus.v3 == 1 and cast_pect < Hekili.DB.profile.toggles.interrupts.channelRemainingThreshold then return true end
         return casting_focus.remains <= (Hekili.DB.profile.toggles.interrupts.castRemainingThreshold or 1)
     end
 

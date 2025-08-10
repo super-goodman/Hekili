@@ -1191,6 +1191,14 @@ function errorCast(name)
         CastSpellByID(227847)
         return true
         
+    elseif name == "精神鞭笞"  then
+        CastSpellByName("精神鞭笞")
+        CastSpellByName("精神鞭笞：狂")
+        return true
+    elseif name == "精神鞭笞：狂"  then
+        CastSpellByName("精神鞭笞：狂")
+        CastSpellByName("精神鞭笞")
+        return true
     elseif name == "圣言祭礼"  then
         CastSpellByName("圣言祭礼")
         UseInventoryItem(16)
