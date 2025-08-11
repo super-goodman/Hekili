@@ -18,11 +18,12 @@ actions.precombat+=/arcane_torrent
 #actions.precombat+=/shadow_crash,if=active_enemies<=12
 #actions.precombat+=/vampiric_touch,if=(!talent.whispering_shadows|!action.shadow_crash.in_flight)&(!talent.shadow_crash.enabled|active_enemies>12|!boss)
 
+actions+=/shadowform,line_cd=5,if=!buff.shadowform.up
 actions+=/silence
 actions+=/mind_flay_cancel,if=find.player_casting.id=15407&gcd.remains=0&find.player_casting.remains<30&find.player_casting.remains>10&buff.mind_flay_insanity.down
 actions+=/variable,name=holding_crash,op=set,value=false
 actions+=/variable,name=pool_for_cds,op=set,value=(cooldown.void_eruption.remains<=gcd.max*3&talent.void_eruption|cooldown.dark_ascension.up&talent.dark_ascension)|talent.void_torrent&talent.psychic_link&cooldown.void_torrent.remains<=4&!variable.holding_crash&!buff.voidform.up
-actions+=/call_action_list,name=aoe,strict=1,if=active_enemies>2
+actions+=/call_action_list,name=aoe,strict=1,if=active_enemies>=2
 actions+=/run_action_list,name=main
 
 actions.aoe+=/call_action_list,name=aoe_variables

@@ -1,4 +1,4 @@
-actions.precombat+=/rushing_jade_wind,if=buff.rushing_jade_wind.remains<=1
+actions.precombat+=/rushing_jade_wind,if=buff.rushing_jade_wind.remains<=1&group
 
 actions+=/detox
 actions+=/spear_hand_strike
@@ -18,7 +18,7 @@ actions+=/call_action_list,name=st,if=cooldown_check&active_enemies<2
 actions.combo+=/rushing_jade_wind,if=buff.rushing_jade_wind.remains<=1
 actions.combo+=/purifying_brew,if=stagger.heavy&!settings.combo_max_damage
 actions.combo+=/celestial_brew,if=health.pct<=60&!settings.combo_max_damage&buff.celestial_brew.down
-actions.combo+=/celestial_infusion,if=health.pct<=60&!settings.combo_max_damage&buff.celestial_infusion.down
+#actions.combo+=/celestial_infusion,if=health.pct<=60&!settings.combo_max_damage&buff.celestial_infusion.down
 actions.combo+=/keg_smash,if=time<15
 actions.combo+=/keg_smash,if=(talent.celestial_brew&!cooldown.celestial_brew.ready|talent.celestial_infusion&!cooldown.celestial_infusion.ready)&cooldown.purifying_brew.charges<2|incoming_damage_3s>health.max*(0.2+(0.2*group))
 actions.combo+=/tiger_palm
@@ -45,7 +45,7 @@ actions.aoe+=/tiger_palm,if=buff.blackout_combo.up
 actions.aoe+=/rising_sun_kick,if=talent.fluidity_of_motion.enabled
 actions.aoe+=/tiger_palm,if=energy>40-cooldown.keg_smash.remains*energy.regen
 
-actions.st+=/rushing_jade_wind,
+actions.st+=/rushing_jade_wind,if=buff.rushing_jade_wind.remains<=1
 actions.st+=/weapons_of_order
 actions.st+=/invoke_niuzao
 actions.st+=/blackout_kick
@@ -74,7 +74,7 @@ actions.mitigation+=/black_ox_brew,if=(!talent.celestial_brew.enabled|cooldown.c
 actions.mitigation+=/vivify,if=health.pct<=settings.vivify_percent&buff.vivacious_vivification.up
 actions.mitigation+=/purifying_brew,if=tanking&settings.purify_for_celestial_max&(time_to_max_charges<gcd.max|buff.purified_chi.up&buff.purified_chi.remains<1.5*gcd.max)
 actions.mitigation+=/celestial_brew,if=tanking&buff.celestial_brew.down&buff.purified_chi.up&(!settings.combo_max_damage|buff.blackout_combo.down)
-actions.mitigation+=/celestial_infusion,if=tanking&buff.celestial_infusion.down&buff.purified_chi.up&(!settings.combo_max_damage|buff.blackout_combo.down)
+##actions.mitigation+=/celestial_infusion,if=tanking&buff.celestial_infusion.down&buff.purified_chi.up&(!settings.combo_max_damage|buff.blackout_combo.down)
 actions.mitigation+=/purifying_brew,if=group&(!settings.combo_max_damage|buff.blackout_combo.down)&settings.purify_stagger_currhp>0&stagger.pct>=settings.purify_stagger_currhp
 actions.mitigation+=/purifying_brew,if=solo&(!settings.combo_max_damage|buff.blackout_combo.down)&settings.purify_stagger_currhp>0&stagger.pct>=settings.purify_stagger_currhp*0.5
 actions.mitigation+=/purifying_brew,if=group&(settings.combo_max_damage&buff.blackout_combo.down)&settings.purify_stagger_maxhp>0&stagger.pct>=settings.purify_stagger_maxhp
@@ -83,10 +83,6 @@ actions.mitigation+=/purifying_brew,if=group&(!settings.combo_max_damage|buff.bl
 actions.mitigation+=/purifying_brew,if=solo&(!settings.combo_max_damage|buff.blackout_combo.down)&settings.purify_stagger_currhp=0&settings.purify_stagger_maxhp=0&stagger.pct>10
 actions.mitigation+=/dampen_harm,if=health.pct<50&incoming_damage_3s>health.max*(0.2+(0.2*group))&buff.fortifying_brew.down&buff.diffuse_magic.down
 actions.mitigation+=/fortifying_brew,if=health.pct<50&incoming_damage_3s>health.max*(0.2+(0.2*group))&buff.dampen_harm.down&buff.diffuse_magic.down
-actions.mitigation+=/celestial_infusion,if=(!settings.combo_max_damage|buff.blackout_combo.down)&buff.aspect_of_harmony_accumulator.value>0.3*health.max&buff.weapons_of_order.up&!dot.aspect_of_harmony_damage.ticking
-actions.mitigation+=/celestial_infusion,if=(!settings.combo_max_damage|buff.blackout_combo.down)&buff.aspect_of_harmony_accumulator.value>0.3*health.max&!talent.weapons_of_order.enabled&!dot.aspect_of_harmony_damage.ticking
-actions.mitigation+=/celestial_infusion,if=(!settings.combo_max_damage|buff.blackout_combo.down)&fight_remains<20&fight_remains>14&buff.aspect_of_harmony_accumulator.value>0.2*health.max
-actions.mitigation+=/celestial_infusion,if=(!settings.combo_max_damage|buff.blackout_combo.down)&buff.aspect_of_harmony_accumulator.value>0.3*health.max&cooldown.weapons_of_order.remains>20&!dot.aspect_of_harmony_damage.ticking
 actions.mitigation+=/celestial_brew,if=(!settings.combo_max_damage|buff.blackout_combo.down)&buff.aspect_of_harmony_accumulator.value>0.3*health.max&buff.weapons_of_order.up&!dot.aspect_of_harmony_damage.ticking
 actions.mitigation+=/celestial_brew,if=(!settings.combo_max_damage|buff.blackout_combo.down)&buff.aspect_of_harmony_accumulator.value>0.3*health.max&!talent.weapons_of_order.enabled&!dot.aspect_of_harmony_damage.ticking
 actions.mitigation+=/celestial_brew,if=(!settings.combo_max_damage|buff.blackout_combo.down)&fight_remains<20&fight_remains>14&buff.aspect_of_harmony_accumulator.value>0.2*health.max

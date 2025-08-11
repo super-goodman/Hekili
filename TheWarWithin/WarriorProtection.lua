@@ -1955,7 +1955,7 @@ spec:RegisterSetting( "stack_shield_block", true, {
     width = "full"
 } )
 
-spec:RegisterSetting( "stance_weaving", false, {
+spec:RegisterSetting( "stance_weaving", true, {
     name = "允许改变姿态",
     desc = function()
         return "如果勾选，在自定义优先级中可以推荐在不同的姿态中转换。"
@@ -2058,27 +2058,6 @@ spec:RegisterSetting( "last_stand_health", 70, {
     width = "full",
 } )
 
-spec:RegisterSetting( "spell_block_amount", 25, {
-    name = "|T132358:0|t 法术格挡伤害阈值",
-    desc = "如果设置大于0，如果在过去5秒内你受到的伤害达到了你最大生命值的该百分比，插件可能会推荐你使用 |T132358:0|t 法术格挡。\n\n"
-        .. "如果设置为 |cFFFFD10050%|r，并且你的最大生命值达到 50,000，那么当你在过去5秒内受到 25,000点伤害，插件会推荐你使用法术格挡。\n\n"
-        .. "默认情况下，你的【防御】快捷切换也必须启用。",
-    type = "range",
-    min = 0,
-    max = 200,
-    step = 1,
-    width = "full",
-} )
-
-spec:RegisterSetting( "spell_block_health", 75, {
-    name = "|T132358:0|t 法术格挡生命阈值",
-    desc = "如果设置大于0，你的当前生命值低于该百分比，插件可能会推荐你使用 |T132358:0|t 法术格挡。",
-    type = "range",
-    min = 0,
-    max = 100,
-    step = 1,
-    width = "full",
-} )
 
 spec:RegisterSetting( "victory_rush_health", 40, {
 	name = "|T589768:0|t 乘胜追击生命阈值",

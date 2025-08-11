@@ -1419,7 +1419,7 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                         slot.wait = state.delay
                                                         slot.waitSec = nil
                                                         slot.gcd = ability.gcd
-                                    
+                                                        slot.formation = ability.formation
 
                                                         local toggles = Hekili.DB.profile.toggles
                                                         slot.terrain = ability.terrain or false

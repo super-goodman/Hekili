@@ -6877,7 +6877,7 @@ packControl.actionID = format( "%04d", id ) end
                                             end
                                         end
 
-
+                                        action_result = nil
                                         return list
                                     end,
                                     order = 3.1,

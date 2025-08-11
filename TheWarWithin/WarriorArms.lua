@@ -846,7 +846,7 @@ spec:RegisterAbilities( {
         startsCombat = false,
         texture = 132349,
         essential = true,
-        nobuff = "stance",
+        nobuff = "battle_stance",
 
         handler = function ()
             applyBuff( "battle_stance" )

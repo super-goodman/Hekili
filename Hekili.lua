@@ -753,8 +753,7 @@ hekili_autocast:SetScript("OnUpdate", function()
 
     if Hekili.autoCastEnabled and action ~= nil and not cutoff  and not tempStopMode() and isOfficialOpen() then
         autoHPPotion()
-        --print(action.empowered)
-        if ((now - lastTime >= Hekili.DB.profile.toggles.autocast.speedRange/3 and action.gcd == "spell" ) or (action.gcd ~= "spell" or isOfficialOpen()) and Hekili.autocastAction_check) and action.indicator ~= "wait" then  
+        if ((now - lastTime >= Hekili.DB.profile.toggles.autocast.speedRange/3 and action.gcd == "spell" and action.listName ~= "precombat" and not isFormationSpell(action)) or (now - lastTime >= 1 and (action.listName == "precombat" or isFormationSpell(action))) or (action.gcd ~= "spell" or isOfficialOpen()) and Hekili.autocastAction_check) and action.indicator ~= "wait" then  
      
            -- and action.delay < 0.5 
             
@@ -792,6 +791,7 @@ hekili_autocast:SetScript("OnUpdate", function()
                 if type == 1 and action.empower_to == nil and (not ChannellingID or isSkippingChannelLock(ChannellingID)) and action.delay < 0.2 then
                     
                     local name = GetLocalizedSpellName(cast_ID)
+                    
                     if Hekili.forceStealth == true  then
                         Hekili.forceStealth = false
                     end
@@ -1179,6 +1179,10 @@ function isSkippingChannelLock(channelID)
     end
 end
 
+function isFormationSpell(action)
+    return action.formation or false
+end
+
 function isOfficialOpen()
    return ( Hekili.DB.profile.toggles.oneButtonRaotaion.value2 and Hekili.DB.profile.toggles.oneButtonRaotaion.value or not Hekili.DB.profile.toggles.oneButtonRaotaion.value)
 end
@@ -1264,6 +1268,16 @@ function errorCast(name)
         CastSpellByName("暗影魔")
         CastSpellByName("虚空幽灵")
         CastSpellByName("摧心魔")
+        return true
+    elseif name == "虚空冲击"  then
+        --CastSpellByID(433895)
+        CastSpellByName("虚空冲击")
+        CastSpellByName("惩击")
+        return true
+    elseif name == "惩击"  then
+        --CastSpellByID(433895)
+        CastSpellByName("惩击")
+        CastSpellByName("虚空冲击")
         return true
     elseif name == "惩击" or name == "暗影冲击" and spec == "戒律" then
         --CastSpellByID(433895)
@@ -1499,6 +1513,10 @@ function GetCurrentEmpowerStage()
     --print(string.format("total Stage duration: %.2f 秒", totalEmpowerTime ))
     if totalEmpowerTime ~= 0 then
         local name, _, _, startTimeMs, endTimeMs, _, _, spellID, isEmpowered, numEmpowerStages = UnitChannelInfo("player")
+        --print(spellID)
+        if spellID == 1217413 then
+            startTimeMs = startTimeMs+100
+        end
         if name then
             Hekili.empower_startTime = startTimeMs * 0.001
         end

@@ -1320,7 +1320,7 @@ spec:RegisterAbilities( {
         cast = 0,
         cooldown = 0,
         gcd = "spell",
-
+        formation = true,
         startsCombat = false,
         texture = 135893,
 

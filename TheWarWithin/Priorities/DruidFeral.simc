@@ -5,12 +5,12 @@
 
 actions.precombat+=/mark_of_the_wild,line_cd=4
 actions.precombat+=/prowl,line_cd=4,if=!buff.prowl.up
-actions.precombat+=/cat_form,line_cd=2,if=!buff.cat_form.up&buff.bear_form.down
+actions.precombat+=/cat_form,line_cd=4,if=!buff.cat_form.up&buff.bear_form.down
 
 #self
 actions+=/call_action_list,name=bear,strict=1,if=buff.bear_form.up
 actions+=/prowl,if=buff.bs_inc.down&!buff.prowl.up
-actions+=/cat_form,if=!buff.cat_form.up&!talent.fluid_form
+actions+=/cat_form,line_cd=4,if=!buff.cat_form.up&!talent.fluid_form
 actions+=/skull_bash
 actions+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check&!raid
 ## Line up <a href='https://www.wowhead.com/spell=10060/power-infusion'>Power Infusion</a> with Berserk.
@@ -28,7 +28,7 @@ actions+=/call_action_list,name=cooldown,strict=1,if=dot.rip.ticking
 # with rip and tear, as wildstalker, we do 3cp rips
 actions+=/rip,if=talent.rip_and_tear&spell_targets=1&hero_tree.wildstalker&buff.tigers_fury.up&!buff.bs_inc.up&(buff.bloodtalons.up|!talent.bloodtalons)&(combo_points>=3&refreshable&cooldown.tigers_fury.remains>25|buff.tigers_fury.remains<5&variable.rip_duration>cooldown.tigers_fury.remains&cooldown.tigers_fury.remains>=dot.rip.remains)
 actions+=/call_action_list,name=builder,if=(buff.bs_inc.up&!buff.ravage.up&!buff.coiled_to_spring.up&hero_tree.druid_of_the_claw&talent.coiled_to_spring&spell_targets<=2)|buff.bloodtalons.stack=0&active_bt_triggers=2
-actions+=/wait,sec=action.tigers_fury.ready,if=combo_points=5&cooldown.tigers_fury.remains<3&spell_targets=1
+actions+=/wait,sec=cooldown.tigers_fury.remains,if=combo_points=5&cooldown.tigers_fury.remains>0&cooldown.tigers_fury.remains<3&spell_targets=1
 actions+=/call_action_list,name=finisher,if=combo_points=5
 ## [Syrif] - combo_points<5 added to stop from sending generators inappropriately
 actions+=/call_action_list,name=builder,if=spell_targets.swipe_cat=1&combo_points<5
@@ -109,8 +109,8 @@ actions.finisher+=/primal_wrath,if=spell_targets.primal_wrath>1&((dot.primal_wra
 actions.finisher+=/rip,cycle_targets=1,if=(!talent.primal_wrath|spell_targets=1)&(buff.bloodtalons.up|!talent.bloodtalons)&(buff.tigers_fury.up|dot.rip.remains<cooldown.tigers_fury.remains)&(remains<fight_remains|remains<4&buff.ravage.up)
 # only bite with ravage in aoe with berserk
 actions.finisher+=/call_action_list,name=aoe_builder,if=hero_tree.druid_of_the_claw&buff.bs_inc.up&!buff.ravage.up&spell_targets>=2
-# actions.finisher+=/call_action_list,name=builder,if=buff.ravage.up&buff.preparing_to_strike.remains<2&buff.preparing_to_strike.up&buff.bs_inc.up
-actions.finisher+=/wait,sec=!buff.sabertooth.up,if=buff.sabertooth.up&energy.deficit>40
+## actions.finisher+=/call_action_list,name=builder,if=buff.ravage.up&buff.preparing_to_strike.remains<2&buff.preparing_to_strike.up&buff.bs_inc.up
+actions.finisher+=/wait,sec=debuff.sabertooth.remains,if=debuff.sabertooth.up&energy.deficit>40
 actions.finisher+=/pool_resource,for_next=1
 actions.finisher+=/ferocious_bite,max_energy=1,cycle_targets=1,if=!buff.bs_inc.up
 actions.finisher+=/pool_resource,for_next=1
@@ -134,7 +134,7 @@ actions.mitigation+=/soothe
 actions.mitigation+=/renewal,if=health.pct<=40
 actions.mitigation+=/barkskin,if=health.pct<=hp_gap&buff.barkskin.down&buff.survival_instincts.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)
 actions.mitigation+=/survival_instincts,if=health.pct<=hp_gap&buff.survival_instincts.down&buff.barkskin.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)
-actions.mitigation+=/bear_form,line_cd=2,enabled=1,if=bear_trans&health.pct<=50&buff.barkskin.down&buff.bear_form.down&(target_me_spell_magic|dot_spell_magic|target_me_spell_physic|dot_spell_physic)
+actions.mitigation+=/bear_form,line_cd=4,enabled=1,if=bear_trans&health.pct<=50&buff.barkskin.down&buff.bear_form.down&(target_me_spell_magic|dot_spell_magic|target_me_spell_physic|dot_spell_physic)
 
 
 actions.bear=/frenzied_regeneration,if=health.pct<=hp_gap&buff.bear_form.up

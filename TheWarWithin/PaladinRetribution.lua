@@ -1549,7 +1549,7 @@ spec:RegisterAbilities( {
         cooldown = 0,
         gcd = "spell",
         school = "holy",
-
+        formation = true,
         talent = "auras_of_the_resolute",
         startsCombat = false,
         nobuff = "paladin_aura",

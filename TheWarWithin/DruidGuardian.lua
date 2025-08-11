@@ -1248,7 +1248,7 @@ spec:RegisterAbilities( {
         cooldown = 0,
         gcd = "spell",
         school = "physical",
-
+        formation = true,
         spend = function() return -25 * ( buff.furious_regeneration.up and 1.15 or 1 ) end,
         spendType = "rage",
 
@@ -1310,7 +1310,7 @@ spec:RegisterAbilities( {
         cooldown = 0,
         gcd = "spell",
         school = "physical",
-
+        formation = true,
         startsCombat = false,
 
         noform = "cat_form",
@@ -1817,7 +1817,7 @@ spec:RegisterAbilities( {
         cooldown = 0,
         gcd = "spell",
         school = "physical",
-
+        formation = true,
         talent = "moonkin_form",
         noform = "moonkin_form",
         startsCombat = false,
