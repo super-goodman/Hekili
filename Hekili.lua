@@ -788,7 +788,7 @@ hekili_autocast:SetScript("OnUpdate", function()
                     Hekili.cycle_state = true
                 end
 
-                if type == 1 and action.empower_to == nil and (not ChannellingID or isSkippingChannelLock(ChannellingID)) and action.delay < 0.2 then
+                if type == 1 and action.empower_to == nil and (not ChannellingID or isSkippingChannelLock(ChannellingID)) and action.delay < 0.5 then
                     
                     local name = GetLocalizedSpellName(cast_ID)
                     
@@ -816,7 +816,7 @@ hekili_autocast:SetScript("OnUpdate", function()
                         if Hekili.DB.profile.toggles.officialAuto.value and action.terrain then
                             local next_id_ = C_AssistedCombat.GetNextCastSpell()
                             local next_id = FindBaseSpellByID(next_id_)
-                            if next_id == cast_ID and  UnitName("boss1") ~= "虚空石畸体" then
+                            if next_id == cast_ID and  UnitName("boss1") ~= "拉夏南" then
                                 CastSpellByID(1229376)
                                 return
                             end
@@ -1172,7 +1172,7 @@ function quickStopSpelling(action)
 end
 
 function isSkippingChannelLock(channelID)
-    if channelID == 115175 or channelID == 263165 then
+    if channelID == 115175 or channelID == 263165 or channelID == 5143 then
         return true
     else
         return false
@@ -1194,7 +1194,10 @@ function errorCast(name)
     if name == "剑刃风暴" then
         CastSpellByID(227847)
         return true
-        
+    elseif name == "假死"  then
+        CastSpellByName("假死")
+        Hekili:Notify( "喵！自动假死驱散！动一下！", 6 )
+        return true
     elseif name == "精神鞭笞"  then
         CastSpellByName("精神鞭笞")
         CastSpellByName("精神鞭笞：狂")

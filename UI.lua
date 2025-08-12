@@ -1022,7 +1022,6 @@ do
                     local a = b.Action
 
                     if a then
-                        --b.Keybind, b.KeybindFrom = Hekili:GetBindingForAction( a, conf, i )
 
                         if i == 1 or conf.keybindings.queued then
                             b.Keybinding:SetText( b.Keybind )
@@ -1088,11 +1087,11 @@ do
             local madeUpdate = false
 
             self.timer = pulseDisplay
-            self.NewRecommendations = nil
 
             local now = GetTime()
 
-            if fullUpdate then
+            if self.NewRecommendations then
+                self.NewRecommendations = nil
                 madeUpdate = true
 
                 local alpha = self.alpha
@@ -1114,6 +1113,10 @@ do
                         local exact_time = b.Recommendation.exact_time
 
                         local ability = class.abilities[ action ]
+
+                        if ability and ability.id < 0 and ability.id > -100 then
+                            ability = nil
+                        end
 
                         if ability then
                             if ( conf.flash.enabled and conf.flash.suppress ) then b:Hide()
@@ -1216,16 +1219,16 @@ do
                                 if b.glowStop then b:glowStop() end
                                 b.glowing = false
                             end
+
+                            b.Action = action
+                            b.Text = caption
+                            b.Indicator = indicator
+                            b.Keybind = keybind
+                            b.Ability = ability
+                            b.ExactTime = exact_time
                         else
                             b:Hide()
                         end
-
-                        b.Action = action
-                        b.Text = caption
-                        b.Indicator = indicator
-                        b.Keybind = keybind
-                        b.Ability = ability
-                        b.ExactTime = exact_time
                     end
 
                     self:RefreshCooldowns( "RECS_UPDATED" )
@@ -1648,7 +1651,7 @@ do
             for i, rec in ipairs( self.Recommendations ) do
                 local button = self.Buttons[ i ]
 
-                if button.Action then
+                if button.Action and button.Action == rec.actionName then
                     local cd = button.Cooldown
                     local ability = button.Ability
 
@@ -2356,7 +2359,7 @@ do
                     local spf = 1000 / ( rate > 0 and rate or 100 )
 
                     if HekiliEngine.threadUpdates then
-                        local dyn = 1.1 * HekiliEngine.threadUpdates.meanWorkTime / floor( HekiliEngine.threadUpdates.meanFrames )
+                        local dyn = HekiliEngine.threadUpdates.meanWorkTime / floor( HekiliEngine.threadUpdates.meanFrames )
                         Hekili.maxFrameTime = 0.8 * max( ceiling, min( 16.667, spf, dyn ) )
                     else
                         Hekili.maxFrameTime = 0.8 * max( ceiling, min( 16.667, spf ) )

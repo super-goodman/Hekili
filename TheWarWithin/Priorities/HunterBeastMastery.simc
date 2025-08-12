@@ -29,31 +29,12 @@ actions.cds+=/fireblood,if=buff.call_of_the_wild.up|!talent.call_of_the_wild&buf
 actions.cds+=/potion,if=buff.call_of_the_wild.up|!talent.call_of_the_wild&buff.bestial_wrath.up|boss&fight_remains<31&raid
 
 
-actions.drcleave+=/bestial_wrath
-actions.drcleave+=/kill_shot,if=buff.withering_fire.up|pet.main.buff.beast_cleave.remains<gcd
-actions.drcleave+=/barbed_shot,cycle_targets=1,if=full_recharge_time<gcd
-actions.drcleave+=/multishot,if=pet.main.buff.beast_cleave.down&(!talent.bloody_frenzy|cooldown.call_of_the_wild.remains)
-actions.drcleave+=/kill_shot
-actions.drcleave+=/call_of_the_wild
-actions.drcleave+=/bloodshed
-actions.drcleave+=/explosive_shot,if=talent.thundering_hooves
-actions.drcleave+=/kill_command
-actions.drcleave+=/cobra_shot,if=focus.time_to_max<gcd*2|!talent.multishot
-actions.drcleave+=/explosive_shot
 
-actions.drst+=/kill_shot
-actions.drst+=/bloodshed
-actions.drst+=/call_of_the_wild,if=fight_remains>60|boss&fight_remains<30
-actions.drst+=/bestial_wrath,if=cooldown.call_of_the_wild.remains>20|!talent.call_of_the_wild|cooldown.call_of_the_wild.ready
-actions.drst+=/kill_command,if=(prev.1.black_arrow|prev.1.kill_shot)&buff.withering_fire.up
-actions.drst+=/barbed_shot,cycle_targets=1,if=full_recharge_time<gcd|charges_fractional>=cooldown.kill_command.charges_fractional
-actions.drst+=/kill_command
-actions.drst+=/cobra_shot
 
 actions.cleave+=/multishot,if=buff.beast_cleave.down&(!talent.bloody_frenzy|cooldown.call_of_the_wild.remains)&time<3
 actions.cleave+=/barbed_shot,if=time<2&debuff.barbed_shot.down
 actions.cleave+=/multishot,if=buff.beast_cleave.down&active_enemies>3&short_term
-actions.cleave+=/bestial_wrath,if=fight_remains>10&buff.howl_of_the_pack_leader_cooldown.remains-buff.lead_from_the_front.duration<buff.lead_from_the_front.duration%gcd*0.5|talent.multishot|!set_bonus.tww3_4pc
+actions.cleave+=/bestial_wrath,if=fight_remains>10&((buff.howl_of_the_pack_leader_cooldown.remains)-(buff.lead_from_the_front.duration))<((buff.lead_from_the_front.duration)%gcd*0.5)|!set_bonus.tww3_4pc
 actions.cleave+=/call_of_the_wild
 actions.cleave+=/barbed_shot,cycle_targets=1,if=full_recharge_time<gcd|charges_fractional>=cooldown.kill_command.charges_fractional|talent.call_of_the_wild&cooldown.call_of_the_wild.ready|howl_summon.ready&full_recharge_time<8
 actions.cleave+=/bloodshed
@@ -62,14 +43,34 @@ actions.cleave+=/call_of_the_wild
 actions.cleave+=/explosive_shot,if=talent.thundering_hooves
 actions.cleave+=/kill_command
 actions.cleave+=/cobra_shot,if=focus.time_to_max<gcd*2|buff.hogstrider.stack>3|!talent.multishot
-actions.cleave+=/explosive_shot
 
-actions.st+=/bestial_wrath,if=buff.howl_of_the_pack_leader_cooldown.remains-buff.lead_from_the_front.duration<buff.lead_from_the_front.duration%gcd*0.5|!set_bonus.tww3_4pc
-actions.st+=/barbed_shot,if=full_recharge_time<gcd
+actions.drcleave+=/kill_shot
+actions.drcleave+=/bestial_wrath,if=cooldown.call_of_the_wild.remains>20|!talent.call_of_the_wild
+actions.drcleave+=/barbed_shot,cycle_targets=1,if=full_recharge_time<gcd
+actions.drcleave+=/bloodshed
+actions.drcleave+=/multishot,if=pet.main.buff.beast_cleave.down&(!talent.bloody_frenzy|cooldown.call_of_the_wild.remains)
+actions.drcleave+=/call_of_the_wild
+actions.drcleave+=/explosive_shot,if=talent.thundering_hooves
+actions.drcleave+=/barbed_shot,cycle_targets=1,if=charges_fractional>=cooldown.kill_command.charges_fractional
+actions.drcleave+=/kill_command
+actions.drcleave+=/cobra_shot,if=focus.time_to_max<gcd*2
+actions.drcleave+=/explosive_shot
+
+actions.drst+=/kill_shot
+actions.drst+=/bestial_wrath,if=cooldown.call_of_the_wild.remains>20|!talent.call_of_the_wild
+actions.drst+=/barbed_shot,cycle_targets=1,if=full_recharge_time<gcd
+actions.drst+=/bloodshed
+actions.drst+=/call_of_the_wild
+actions.drst+=/kill_command
+actions.drst+=/barbed_shot,cycle_targets=1
+actions.drst+=/cobra_shot
+
+actions.st+=/bestial_wrath,if=((buff.howl_of_the_pack_leader_cooldown.remains)-(buff.lead_from_the_front.duration))<((buff.lead_from_the_front.duration)%gcd*0.5)|!set_bonus.tww3_4pc
+actions.st+=/barbed_shot,cycle_targets=1,if=full_recharge_time<gcd
 actions.st+=/call_of_the_wild
 actions.st+=/bloodshed
-actions.st+=/kill_command,if=charges_fractional>=cooldown.barbed_shot.charges_fractional
-actions.st+=/barbed_shot
+actions.st+=/kill_command,if=charges_fractional>=cooldown.barbed_shot.charges_fractional&!(buff.lead_from_the_front.remains>gcd&buff.lead_from_the_front.remains<gcd*2&!howl_summon.ready&full_recharge_time>gcd)
+actions.st+=/barbed_shot,cycle_targets=1
 actions.st+=/cobra_shot
 
 actions.trinkets+=/variable,name=buff_sync_ready,value=talent.call_of_the_wild&(prev_gcd.1.call_of_the_wild)|talent.bloodshed&(prev_gcd.1.bloodshed)|(!talent.call_of_the_wild&!talent.bloodshed)&(buff.bestial_wrath.up|cooldown.bestial_wrath.remains_guess<5)

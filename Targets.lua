@@ -216,7 +216,16 @@ local enemyExclusions = {
     [237967] = true,              -- Gallywix: Discharged Giga Bomb
     [237968] = true,              -- Gallywix: Charged Giga Bomb
     [151579] = true,              -- Operation: Mechagon - Shield Generator
-    [219588] = true               -- Cinderbrew Meadery - Yes Man (etc.)
+    [219588] = true,              -- Cinderbrew Meadery - Yes Man (etc.)
+    [225601] = true,              -- Webbed Victim
+    [215826] = true,              -- Bloodworker
+    [215968] = true,              -- Black Blood
+    [220599] = true,              -- Bloodstained Webmage
+    [177500] = true,              -- Corsair Brute
+    [166034] = true,              -- Empty Anima Vessel
+    [165913] = true,              -- Ghastly Parishioner
+    [165737] = true,              -- Sinstone Statue
+    [244302] = true,              -- Binding Javelin
 }
 
 local requiredForInclusion = {

@@ -50,22 +50,28 @@ actions.cds+=/ancestral_call
 ## actions.cds+=/invoke_external_buff,name=blessing_of_summer,if=buff.blessing_of_summer.down
 
 actions.ff_aoe+=/cone_of_cold,if=talent.coldest_snap&(prev_gcd.1.comet_storm|!cooldown.comet_storm.ready)&(fight_remains>10|raid)&!cooldown.frozen_orb.ready&cooldown.frozen_orb.remains>10&cooldown.comet_storm.remains>10
-actions.ff_aoe+=/freeze,if=freezable&prev_gcd.1.comet_storm
-actions.ff_aoe+=/ice_nova,if=freezable&!prev_off_gcd.freeze&prev_gcd.1.comet_storm&time-action.cone_of_cold.last_used>8
+# Against freezable targets prioritize Pet Freeze and Ice Nova to shatter Glacial Spike and Comet Storm.
+actions.ff_aoe+=/freeze,if=freezable&action.cone_of_cold.time_since>8&(prev_gcd.1.glacial_spike&remaining_winters_chill=0&debuff.winters_chill.down|prev_gcd.1.comet_storm)
+actions.ff_aoe+=/ice_nova,if=!prev_off_gcd.freeze&freezable&action.cone_of_cold.time_since>8&(prev_gcd.1.glacial_spike&remaining_winters_chill=0&debuff.winters_chill.down|prev_gcd.1.comet_storm)
 actions.ff_aoe+=/frost_nova,enabled=0,if=freezable&!prev_off_gcd.freeze&!prev_off_gcd.ice_nova&(prev_gcd.1.glacial_spike&remaining_winters_chill=0&debuff.winters_chill.down|prev_gcd.1.comet_storm)
-actions.ff_aoe+=/frozen_orb,if=fight_remains>10|raid
-actions.ff_aoe+=/ice_lance,if=buff.excess_fire.stack=2&cooldown.comet_storm.up
+actions.ff_aoe+=/flurry,if=!prev_off_gcd.freeze&remaining_winters_chill=0&debuff.winters_chill.down&prev_gcd.1.glacial_spike
+actions.ff_aoe+=/frozen_orb
 actions.ff_aoe+=/blizzard,if=talent.ice_caller|talent.freezing_rain
-actions.ff_aoe=/frostfire_bolt,if=talent.deaths_chill&buff.icy_veins.remains>9&(buff.deaths_chill.stack<9|buff.deaths_chill.stack=9&!action.frostfire_bolt.in_flight)
-actions.ff_aoe+=/comet_storm,if=(cooldown.cone_of_cold.remains>5|cooldown.cone_of_cold.ready)&fight_remains>10|raid
-actions.ff_aoe+=/ray_of_frost,if=talent.splintering_ray&remaining_winters_chill
+# During Icy Veins stack Death's Chill to 12 while keeping Blizzard and Frozen Orb on cooldown.
+actions.ff_aoe+=/frostfire_bolt,if=talent.deaths_chill&buff.icy_veins.up&(buff.deaths_chill.stack<9|buff.deaths_chill.stack=9&!action.frostfire_bolt.in_flight)
+# Don't munch Excess Fire before pressing the 2nd Comet Storm in the Cone of Cold sequence. Only relevant for Deaths Chill builds.
+actions.ff_aoe+=/ice_lance,if=talent.deaths_chill&buff.excess_fire.stack=2&cooldown.comet_storm.ready
+# Hold Comet Storm for up to 12 seconds for Cone of Cold.
+actions.ff_aoe+=/comet_storm,if=cooldown.cone_of_cold.remains>12|cooldown.cone_of_cold.ready
+actions.ff_aoe+=/ray_of_frost,if=talent.splintering_ray&remaining_winters_chill=2
 actions.ff_aoe+=/glacial_spike,if=buff.icicles.stack=5
-actions.ff_aoe+=/flurry,if=buff.excess_fire.up&buff.excess_frost.up
-actions.ff_aoe+=/flurry,if=remaining_winters_chill=0&debuff.winters_chill.down
-actions.ff_aoe+=/frostfire_bolt,if=buff.frostfire_empowerment.up&!buff.excess_fire.up
+# Cast Flurry to spend Excess Frost.
+actions.ff_aoe+=/flurry,if=buff.excess_frost.up
+# With Araz's Ritual Forge equipped only cast Shifting Power outside of Icy Veins to create more overlap with subsequent Icy Veins.
 actions.ff_aoe+=/shifting_power,if=cooldown.icy_veins.remains>10&cooldown.frozen_orb.remains>10&(!talent.comet_storm|cooldown.comet_storm.remains>10)
+actions.ff_aoe+=/frostfire_bolt,if=buff.frostfire_empowerment.up&!buff.excess_fire.up
 actions.ff_aoe+=/ice_lance,if=buff.fingers_of_frost.up
-actions.ff_aoe+=/ice_lance,cycle_targets=1,if=remaining_winters_chill
+actions.ff_aoe+=/ice_lance,if=remaining_winters_chill
 actions.ff_aoe+=/frostfire_bolt
 actions.ff_aoe+=/call_action_list,name=movement
 
@@ -86,7 +92,7 @@ actions.ff_cleave+=/call_action_list,name=movement
 
 actions.ff_st+=/flurry,if=remaining_winters_chill=0&debuff.winters_chill.down&prev_gcd.1.glacial_spike
 # Cast Flurry only with 3+ Icicles to guarantee shattering the Glacial Spike + Pyroblast into Winter's Chill. This also means queueing Flurry when casting Frostfire Bolt with 2+ Icicles and overcapping freely.
-actions.ff_st+=/flurry,if=remaining_winters_chill=0&debuff.winters_chill.down&prev_gcd.1.frostfire_bolt&(buff.icicles.stack>=3|!talent.glacial_spike)
+actions.ff_st+=/flurry,if=remaining_winters_chill=0&debuff.winters_chill.down&(buff.icicles.stack>=3|!talent.glacial_spike)
 actions.ff_st+=/comet_storm,if=remaining_winters_chill
 actions.ff_st+=/ray_of_frost,if=remaining_winters_chill=2
 actions.ff_st+=/glacial_spike,if=buff.icicles.stack=5
