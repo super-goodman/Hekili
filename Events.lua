@@ -2243,7 +2243,7 @@ local function ReadKeybindings( event )
             end
 
         -- Dominos support
-        elseif _G["Dominos"] then
+        elseif C_AddOns.IsAddOnLoaded("Dominos") then
             table.wipe( slotsUsed )
 
             for i = 1, 14 do
@@ -2453,7 +2453,7 @@ local function ReadOneKeybinding( event, slot )
         end
 
     -- Dominos support
-    elseif _G["Dominos"] then
+    elseif C_AddOns.IsAddOnLoaded("Dominos") then
         local bar = _G["DominosFrame" .. actionBarNumber]
         local button = bar.buttons[keyNumber]
 

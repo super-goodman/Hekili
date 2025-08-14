@@ -617,7 +617,7 @@ spec:RegisterGear({
             -- Herald of the Sun
             solar_wrath= {
                 id = 1236972,
-                duration = 20,
+                duration = 10,
                 max_stack = 1
             },
         }

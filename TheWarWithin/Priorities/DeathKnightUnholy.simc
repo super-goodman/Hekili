@@ -152,6 +152,7 @@ actions.cleave+=/festering_strike,cycle_targets=1,if=buff.vampiric_strike.down&c
 actions.cleave+=/wound_spender,if=variable.pop_wounds
 
 ## San'layn Fishing
+actions.san_fishing+=/antimagic_shell,if=death_knight.ams_absorb_percent>0&runic_power<40
 actions.san_fishing+=/wound_spender,if=buff.infliction_of_sorrow.up
 actions.san_fishing+=/any_dnd,if=!buff.death_and_decay.up&!buff.vampiric_strike.up
 actions.san_fishing+=/death_coil,if=buff.sudden_doom.up&talent.doomed_bidding|set_bonus.tww2_4pc&buff.essence_of_the_blood_queen.at_max_stacks&talent.frenzied_bloodthirst&!buff.vampiric_strike.up

@@ -487,6 +487,11 @@ spec:RegisterAuras( {
         duration = 10,
         max_stack = 1,
     },
+    faith_barricade = {
+        id = 385724,
+        duration = 10,
+        max_stack = 1
+    },
     faith_in_the_light = {
         id = 379041,
         duration = 5,

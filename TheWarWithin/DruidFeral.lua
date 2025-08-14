@@ -1,4 +1,3 @@
-
 -- DruidFeral.lua
 -- August 2025
 -- Patch 11.2
@@ -2302,7 +2301,6 @@ spec:RegisterAbilities( {
 
         spend = function () return 25 * ( buff.incarnation.up and 0.75 or 1 ) end,
         spendType = "energy",
-
         talent = "primal_wrath",
         startsCombat = true,
 
@@ -2326,7 +2324,7 @@ spec:RegisterAbilities( {
 
         form = "cat_form",
 
-        usable = function () return combo_points.current > 0 and target.distance <= 10, "no combo points" end,
+        usable = function () return combo_points.current > 0 and target.distance <= 8, "no combo points" end,
         handler = function ()
             applyDebuff( "target", "rip", action.primal_wrath.apply_duration )
             active_dot.rip = active_enemies
@@ -2962,7 +2960,7 @@ spec:RegisterAbilities( {
         talent = "tigers_fury",
         startsCombat = false,
 
-        usable = function () return buff.tigers_fury.down or energy.deficit > 50 + energy.regen end,
+        usable = function () return (buff.tigers_fury.down or energy.deficit > 50 + energy.regen) and target.distance <= 8 end,
         handler = function ()
             shift( "cat_form" )
             applyBuff( "tigers_fury" )

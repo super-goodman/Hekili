@@ -1419,6 +1419,7 @@ spec:RegisterAbilities( {
     -- Talent: Pummels all targets in front of you, dealing ${5*$117418s1} Physical damage to your primary target and ${5*$117418s1*$s6/100} damage to all other enemies over $113656d. Deals reduced damage beyond $s1 targets. Can be channeled while moving.
     fists_of_fury = {
         id = 113656,
+        --self 
         cast = 3,
         channeled = true,
         cooldown = 24,

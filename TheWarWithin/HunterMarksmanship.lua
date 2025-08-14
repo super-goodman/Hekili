@@ -954,7 +954,7 @@ spec:RegisterHook( "reset_precast", function ()
     -- FIXME
     -- This is still happening, but works better at further distances. It might be good practice to slow the projectile in general.
     -- Ensure that multishot recommendation doesn't flicker while black arrow is in flight, which was happening when only using the impact() function of the spell
-    if ( action.black_arrow.in_flight or prev_gcd[1].black_arrow and action.black_arrow.time_since <= 2 ) and talent.umbral_reach.enabled and active_enemies > 1 and talent.trick_shots.enabled then
+    if action.kill_shot.in_flight and talent.umbral_reach.enabled and active_enemies > 1 and talent.trick_shots.enabled then
         applyBuff( "trick_shots" )
     end
 

@@ -2998,7 +2998,6 @@ do
             name = "algari_healing_potion",
             items = { 211878, 211879, 211880 }
         },
-        
         {
             name = "cavedwellers_delight",
             items = { 212242, 212243, 212244 }
@@ -3166,6 +3165,7 @@ local gotn_classes = {
 
 local baseClass = UnitClassBase( "player" ) or "WARRIOR"
 local gotnID = gotn_classes[ baseClass ] or 28880
+
 all:RegisterAura( "gift_of_the_naaru", {
     id = gotnID,
     duration = 5,

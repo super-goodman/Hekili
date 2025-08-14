@@ -1134,6 +1134,7 @@ spec:RegisterAbilities( {
         cooldown = 0,
         gcd = "spell",
         hasteCD = true,
+        spell_targets = function() return max( active_enemies, ( talent.heavy_handed.enabled and 3 or 1 ) ) end,
 
         spend = 0,
         spendType = "rage",

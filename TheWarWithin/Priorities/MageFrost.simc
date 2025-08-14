@@ -56,6 +56,7 @@ actions.ff_aoe+=/ice_nova,if=!prev_off_gcd.freeze&freezable&action.cone_of_cold.
 actions.ff_aoe+=/frost_nova,enabled=0,if=freezable&!prev_off_gcd.freeze&!prev_off_gcd.ice_nova&(prev_gcd.1.glacial_spike&remaining_winters_chill=0&debuff.winters_chill.down|prev_gcd.1.comet_storm)
 actions.ff_aoe+=/flurry,if=!prev_off_gcd.freeze&remaining_winters_chill=0&debuff.winters_chill.down&prev_gcd.1.glacial_spike
 actions.ff_aoe+=/frozen_orb
+actions.ff_aoe+=/ice_lance,if=buff.excess_fire.stack=2&cooldown.comet_storm.up
 actions.ff_aoe+=/blizzard,if=talent.ice_caller|talent.freezing_rain
 # During Icy Veins stack Death's Chill to 12 while keeping Blizzard and Frozen Orb on cooldown.
 actions.ff_aoe+=/frostfire_bolt,if=talent.deaths_chill&buff.icy_veins.up&(buff.deaths_chill.stack<9|buff.deaths_chill.stack=9&!action.frostfire_bolt.in_flight)
@@ -84,14 +85,14 @@ actions.ff_cleave+=/blizzard,if=buff.icy_veins.down&buff.freezing_rain.up
 # With Araz's Ritual Forge equipped only cast Shifting Power outside of Icy Veins to create more overlap with subsequent Icy Veins.
 actions.ff_cleave+=/shifting_power,if=(!equipped.arazs_ritual_forge|buff.icy_veins.down)&cooldown.icy_veins.remains>8&(cooldown.comet_storm.remains>8|!talent.comet_storm)
 actions.ff_cleave+=/ice_lance,if=buff.fingers_of_frost.up
-# Cast Ice Lance into 2 Winter's Chill stacks, unless you have all of Death's Chill, Cold Front and Slick Ice talented.
-actions.ff_cleave+=/ice_lance,cycle_targets=1,if=remaining_winters_chill=2&!(talent.slick_ice&talent.cold_front&talent.deaths_chill)
+# Without Death's Chill talented, also cast Ice Lance into any target with 2 stacks of Winter's Chill.
+actions.ff_cleave+=/ice_lance,cycle_targets=1,if=!talent.deaths_chill&remaining_winters_chill=2
 # Always cast Frostfire Bolt at the target with the lowest number of Winter's Chill stacks.
 actions.ff_cleave+=/frostfire_bolt,cycle_targets=1
 actions.ff_cleave+=/call_action_list,name=movement
 
 actions.ff_st+=/flurry,if=remaining_winters_chill=0&debuff.winters_chill.down&prev_gcd.1.glacial_spike
-# Cast Flurry only with 3+ Icicles to guarantee shattering the Glacial Spike + Pyroblast into Winter's Chill. This also means queueing Flurry when casting Frostfire Bolt with 2+ Icicles and overcapping freely.
+# Cast Flurry with 3+ Icicles to guarantee shattering the Glacial Spike + Pyroblast into Winter's Chill. This also means queueing Flurry when casting Frostfire Bolt with 2+ Icicles and overcapping freely.
 actions.ff_st+=/flurry,if=remaining_winters_chill=0&debuff.winters_chill.down&(buff.icicles.stack>=3|!talent.glacial_spike)
 actions.ff_st+=/comet_storm,if=remaining_winters_chill
 actions.ff_st+=/ray_of_frost,if=remaining_winters_chill=2
@@ -131,8 +132,8 @@ actions.ss_aoe+=/ice_nova,if=(freezable|talent.unerring_proficiency)&active_enem
 actions.ss_aoe+=/freeze,if=freezable&(prev_gcd.1.glacial_spike|!talent.glacial_spike&action.cone_of_cold.time_since>8)
 actions.ss_aoe+=/flurry,if=remaining_winters_chill=0&debuff.winters_chill.down&prev_gcd.1.glacial_spike
 actions.ss_aoe+=/flurry,if=remaining_winters_chill=0&debuff.winters_chill.down&prev_gcd.1.frostbolt
-# Cast Flurry regardless of Winter's Chill to spend the Cold Front buff. Optimally target swap to enemies without Winter's Chill.
-actions.ss_aoe+=/flurry,cycle_targets=1,if=buff.cold_front_ready.up
+# Cast Flurry regardless of Winter's Chill to spend the Cold Front buff.
+actions.ss_aoe+=/flurry,if=buff.cold_front_ready.up
 actions.ss_aoe+=/frozen_orb
 actions.ss_aoe+=/blizzard,if=talent.ice_caller|talent.freezing_rain
 actions.ss_aoe+=/comet_storm,if=talent.glacial_assault|buff.icy_veins.down
@@ -145,7 +146,7 @@ actions.ss_aoe+=/glacial_spike,if=buff.icicles.stack=5&(action.flurry.ready|rema
 # During Icy Veins stack Deaths Chill to 9 before using regular Ice Lances.
 actions.ss_aoe+=/frostbolt,if=talent.deaths_chill&buff.icy_veins.up&(buff.deaths_chill.stack<6|buff.deaths_chill.stack=6&!action.frostbolt.in_flight)
 actions.ss_aoe+=/ice_lance,if=buff.fingers_of_frost.up
-actions.ss_aoe+=/ice_lance,cycle_targets=1,if=remaining_winters_chill
+actions.ss_aoe+=/ice_lance,if=remaining_winters_chill
 actions.ss_aoe+=/shifting_power,if=buff.icy_veins.down&cooldown.icy_veins.remains>8
 actions.ss_aoe+=/frostbolt
 actions.ss_aoe+=/call_action_list,name=movement
