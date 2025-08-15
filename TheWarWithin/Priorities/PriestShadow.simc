@@ -22,7 +22,7 @@ actions.precombat+=/arcane_torrent
 
 actions+=/shadowform,line_cd=5,if=!buff.shadowform.up
 actions+=/silence
-actions+=/mind_flay_cancel,if=find.player_casting.id=15407&gcd.remains=0&find.player_casting.remains<30&find.player_casting.remains>10&buff.mind_flay_insanity.down
+actions+=/mind_flay_cancel,if=find.player_casting.id=15407&gcd.remains=0&find.player_casting.remains<70&find.player_casting.remains>10&buff.mind_flay_insanity.down
 actions+=/angelic_feather,if=(!buff.body_and_soul.up|!talent.body_and_soul)&!buff.angelic_feather.up&charges>2&movement.distance>8&!buff.premonition_of_insight.up
 actions+=/variable,name=holding_crash,op=set,value=false
 actions+=/variable,name=pool_for_cds,op=set,value=(cooldown.void_eruption.remains<=gcd.max*3&talent.void_eruption|cooldown.dark_ascension.up&talent.dark_ascension)|talent.void_torrent&talent.psychic_link&cooldown.void_torrent.remains<=4&!variable.holding_crash&!buff.voidform.up
@@ -31,7 +31,7 @@ actions+=/run_action_list,name=main
 
 actions.aoe+=/call_action_list,name=aoe_variables
 # Use Shadow Crash to apply Vampiric Touch to as many adds as possible while being efficient with Vampiric Touch refresh windows
-actions.aoe+=/shadow_crash,if=(!variable.holding_crash&!action.shadow_crash.in_flight&active_dot.vampiric_touch<active_enemies|debuff.vampiric_touch.down&!action.shadow_crash.in_flight&!buff.entropic_rift.up&active_enemies<2)&fight_remains>25
+actions.aoe+=/shadow_crash,line_cd=3,if=(!variable.holding_crash&!action.shadow_crash.in_flight&active_dot.vampiric_touch<active_enemies|debuff.vampiric_touch.down&!action.shadow_crash.in_flight&!buff.entropic_rift.up&active_enemies<2)&fight_remains>25
 # High Priority action to put out Vampiric Touch on enemies that will live at least 18 seconds, up to 12 targets manually while prepping AoE
 actions.aoe+=/vampiric_touch,cycle_targets=1,if=debuff.vampiric_touch.down&!action.shadow_crash.in_flight&!buff.entropic_rift.up
 
@@ -96,7 +96,7 @@ actions.main+=/void_volley,if=buff.void_volley.remains<=5|buff.entropic_rift.up&
 # MFI is a good button
 actions.main+=/mind_flay,cycle_targets=1,if=buff.mind_flay_insanity.up
 # Use Shadow Crash as long as you are not holding for adds and Vampiric Touch is within pandemic range
-actions.main+=/shadow_crash,cycle_targets=1,if=!variable.holding_crash&!action.shadow_crash.in_flight&fight_remains>25
+actions.main+=/shadow_crash,cycle_targets=1,if=!variable.holding_crash&!action.shadow_crash.in_flight&fight_remains>25&cooldown.shadow_crash.charges>=2
 # Put out Vampiric Touch on enemies that will live at least 12s and Shadow Crash is not available soon
 actions.main+=/vampiric_touch,cycle_targets=1,if=refreshable&target.time_to_die>12&(dot.vampiric_touch.ticking|!variable.dots_up)&(variable.max_vts>0|active_enemies=1)&(action.shadow_crash.usable_in>=dot.vampiric_touch.remains|variable.holding_crash|!action.shadow_crash.enabled)&(!action.shadow_crash.in_flight)
 # Use all charges of Mind Blast if Vampiric Touch and Shadow Word: Pain are active and Mind Devourer is not active or you are prepping Void Eruption
@@ -106,14 +106,14 @@ actions.main+=/devouring_plague,if=buff.voidform.up&talent.void_eruption|buff.po
 actions.main+=/halo,if=spell_targets>1&fight_remains>30
 # Healing spell action list for proccing Twist of Fate. Set priest.twist_of_fate_heal_rppm=<rppm> to make this be used.
 # actions.main+=/call_action_list,name=heal_for_tof,if=!buff.twist_of_fate.up&buff.twist_of_fate_can_trigger_on_ally_heal.up&(talent.rhapsody|talent.divine_star|talent.halo)
-actions.main+=/shadow_crash,if=!variable.holding_crash&raid_event.adds.in>=30&talent.descending_darkness&raid_event.movement.in>=30&fight_remains>25
+# actions.main+=/shadow_crash,if=!variable.holding_crash&raid_event.adds.in>=30&talent.descending_darkness&raid_event.movement.in>=30&fight_remains>25
 actions.main+=/shadow_word_death,cycle_targets=1,if=target.health.pct<20|talent.deathspeaker&target.health.pct<35
 actions.main+=/shadow_word_death,cycle_targets=1,if=talent.inescapable_torment&pet.fiend.active
 
 actions.main+=/mind_flay
 actions.main+=/divine_star
 # Use Shadow Crash while moving as a low-priority action when adds will not spawn in 20 seconds.
-actions.main+=/shadow_crash,if=raid_event.adds.in>20&fight_remains>25
+# actions.main+=/shadow_crash,if=raid_event.adds.in>20&fight_remains>25
 # Use Shadow Word: Death while moving as a low-priority action in execute
 actions.main+=/shadow_word_death,cycle_targets=1,if=target.health.pct<20
 # Use Shadow Word: Death while moving as a low-priority action

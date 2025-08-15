@@ -12,7 +12,7 @@ actions+=/variable,name=num_spawnable_souls,op=max,value=1,if=talent.soul_sigils
 actions+=/variable,name=num_spawnable_souls,op=max,value=2,if=talent.fracture&cooldown.fracture.charges_fractional>=1&!buff.metamorphosis.up
 actions+=/variable,name=num_spawnable_souls,op=max,value=3,if=talent.fracture&cooldown.fracture.charges_fractional>=1&buff.metamorphosis.up
 actions+=/variable,name=num_spawnable_souls,op=add,value=1,if=talent.soul_carver&(cooldown.soul_carver.remains>(cooldown.soul_carver.duration-3))
-actions+=/infernal_strike,use_off_gcd=1
+
 actions+=/tank_combat_wait,if=time<combat_delay&moving
 actions+=/tank_combat_wait,if=time<combat_delay&time<combat_delay/2&moving
 actions+=/run_action_list,name=ar,strict=1,if=!hero_tree.felscarred&(time>combat_delay|combat_delay=0|!moving)&cooldown_check   
@@ -41,7 +41,7 @@ actions.ar+=/soul_cleave,if=health.pct<40&soul_fragments>=2
 actions.ar+=/immolation_aura
 
 actions.ar+=/run_action_list,name=rg_sequence,strict=1,if=buff.glaive_flurry.up|buff.rending_strike.up|prev_gcd.1.reavers_glaive
-actions.ar+=/metamorphosis,use_off_gcd=1,if=buff.metamorphosis.remains<2&(active_enemies>9&fight_remains>40|find.easy_boss.exist&fight_remains>110)
+actions.ar+=/metamorphosis,use_off_gcd=1,if=buff.metamorphosis.remains<2&(active_enemies>8&fight_remains>40|find.easy_boss.exist&fight_remains>110)
 actions.ar+=/the_hunt,if=!buff.reavers_glaive.up&(buff.art_of_the_glaive.stack+soul_fragments)<20&health.pct>40
 actions.ar+=/spirit_bomb,if=variable.can_spb&(soul_fragments>2|prev_gcd.1.sigil_of_spite|prev_gcd.1.soul_carver|(spell_targets.spirit_bomb>=4&talent.fallout&cooldown.immolation_aura.remains<gcd.max))
 

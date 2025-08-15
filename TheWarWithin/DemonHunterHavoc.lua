@@ -130,146 +130,147 @@ spec:RegisterResource( Enum.PowerType.Fury, {
 
 -- Talents
 spec:RegisterTalents( {
-    -- DemonHunter
-    aldrachi_design          = {  90999, 391409, 1 }, -- Increases your chance to parry by 3%.
-    aura_of_pain             = {  90933, 207347, 1 }, -- Increases the critical strike chance of Immolation Aura by 6%.
-    blazing_path             = {  91008, 320416, 1 }, -- Fel Rush gains an additional charge.
-    bouncing_glaives         = {  90931, 320386, 1 }, -- Throw Glaive ricochets to 1 additional target.
-    champion_of_the_glaive   = {  90994, 429211, 1 }, -- Throw Glaive has 2 charges and 10 yard increased range.
-    chaos_fragments          = {  95154, 320412, 1 }, -- Each enemy stunned by Chaos Nova has a 30% chance to generate a Lesser Soul Fragment.
-    chaos_nova               = {  90993, 179057, 1 }, -- Unleash an eruption of fel energy, dealing 7,335 Chaos damage and stunning all nearby enemies for 2 sec.
-    charred_warblades        = {  90948, 213010, 1 }, -- You heal for 3% of all Fire damage you deal.
-    collective_anguish       = {  95152, 390152, 1 }, -- Eye Beam summons an allied Vengeance Demon Hunter who casts Fel Devastation, dealing 43,890 Fire damage over 2.2 sec. Dealing damage heals you for up to 3,188 health.
-    consume_magic            = {  91006, 278326, 1 }, -- Consume 1 beneficial Magic effect removing it from the target.
-    darkness                 = {  91002, 196718, 1 }, -- Summons darkness around you in an 8 yd radius, granting friendly targets a 15% chance to avoid all damage from an attack. Lasts 8 sec. Chance to avoid damage increased by 100% when not in a raid.
-    demon_muzzle             = {  90928, 388111, 1 }, -- Enemies deal 8% reduced magic damage to you for 8 sec after being afflicted by one of your Sigils.
-    demonic                  = {  91003, 213410, 1 }, -- Eye Beam causes you to enter demon form for 5 sec after it finishes dealing damage.
-    disrupting_fury          = {  90937, 183782, 1 }, -- Disrupt generates 30 Fury on a successful interrupt.
-    erratic_felheart         = {  90996, 391397, 2 }, -- The cooldown of Fel Rush is reduced by 10%.
-    felblade                 = {  95150, 232893, 1 }, -- Charge to your target and deal 22,671 Fire damage. Demon Blades has a chance to reset the cooldown of Felblade. Generates 40 Fury.
-    felfire_haste            = {  90939, 389846, 1 }, -- Fel Rush increases your movement speed by 10% for 8 sec.
-    flames_of_fury           = {  90949, 389694, 2 }, -- Sigil of Flame deals 35% increased damage and generates 1 additional Fury per target hit.
-    illidari_knowledge       = {  90935, 389696, 1 }, -- Reduces magic damage taken by 5%.
-    imprison                 = {  91007, 217832, 1 }, -- Imprisons a demon, beast, or humanoid, incapacitating them for 1 min. Damage may cancel the effect. Limit 1.
-    improved_disrupt         = {  90938, 320361, 1 }, -- Increases the range of Disrupt to 10 yds.
-    improved_sigil_of_misery = {  90945, 320418, 1 }, -- Reduces the cooldown of Sigil of Misery by 30 sec.
-    infernal_armor           = {  91004, 320331, 2 }, -- Immolation Aura increases your armor by 20% and causes melee attackers to suffer 2,212 Fire damage.
-    internal_struggle        = {  90934, 393822, 1 }, -- Increases your mastery by 4.5%.
-    live_by_the_glaive       = {  95151, 428607, 1 }, -- When you parry an attack or have one of your attacks parried, restore 2% of max health and 10 Fury. This effect may only occur once every 5 sec.
-    long_night               = {  91001, 389781, 1 }, -- Increases the duration of Darkness by 3 sec.
-    lost_in_darkness         = {  90947, 389849, 1 }, -- Spectral Sight has 5 sec reduced cooldown and no longer reduces movement speed.
-    master_of_the_glaive     = {  90994, 389763, 1 }, -- Throw Glaive has 2 charges and snares all enemies hit by 50% for 6 sec.
-    pitch_black              = {  91001, 389783, 1 }, -- Reduces the cooldown of Darkness by 120 sec.
-    precise_sigils           = {  95155, 389799, 1 }, -- All Sigils are now placed at your target's location.
-    pursuit                  = {  90940, 320654, 1 }, -- Mastery increases your movement speed.
-    quickened_sigils         = {  95149, 209281, 1 }, -- All Sigils activate 1 second faster.
-    rush_of_chaos            = {  95148, 320421, 2 }, -- Reduces the cooldown of Metamorphosis by 30 sec.
-    shattered_restoration    = {  90950, 389824, 1 }, -- The healing of Shattered Souls is increased by 10%.
-    sigil_of_misery          = {  90946, 207684, 1 }, -- Place a Sigil of Misery at the target location that activates after 1 sec. Causes all enemies affected by the sigil to cower in fear, disorienting them for 15 sec.
-    sigil_of_spite           = {  90997, 390163, 1 }, -- Place a demonic sigil at the target location that activates after 1 sec. Detonates to deal 120,957 Chaos damage and shatter up to 3 Lesser Soul Fragments from enemies affected by the sigil. Deals reduced damage beyond 5 targets.
-    soul_rending             = {  90936, 204909, 2 }, -- Leech increased by 6%. Gain an additional 6% leech while Metamorphosis is active.
-    soul_sigils              = {  90929, 395446, 1 }, -- Afflicting an enemy with a Sigil generates 1 Lesser Soul Fragment.
-    swallowed_anger          = {  91005, 320313, 1 }, -- Consume Magic generates 20 Fury when a beneficial Magic effect is successfully removed from the target.
-    the_hunt                 = {  90927, 370965, 1 }, -- Charge to your target, striking them for 153,784 Chaos damage, rooting them in place for 1.5 sec and inflicting 119,447 Chaos damage over 6 sec to up to 5 enemies in your path. The pursuit invigorates your soul, healing you for 10% of the damage you deal to your Hunt target for 20 sec.
-    unrestrained_fury        = {  90941, 320770, 1 }, -- Increases maximum Fury by 20.
-    vengeful_bonds           = {  90930, 320635, 1 }, -- Vengeful Retreat reduces the movement speed of all nearby enemies by 70% for 3 sec.
-    vengeful_retreat         = {  90942, 198793, 1 }, -- Remove all snares and vault away. Nearby enemies take 2,865 Physical damage.
-    will_of_the_illidari     = {  91000, 389695, 1 }, -- Increases maximum health by 5%.
+
+    -- Demon Hunter
+    aldrachi_design                = {  90999,  391409, 1 }, -- Increases your chance to parry by $s1%
+    aura_of_pain                   = {  90933,  207347, 1 }, -- Increases the critical strike chance of Immolation Aura by $s1%
+    blazing_path                   = {  91008,  320416, 1 }, -- Fel Rush gains an additional charge
+    bouncing_glaives               = {  90931,  320386, 1 }, -- Throw Glaive ricochets to $s1 additional target
+    champion_of_the_glaive         = {  90994,  429211, 1 }, -- Throw Glaive has $s1 charges and $s2 yard increased range
+    chaos_fragments                = {  95154,  320412, 1 }, -- Each enemy stunned by Chaos Nova has a $s1% chance to generate a Lesser Soul Fragment
+    chaos_nova                     = {  90993,  179057, 1 }, -- Unleash an eruption of fel energy, dealing $s$s2 Chaos damage and stunning all nearby enemies for $s3 sec. Each enemy stunned by Chaos Nova has a $s4% chance to generate a Lesser Soul Fragment
+    charred_warblades              = {  90948,  213010, 1 }, -- You heal for $s1% of all Fire damage you deal
+    collective_anguish             = {  95152,  390152, 1 }, -- Eye Beam summons an allied Vengeance Demon Hunter who casts Fel Devastation, dealing $s$s3 Fire damage over $s4 sec$s$s5 Dealing damage heals you for up to $s6 health
+    consume_magic                  = {  91006,  278326, 1 }, -- Consume $s1 beneficial Magic effect removing it from the target
+    darkness                       = {  91002,  196718, 1 }, -- Summons darkness around you in an $s1 yd radius, granting friendly targets a $s2% chance to avoid all damage from an attack. Lasts $s3 sec. Chance to avoid damage increased by $s4% when not in a raid
+    demon_muzzle                   = {  90928,  388111, 1 }, -- Enemies deal $s1% reduced magic damage to you for $s2 sec after being afflicted by one of your Sigils
+    demonic                        = {  91003,  213410, 1 }, -- Eye Beam causes you to enter demon form for $s1 sec after it finishes dealing damage
+    disrupting_fury                = {  90937,  183782, 1 }, -- Disrupt generates $s1 Fury on a successful interrupt
+    erratic_felheart               = {  90996,  391397, 2 }, -- The cooldown of Fel Rush is reduced by $s1%
+    felblade                       = {  95150,  232893, 1 }, -- Charge to your target and deal $s$s2 Fire damage. Demon Blades has a chance to reset the cooldown of Felblade. Generates $s3 Fury
+    felfire_haste                  = {  90939,  389846, 1 }, -- Fel Rush increases your movement speed by $s1% for $s2 sec
+    flames_of_fury                 = {  90949,  389694, 2 }, -- Sigil of Flame deals $s1% increased damage and generates $s2 additional Fury per target hit
+    illidari_knowledge             = {  90935,  389696, 1 }, -- Reduces magic damage taken by $s1%
+    imprison                       = {  91007,  217832, 1 }, -- Imprisons a demon, beast, or humanoid, incapacitating them for $s1 min. Damage may cancel the effect. Limit $s2
+    improved_disrupt               = {  90938,  320361, 1 }, -- Increases the range of Disrupt to $s1 yds
+    improved_sigil_of_misery       = {  90945,  320418, 1 }, -- Reduces the cooldown of Sigil of Misery by $s1 sec
+    infernal_armor                 = {  91004,  320331, 2 }, -- Immolation Aura increases your armor by $s2% and causes melee attackers to suffer $s$s3 Fire damage
+    internal_struggle              = {  90934,  393822, 1 }, -- Increases your mastery by $s1%
+    live_by_the_glaive             = {  95151,  428607, 1 }, -- When you parry an attack or have one of your attacks parried, restore $s1% of max health and $s2 Fury. This effect may only occur once every $s3 sec
+    long_night                     = {  91001,  389781, 1 }, -- Increases the duration of Darkness by $s1 sec
+    lost_in_darkness               = {  90947,  389849, 1 }, -- Spectral Sight has $s1 sec reduced cooldown and no longer reduces movement speed
+    master_of_the_glaive           = {  90994,  389763, 1 }, -- Throw Glaive has $s1 charges and snares all enemies hit by $s2% for $s3 sec
+    pitch_black                    = {  91001,  389783, 1 }, -- Reduces the cooldown of Darkness by $s1 sec
+    precise_sigils                 = {  95155,  389799, 1 }, -- All Sigils are now placed at your target's location
+    pursuit                        = {  90940,  320654, 1 }, -- Mastery increases your movement speed
+    quickened_sigils               = {  95149,  209281, 1 }, -- All Sigils activate $s1 second faster
+    rush_of_chaos                  = {  95148,  320421, 2 }, -- Reduces the cooldown of Metamorphosis by $s1 sec
+    shattered_restoration          = {  90950,  389824, 1 }, -- The healing of Shattered Souls is increased by $s1%
+    sigil_of_misery                = {  90946,  207684, 1 }, -- Place a Sigil of Misery at the target location that activates after $s1 sec. Causes all enemies affected by the sigil to cower in fear, disorienting them for $s2 sec
+    sigil_of_spite                 = {  90997,  390163, 1 }, -- Place a demonic sigil at the target location that activates after $s2 sec. Detonates to deal $s$s3 Chaos damage and shatter up to $s4 Lesser Soul Fragments from enemies affected by the sigil. Deals reduced damage beyond $s5 targets
+    soul_rending                   = {  90936,  204909, 2 }, -- Leech increased by $s1%. Gain an additional $s2% leech while Metamorphosis is active
+    soul_sigils                    = {  90929,  395446, 1 }, -- Afflicting an enemy with a Sigil generates $s1 Lesser Soul Fragment
+    swallowed_anger                = {  91005,  320313, 1 }, -- Consume Magic generates $s1 Fury when a beneficial Magic effect is successfully removed from the target
+    the_hunt                       = {  90927,  370965, 1 }, -- Charge to your target, striking them for $s$s3 Chaos damage, rooting them in place for $s4 sec and inflicting $s$s5 Chaos damage over $s6 sec to up to $s7 enemies in your path. The pursuit invigorates your soul, healing you for $s8% of the damage you deal to your Hunt target for $s9 sec
+    unrestrained_fury              = {  90941,  320770, 1 }, -- Increases maximum Fury by $s1
+    vengeful_bonds                 = {  90930,  320635, 1 }, -- Vengeful Retreat reduces the movement speed of all nearby enemies by $s1% for $s2 sec
+    vengeful_retreat               = {  90942,  198793, 1 }, -- Remove all snares and vault away. Nearby enemies take $s$s2 Physical damage
+    will_of_the_illidari           = {  91000,  389695, 1 }, -- Increases maximum health by $s1%
 
     -- Havoc
-    a_fire_inside            = {  95143, 427775, 1 }, -- Immolation Aura has 1 additional charge, 30% chance to refund a charge when used, and deals Chaos damage instead of Fire. You can have multiple Immolation Auras active at a time.
-    accelerated_blade        = {  91011, 391275, 1 }, -- Throw Glaive deals 60% increased damage, reduced by 30% for each previous enemy hit.
-    blind_fury               = {  91026, 203550, 2 }, -- Eye Beam generates 40 Fury every second, and its damage and duration are increased by 10%.
-    burning_hatred           = {  90923, 320374, 1 }, -- Immolation Aura generates an additional 40 Fury over 10 sec.
-    burning_wound            = {  90917, 391189, 1 }, -- Demon Blades and Throw Glaive leave open wounds on your enemies, dealing 20,193 Chaos damage over 15 sec and increasing damage taken from your Immolation Aura by 40%. May be applied to up to 3 targets.
-    chaos_theory             = {  91035, 389687, 1 }, -- Blade Dance causes your next Chaos Strike within 8 sec to have a 14-30% increased critical strike chance and will always refund Fury.
-    chaotic_disposition      = {  95147, 428492, 2 }, -- Your Chaos damage has a 7.77% chance to be increased by 17%, occurring up to 3 total times.
-    chaotic_transformation   = {  90922, 388112, 1 }, -- When you activate Metamorphosis, the cooldowns of Blade Dance and Eye Beam are immediately reset.
-    critical_chaos           = {  91028, 320413, 1 }, -- The chance that Chaos Strike will refund 20 Fury is increased by 30% of your critical strike chance.
-    cycle_of_hatred          = {  91032, 258887, 1 }, -- Activating Eye Beam reduces the cooldown of your next Eye Beam by 5.0 sec, stacking up to 20 sec.
-    dancing_with_fate        = {  91015, 389978, 2 }, -- The final slash of Blade Dance deals an additional 25% damage.
-    dash_of_chaos            = {  93014, 427794, 1 }, -- For 2 sec after using Fel Rush, activating it again will dash back towards your initial location.
-    deflecting_dance         = {  93015, 427776, 1 }, -- You deflect incoming attacks while Blade Dancing, absorbing damage up to 15% of your maximum health.
-    demon_blades             = {  91019, 203555, 1 }, -- Your auto attacks deal an additional 3,423 Shadow damage and generate 7-12 Fury.
-    demon_hide               = {  91017, 428241, 1 }, -- Magical damage increased by 3%, and Physical damage taken reduced by 5%.
-    desperate_instincts      = {  93016, 205411, 1 }, -- Blur now reduces damage taken by an additional 10%. Additionally, you automatically trigger Blur with 50% reduced cooldown and duration when you fall below 35% health. This effect can only occur when Blur is not on cooldown.
-    essence_break            = {  91033, 258860, 1 }, -- Slash all enemies in front of you for 75,406 Chaos damage, and increase the damage your Chaos Strike and Blade Dance deal to them by 80% for 4 sec. Deals reduced damage beyond 8 targets.
-    exergy                   = {  91021, 206476, 1 }, -- The Hunt and Vengeful Retreat increase your damage by 5% for 20 sec.
-    eye_beam                 = {  91018, 198013, 1 }, -- Blasts all enemies in front of you, for up to 322,392 Chaos damage over 1.8 sec. Deals reduced damage beyond 5 targets. When Eye Beam finishes fully channeling, your Haste is increased by an additional 10% for 10 sec.
-    fel_barrage              = {  95144, 258925, 1 }, -- Unleash a torrent of Fel energy, rapidly consuming Fury to inflict 9,316 Chaos damage to all enemies within 12 yds, lasting 8 sec or until Fury is depleted. Deals reduced damage beyond 5 targets.
-    first_blood              = {  90925, 206416, 1 }, -- Blade Dance deals 60,036 Chaos damage to the first target struck.
-    furious_gaze             = {  91025, 343311, 1 }, -- When Eye Beam finishes fully channeling, your Haste is increased by an additional 10% for 10 sec.
-    furious_throws           = {  93013, 393029, 1 }, -- Throw Glaive now costs 25 Fury and throws a second glaive at the target.
-    glaive_tempest           = {  91035, 342817, 1 }, -- Launch two demonic glaives in a whirlwind of energy, causing 80,232 Chaos damage over 3 sec to all nearby enemies. Deals reduced damage beyond 8 targets.
-    growing_inferno          = {  90916, 390158, 1 }, -- Immolation Aura's damage increases by 10% each time it deals damage.
-    improved_chaos_strike    = {  91030, 343206, 1 }, -- Chaos Strike damage increased by 10%.
-    improved_fel_rush        = {  93014, 343017, 1 }, -- Fel Rush damage increased by 20%.
-    inertia                  = {  91021, 427640, 1 }, -- The Hunt and Vengeful Retreat cause your next Fel Rush or Felblade to empower you, increasing damage by 18% for 5 sec.
-    initiative               = {  91027, 388108, 1 }, -- Damaging an enemy before they damage you increases your critical strike chance by 10% for 5 sec. Vengeful Retreat refreshes your potential to trigger this effect on any enemies you are in combat with.
-    inner_demon              = {  91024, 389693, 1 }, -- Entering demon form causes your next Chaos Strike to unleash your inner demon, causing it to crash into your target and deal 56,855 Chaos damage to all nearby enemies. Deals reduced damage beyond 5 targets.
-    insatiable_hunger        = {  91019, 258876, 1 }, -- Demon's Bite deals 50% more damage and generates 5 to 10 additional Fury.
-    isolated_prey            = {  91036, 388113, 1 }, -- Chaos Nova, Eye Beam, and Immolation Aura gain bonuses when striking 1 target.  Chaos Nova: Stun duration increased by 2 sec.  Eye Beam: Deals 30% increased damage.  Immolation Aura: Always critically strikes.
-    know_your_enemy          = {  91034, 388118, 2 }, -- Gain critical strike damage equal to 40% of your critical strike chance.
-    looks_can_kill           = {  90921, 320415, 1 }, -- Eye Beam deals guaranteed critical strikes.
-    mortal_dance             = {  93015, 328725, 1 }, -- Blade Dance now reduces targets' healing received by 50% for 6 sec.
-    netherwalk               = {  93016, 196555, 1 }, -- Slip into the nether, increasing movement speed by 100% and becoming immune to damage, but unable to attack. Lasts 6 sec.
-    ragefire                 = {  90918, 388107, 1 }, -- Each time Immolation Aura deals damage, 30% of the damage dealt by up to 3 critical strikes is gathered as Ragefire. When Immolation Aura expires you explode, dealing all stored Ragefire damage to nearby enemies.
-    relentless_onslaught     = {  91012, 389977, 1 }, -- Chaos Strike has a 10% chance to trigger a second Chaos Strike.
-    restless_hunter          = {  91024, 390142, 1 }, -- Leaving demon form grants a charge of Fel Rush and increases the damage of your next Blade Dance by 50%.
-    scars_of_suffering       = {  90914, 428232, 1 }, -- Increases Versatility by 4% and reduces threat generated by 8%.
-    screaming_brutality      = {  90919, 1220506, 1 }, -- Blade Dance automatically triggers Throw Glaive on your primary target for 100% damage and each slash has a 50% chance to Throw Glaive an enemy for 35% damage.
-    serrated_glaive          = {  91013, 390154, 1 }, -- Enemies hit by Chaos Strike or Throw Glaive take 15% increased damage from Chaos Strike and Throw Glaive for 15 sec.
-    shattered_destiny        = {  91031, 388116, 1 }, -- The duration of your active demon form is extended by 0.1 sec per 12 Fury spent.
-    soulscar                 = {  91012, 388106, 1 }, -- Throw Glaive causes targets to take an additional 80% of damage dealt as Chaos over 6 sec.
-    tactical_retreat         = {  91022, 389688, 1 }, -- Vengeful Retreat has a 5 sec reduced cooldown and generates 80 Fury over 10 sec.
-    trail_of_ruin            = {  90915, 258881, 1 }, -- The final slash of Blade Dance inflicts an additional 19,218 Chaos damage over 4 sec.
-    unbound_chaos            = {  91020, 347461, 1 }, -- The Hunt and Vengeful Retreat increase the damage of your next Fel Rush or Felblade by 300%. Lasts 12 sec.
+    a_fire_inside                  = {  95143,  427775, 1 }, -- Immolation Aura has $s1 additional charge, $s2% chance to refund a charge when used, and deals Chaos damage instead of Fire. You can have multiple Immolation Auras active at a time
+    accelerated_blade              = {  91011,  391275, 1 }, -- Throw Glaive deals $s1% increased damage, reduced by $s2% for each previous enemy hit
+    blind_fury                     = {  91026,  203550, 2 }, -- Eye Beam generates $s1 Fury every second, and its damage and duration are increased by $s2%
+    burning_hatred                 = {  90923,  320374, 1 }, -- Immolation Aura generates an additional $s1 Fury over $s2 sec
+    burning_wound                  = {  90917,  391189, 1 }, -- Demon Blades and Throw Glaive leave open wounds on your enemies, dealing $s$s2 Chaos damage over $s3 sec and increasing damage taken from your Immolation Aura by $s4%. May be applied to up to $s5 targets
+    chaos_theory                   = {  91035,  389687, 1 }, -- Blade Dance causes your next Chaos Strike within $s1 sec to have a $s2-$s3% increased critical strike chance and will always refund Fury
+    chaotic_disposition            = {  95147,  428492, 2 }, -- Your Chaos damage has a $s1% chance to be increased by $s2%, occurring up to $s3 total times
+    chaotic_transformation         = {  90922,  388112, 1 }, -- When you activate Metamorphosis, the cooldowns of Blade Dance and Eye Beam are immediately reset
+    critical_chaos                 = {  91028,  320413, 1 }, -- The chance that Chaos Strike will refund $s1 Fury is increased by $s2% of your critical strike chance
+    cycle_of_hatred                = {  91032,  258887, 1 }, -- Activating Eye Beam reduces the cooldown of your next Eye Beam by $s1 sec, stacking up to $s2 sec
+    dancing_with_fate              = {  91015,  389978, 2 }, -- The final slash of Blade Dance deals an additional $s1% damage
+    dash_of_chaos                  = {  93014,  427794, 1 }, -- For $s1 sec after using Fel Rush, activating it again will dash back towards your initial location
+    deflecting_dance               = {  93015,  427776, 1 }, -- You deflect incoming attacks while Blade Dancing, absorbing damage up to $s1% of your maximum health
+    demon_blades                   = {  91019,  203555, 1 }, -- Your auto attacks deal an additional $s$s2 Shadow damage and generate $s3-$s4 Fury
+    demon_hide                     = {  91017,  428241, 1 }, -- Magical damage increased by $s1%, and Physical damage taken reduced by $s2%
+    desperate_instincts            = {  93016,  205411, 1 }, -- Blur now reduces damage taken by an additional $s1%. Additionally, you automatically trigger Blur with $s2% reduced cooldown and duration when you fall below $s3% health. This effect can only occur when Blur is not on cooldown
+    essence_break                  = {  91033,  258860, 1 }, -- Slash all enemies in front of you for $s$s2 Chaos damage, and increase the damage your Chaos Strike and Blade Dance deal to them by $s3% for $s4 sec. Deals reduced damage beyond $s5 targets
+    exergy                         = {  91021,  206476, 1 }, -- The Hunt and Vengeful Retreat increase your damage by $s1% for $s2 sec
+    eye_beam                       = {  91018,  198013, 1 }, -- Blasts all enemies in front of you, dealing guaranteed critical strikes for up to $s$s2 Chaos damage over $s3 sec. Deals reduced damage beyond $s4 targets. When Eye Beam finishes fully channeling, your Haste is increased by an additional $s5% for $s6 sec
+    fel_barrage                    = {  95144,  258925, 1 }, -- Unleash a torrent of Fel energy, rapidly consuming Fury to inflict $s$s2 Chaos damage to all enemies within $s3 yds, lasting $s4 sec or until Fury is depleted. Deals reduced damage beyond $s5 targets
+    first_blood                    = {  90925,  206416, 1 }, -- Blade Dance deals $s$s2 Chaos damage to the first target struck
+    furious_gaze                   = {  91025,  343311, 1 }, -- When Eye Beam finishes fully channeling, your Haste is increased by an additional $s1% for $s2 sec
+    furious_throws                 = {  93013,  393029, 1 }, -- Throw Glaive now costs $s1 Fury and throws a second glaive at the target
+    glaive_tempest                 = {  91035,  342817, 1 }, -- Launch two demonic glaives in a whirlwind of energy, causing $s$s2 Chaos damage over $s3 sec to all nearby enemies. Deals reduced damage beyond $s4 targets
+    growing_inferno                = {  90916,  390158, 1 }, -- Immolation Aura's damage increases by $s1% each time it deals damage
+    improved_chaos_strike          = {  91030,  343206, 1 }, -- Chaos Strike damage increased by $s1%
+    improved_fel_rush              = {  93014,  343017, 1 }, -- Fel Rush damage increased by $s1%
+    inertia                        = {  91021,  427640, 1 }, -- The Hunt and Vengeful Retreat cause your next Fel Rush or Felblade to empower you, increasing damage by $s1% for $s2 sec
+    initiative                     = {  91027,  388108, 1 }, -- Damaging an enemy before they damage you increases your critical strike chance by $s1% for $s2 sec. Vengeful Retreat refreshes your potential to trigger this effect on any enemies you are in combat with
+    inner_demon                    = {  91024,  389693, 1 }, -- Entering demon form causes your next Chaos Strike to unleash your inner demon, causing it to crash into your target and deal $s$s2 Chaos damage to all nearby enemies. Deals reduced damage beyond $s3 targets
+    insatiable_hunger              = {  91019,  258876, 1 }, -- Demon's Bite deals $s1% more damage and generates $s2 to $s3 additional Fury
+    isolated_prey                  = {  91036,  388113, 1 }, -- Chaos Nova, Eye Beam, and Immolation Aura gain bonuses when striking $s1 target.  Chaos Nova: Stun duration increased by $s4 sec.  Eye Beam: Deals $s7% increased damage.  Immolation Aura: Always critically strikes
+    know_your_enemy                = {  91034,  388118, 2 }, -- Gain critical strike damage equal to $s1% of your critical strike chance
+    looks_can_kill                 = {  90921,  320415, 1 }, -- Eye Beam deals guaranteed critical strikes
+    mortal_dance                   = {  93015,  328725, 1 }, -- Blade Dance now reduces targets' healing received by $s1% for $s2 sec
+    netherwalk                     = {  93016,  196555, 1 }, -- Slip into the nether, increasing movement speed by $s1% and becoming immune to damage, but unable to attack. Lasts $s2 sec
+    ragefire                       = {  90918,  388107, 1 }, -- Each time Immolation Aura deals damage, $s1% of the damage dealt by up to $s2 critical strikes is gathered as Ragefire. When Immolation Aura expires you explode, dealing all stored Ragefire damage to nearby enemies
+    relentless_onslaught           = {  91012,  389977, 1 }, -- Chaos Strike has a $s1% chance to trigger a second Chaos Strike
+    restless_hunter                = {  91024,  390142, 1 }, -- Leaving demon form grants a charge of Fel Rush and increases the damage of your next Blade Dance by $s1%
+    scars_of_suffering             = {  90914,  428232, 1 }, -- Increases Versatility by $s1% and reduces threat generated by $s2%
+    screaming_brutality            = {  90919, 1220506, 1 }, -- Blade Dance automatically triggers Throw Glaive on your primary target for $s1% damage and each slash has a $s2% chance to Throw Glaive an enemy for $s3% damage
+    serrated_glaive                = {  91013,  390154, 1 }, -- Enemies hit by Chaos Strike or Throw Glaive take $s1% increased damage from Chaos Strike and Throw Glaive for $s2 sec
+    shattered_destiny              = {  91031,  388116, 1 }, -- The duration of your active demon form is extended by $s1 sec per $s2 Fury spent
+    soulscar                       = {  91012,  388106, 1 }, -- Throw Glaive causes targets to take an additional $s1% of damage dealt as Chaos over $s2 sec
+    tactical_retreat               = {  91022,  389688, 1 }, -- Vengeful Retreat has a $s1 sec reduced cooldown and generates $s2 Fury over $s3 sec
+    trail_of_ruin                  = {  90915,  258881, 1 }, -- The final slash of Blade Dance inflicts an additional $s$s2 Chaos damage over $s3 sec
+    unbound_chaos                  = {  91020,  347461, 1 }, -- The Hunt and Vengeful Retreat increase the damage of your next Fel Rush or Felblade by $s1%. Lasts $s2 sec
 
     -- Aldrachi Reaver
-    aldrachi_tactics         = {  94914, 442683, 1 }, -- The second enhanced ability in a pattern shatters an additional Soul Fragment.
-    army_unto_oneself        = {  94896, 442714, 1 }, -- Felblade surrounds you with a Blade Ward, reducing damage taken by 10% for 5 sec.
-    art_of_the_glaive        = {  94915, 442290, 1, "aldrachi_reaver" }, -- Consuming 6 Soul Fragments or casting The Hunt converts your next Throw Glaive into Reaver's Glaive.  Reaver's Glaive: Throw a glaive enhanced with the essence of consumed souls at your target, dealing 46,361 Physical damage and ricocheting to 3 additional enemies. Begins a well-practiced pattern of glaivework, enhancing your next Chaos Strike and Blade Dance. The enhanced ability you cast first deals 10% increased damage, and the second deals 20% increased damage.
-    evasive_action           = {  94911, 444926, 1 }, -- Vengeful Retreat can be cast a second time within 3 sec.
-    fury_of_the_aldrachi     = {  94898, 442718, 1 }, -- When enhanced by Reaver's Glaive, Blade Dance casts 3 additional glaive slashes to nearby targets. If cast after Chaos Strike, cast 6 slashes instead.
-    incisive_blade           = {  94895, 442492, 1 }, -- Chaos Strike deals 10% increased damage.
-    incorruptible_spirit     = {  94896, 442736, 1 }, -- Each Soul Fragment you consume shields you for an additional 15% of the amount healed.
-    keen_engagement          = {  94910, 442497, 1 }, -- Reaver's Glaive generates 20 Fury.
-    preemptive_strike        = {  94910, 444997, 1 }, -- Throw Glaive deals 3,443 Physical damage to enemies near its initial target.
-    reavers_mark             = {  94903, 442679, 1 }, -- When enhanced by Reaver's Glaive, Chaos Strike applies Reaver's Mark, which causes the target to take 7% increased damage for 20 sec. If cast after Blade Dance, Reaver's Mark is increased to 14%.
-    thrill_of_the_fight      = {  94919, 442686, 1 }, -- After consuming both enhancements, gain Thrill of the Fight, increasing your attack speed by 15% for 20 sec and your damage and healing by 20% for 10 sec.
-    unhindered_assault       = {  94911, 444931, 1 }, -- Vengeful Retreat resets the cooldown of Felblade.
-    warblades_hunger         = {  94906, 442502, 1 }, -- Consuming a Soul Fragment causes your next Chaos Strike to deal 6,886 additional Physical damage. Felblade consumes up to 5 nearby Soul Fragments.
-    wounded_quarry           = {  94897, 442806, 1 }, -- Expose weaknesses in the target of your Reaver's Mark, causing your Physical damage to any enemy to also deal 20% of the damage dealt to your marked target as Chaos.
+    aldrachi_tactics               = {  94914,  442683, 1 }, -- The second enhanced ability in a pattern shatters an additional Soul Fragment
+    army_unto_oneself              = {  94896,  442714, 1 }, -- Felblade surrounds you with a Blade Ward, reducing damage taken by $s1% for $s2 sec
+    art_of_the_glaive              = {  94915,  442290, 1 }, -- Consuming $s2 Soul Fragments or casting The Hunt converts your next Throw Glaive into Reaver's Glaive.  Reaver's Glaive: Throw a glaive enhanced with the essence of consumed souls at your target, dealing $s$s5 Physical damage and ricocheting to $s6 additional enemies. Begins a well-practiced pattern of glaivework, enhancing your next Chaos Strike and Blade Dance. The enhanced ability you cast first deals $s7% increased damage, and the second deals $s8% increased damage
+    evasive_action                 = {  94911,  444926, 1 }, -- Vengeful Retreat can be cast a second time within $s1 sec
+    fury_of_the_aldrachi           = {  94898,  442718, 1 }, -- When enhanced by Reaver's Glaive, Blade Dance casts $s1 additional glaive slashes to nearby targets. If cast after Chaos Strike, cast $s2 slashes instead
+    incisive_blade                 = {  94895,  442492, 1 }, -- Chaos Strike deals $s1% increased damage
+    incorruptible_spirit           = {  94896,  442736, 1 }, -- Each Soul Fragment you consume shields you for an additional $s1% of the amount healed
+    keen_engagement                = {  94910,  442497, 1 }, -- Reaver's Glaive generates $s1 Fury
+    preemptive_strike              = {  94910,  444997, 1 }, -- Throw Glaive deals $s$s2 Physical damage to enemies near its initial target
+    reavers_mark                   = {  94903,  442679, 1 }, -- When enhanced by Reaver's Glaive, Chaos Strike applies Reaver's Mark, which causes the target to take $s1% increased damage for $s2 sec. Max $s3 stacks. Applies $s4 additional stack of Reaver's Mark If cast after Blade Dance
+    thrill_of_the_fight            = {  94919,  442686, 1 }, -- After consuming both enhancements, gain Thrill of the Fight, increasing your attack speed by $s1% for $s2 sec and your damage and healing by $s3% for $s4 sec
+    unhindered_assault             = {  94911,  444931, 1 }, -- Vengeful Retreat resets the cooldown of Felblade
+    warblades_hunger               = {  94906,  442502, 1 }, -- Consuming a Soul Fragment causes your next Chaos Strike to deal $s1 additional Physical damage. Felblade consumes up to $s2 nearby Soul Fragments
+    wounded_quarry                 = {  94897,  442806, 1 }, -- Expose weaknesses in the target of your Reaver's Mark, causing your Physical damage to any enemy to also deal $s1% of the damage dealt to your marked target as Chaos, and sometimes shatter a Lesser Soul Fragment
 
-    -- Fel-Scarred
-    burning_blades           = {  94905, 452408, 1 }, -- Your blades burn with Fel energy, causing your Chaos Strike, Throw Glaive, and auto-attacks to deal an additional 50% damage as Fire over 6 sec.
-    demonic_intensity        = {  94901, 452415, 1 }, -- Activating Metamorphosis greatly empowers Eye Beam, Immolation Aura, and Sigil of Flame. Demonsurge damage is increased by 10% for each time it previously triggered while your demon form is active.
-    demonsurge               = {  94917, 452402, 1, "felscarred" }, -- Metamorphosis now also causes Demon Blades to generate 5 additional Fury. While demon form is active, the first cast of each empowered ability induces a Demonsurge, causing you to explode with Fel energy, dealing 28,790 Fire damage to nearby enemies.
-    enduring_torment         = {  94916, 452410, 1 }, -- The effects of your demon form persist outside of it in a weakened state, increasing Chaos Strike and Blade Dance damage by 15%, and Haste by 5%.
-    flamebound               = {  94902, 452413, 1 }, -- Immolation Aura has 2 yd increased radius and 30% increased critical strike damage bonus.
-    focused_hatred           = {  94918, 452405, 1 }, -- Demonsurge deals 50% increased damage when it strikes a single target. Each additional target reduces this bonus by 10%.
-    improved_soul_rending    = {  94899, 452407, 1 }, -- Leech granted by Soul Rending increased by 2% and an additional 2% while Metamorphosis is active.
-    monster_rising           = {  94909, 452414, 1 }, -- Agility increased by 8% while not in demon form.
-    pursuit_of_angriness     = {  94913, 452404, 1 }, -- Movement speed increased by 1% per 10 Fury.
-    set_fire_to_the_pain     = {  94899, 452406, 1 }, -- 5% of all non-Fire damage taken is instead taken as Fire damage over 6 sec. Fire damage taken reduced by 10%.
-    student_of_suffering     = {  94902, 452412, 1 }, -- Sigil of Flame applies Student of Suffering to you, increasing Mastery by 18.0% and granting 5 Fury every 2 sec, for 6 sec.
-    untethered_fury          = {  94904, 452411, 1 }, -- Maximum Fury increased by 50.
-    violent_transformation   = {  94912, 452409, 1 }, -- When you activate Metamorphosis, the cooldowns of your Sigil of Flame and Immolation Aura are immediately reset.
-    wave_of_debilitation     = {  94913, 452403, 1 }, -- Chaos Nova slows enemies by 60% and reduces attack and cast speed 15% for 5 sec after its stun fades.
+    -- Felscarred
+    burning_blades                 = {  94905,  452408, 1 }, -- Your blades burn with Fel energy, causing your Chaos Strike, Throw Glaive, and auto-attacks to deal an additional $s1% damage as Fire over $s2 sec
+    demonic_intensity              = {  94901,  452415, 1 }, -- Activating Metamorphosis greatly empowers Eye Beam, Immolation Aura, and Sigil of Flame$s$s2 Demonsurge damage is increased by $s3% for each time it previously triggered while your demon form is active
+    demonsurge                     = {  94917,  452402, 1 }, -- Metamorphosis now also causes Demon Blades to generate $s2 additional Fury. While demon form is active, the first cast of each empowered ability induces a Demonsurge, causing you to explode with Fel energy, dealing $s$s3 Fire damage to nearby enemies. Deals reduced damage beyond $s4 targets
+    enduring_torment               = {  94916,  452410, 1 }, -- The effects of your demon form persist outside of it in a weakened state, increasing Chaos Strike and Blade Dance damage by $s1%, and Haste by $s2%
+    flamebound                     = {  94902,  452413, 1 }, -- Immolation Aura has $s1 yd increased radius and $s2% increased critical strike damage bonus
+    focused_hatred                 = {  94918,  452405, 1 }, -- Demonsurge deals $s1% increased damage when it strikes a single target. Each additional target reduces this bonus by $s2%
+    improved_soul_rending          = {  94899,  452407, 1 }, -- Leech granted by Soul Rending increased by $s1% and an additional $s2% while Metamorphosis is active
+    monster_rising                 = {  94909,  452414, 1 }, -- Agility increased by $s1% while not in demon form
+    pursuit_of_angriness           = {  94913,  452404, 1 }, -- Movement speed increased by $s1% per $s2 Fury
+    set_fire_to_the_pain           = {  94899,  452406, 1 }, -- $s2% of all non-Fire damage taken is instead taken as Fire damage over $s3 sec$s$s4 Fire damage taken reduced by $s5%
+    student_of_suffering           = {  94902,  452412, 1 }, -- Sigil of Flame applies Student of Suffering to you, increasing Mastery by $s1% and granting $s2 Fury every $s3 sec, for $s4 sec
+    untethered_fury                = {  94904,  452411, 1 }, -- Maximum Fury increased by $s1
+    violent_transformation         = {  94912,  452409, 1 }, -- When you activate Metamorphosis, the cooldowns of your Sigil of Flame and Immolation Aura are immediately reset
+    wave_of_debilitation           = {  94913,  452403, 1 }, -- Chaos Nova slows enemies by $s1% and reduces attack and cast speed by $s2% for $s3 sec after its stun fades
 } )
 
 -- PvP Talents
 spec:RegisterPvpTalents( {
-    blood_moon        = 5433, -- (355995)
-    cleansed_by_flame =  805, -- (205625)
-    cover_of_darkness = 1206, -- (357419)
-    detainment        =  812, -- (205596)
-    glimpse           =  813, -- (354489)
-    illidans_grasp    = 5691, -- (205630) You strangle the target with demonic magic, stunning them in place and dealing 120,508 Shadow damage over 5 sec while the target is grasped. Can move while channeling. Use Illidan's Grasp again to toss the target to a location within 20 yards.
-    rain_from_above   =  811, -- (206803) You fly into the air out of harm's way. While floating, you gain access to Fel Lance allowing you to deal damage to enemies below.
-    reverse_magic     =  806, -- (205604) Removes all harmful magical effects from yourself and all nearby allies within 10 yards, and sends them back to their original caster if possible.
-    sigil_mastery     = 5523, -- (211489)
-    unending_hatred   = 1218, -- (213480)
+    blood_moon                     = 5433, -- (355995) Consume Magic now affects all enemies within $s1 yards of the target and generates a Lesser Soul Fragment. Each effect consumed has a $s2% chance to upgrade to a Greater Soul
+    cleansed_by_flame              =  805, -- (205625) Immolation Aura dispels a magical effect on you when cast
+    cover_of_darkness              = 1206, -- (357419) The radius of Darkness is increased by $s1 yds, and its duration by $s2 sec
+    detainment                     =  812, -- (205596) Imprison's PvP duration is increased by $s1 sec, and targets become immune to damage and healing while imprisoned
+    glimpse                        =  813, -- (354489) Vengeful Retreat provides immunity to loss of control effects, and reduces damage taken by $s1% until you land
+    illidans_grasp                 = 5691, -- (205630) You strangle the target with demonic magic, stunning them in place and dealing $s$s2 Shadow damage over $s3 sec while the target is grasped. Can move while channeling. Use Illidan's Grasp again to toss the target to a location within $s4 yards
+    rain_from_above                =  811, -- (206803) You fly into the air out of harm's way. While floating, you gain access to Fel Lance allowing you to deal damage to enemies below
+    reverse_magic                  =  806, -- (205604) Removes all harmful magical effects from yourself and all nearby allies within $s1 yards, and sends them back to their original caster if possible
+    sigil_mastery                  = 5523, -- (211489) Reduces the cooldown of your Sigils by an additional $s1%
+    unending_hatred                = 1218, -- (213480) Taking damage causes you to gain Fury based on the damage dealt
 } )
 
 -- Auras
@@ -931,24 +932,40 @@ spec:RegisterAuras( {
     },
 } )
 
-spec:RegisterStateExpr( "soul_fragments", function ()
-    return GetSpellCastCount(232893) -- only works with Reaver hero tree
-end )
+-- Soul fragments metatable - Havoc DH (simpler than Vengeance due to limited real data)
+spec:RegisterStateTable( "soul_fragments", setmetatable( {
 
-spec:RegisterStateTable( "fragments", {
-    real = 0,
-    realTime = 0,
-} )
+    reset = setfenv( function()
+        -- For Havoc - use spell cast count from Reaver hero tree talent
+        soul_fragments.active = GetSpellCastCount( 232893 ) or 0
+        soul_fragments.inactive = 0  -- Havoc doesn't track inactive fragments reliably
+    end, state ),
 
-spec:RegisterStateFunction( "queue_fragments", function( num, extraTime )
-    fragments.real = fragments.real + num
-    fragments.realTime = GetTime() + 1.25 + ( extraTime or 0 )
-end )
+    queueFragments = setfenv( function( count, extraTime )
+        -- Simple virtual tracking for simulation purposes only
+        count = count or 1
+        soul_fragments.inactive = soul_fragments.inactive + count
+    end, state ),
 
-spec:RegisterStateFunction( "purge_fragments", function()
-    fragments.real = 0
-    fragments.realTime = 0
-end )
+    consumeFragments = setfenv( function()
+        -- Consume all active fragments
+        gain( 20 * soul_fragments.active, "fury" )
+        soul_fragments.active = 0
+    end, state ),
+
+}, {
+    __index = function( t, k )
+        if k == "total" then
+            return ( rawget( t, "active" ) or 0 ) + ( rawget( t, "inactive" ) or 0 )
+        elseif k == "active" then
+            return rawget( t, "active" ) or 0
+        elseif k == "inactive" then
+            return rawget( t, "inactive" ) or 0
+        end
+
+        return 0
+    end
+} ) )
 
 spec:RegisterStateExpr( "activation_time", function()
     return talent.quickened_sigils.enabled and 1 or 2
@@ -989,14 +1006,17 @@ local death_events = {
 
 spec:RegisterHook( "COMBAT_LOG_EVENT_UNFILTERED", function( _, subtype, _, sourceGUID, sourceName, _, _, destGUID, destName, destFlags, _, spellID, spellName )
     if sourceGUID == GUID then
+        if spellID == 228532 then
+            -- Consumed
+            soul_fragments.reset()
+        end
         if subtype == "SPELL_CAST_SUCCESS" then
             if spellID == 198793 and talent.initiative.enabled then
                 wipe( initiative_actual )
+            elseif spellID == 228537 then
+                -- Generated
+                soul_fragments.reset()
             end
-
-        elseif spellID == 203981 and fragments.real > 0 and ( subtype == "SPELL_AURA_APPLIED" or subtype == "SPELL_AURA_APPLIED_DOSE" ) then
-            fragments.real = fragments.real - 1
-
         elseif state.set_bonus.tier30_2pc > 0 and subtype == "SPELL_AURA_APPLIED" and spellID == 408737 then
             furySpent = max( 0, furySpent - 175 )
 
@@ -1018,67 +1038,109 @@ end )
 spec:RegisterHook( "UNIT_ELIMINATED", function( id )
     initiative_actual[ id ] = nil
 end )
-
--- Gear Sets
-spec:RegisterGear( "tier29", 200345, 200347, 200342, 200344, 200346 )
-spec:RegisterAura( "seething_chaos", {
-    id = 394934,
-    duration = 6,
-    max_stack = 1
-} )
-
--- Tier 30
-spec:RegisterGear( "tier30", 202527, 202525, 202524, 202523, 202522 )
--- 2 pieces (Havoc) : Every 175 Fury you spend, gain Seething Fury, increasing your Agility by 8% for 6 sec.
--- TODO: Track Fury spent toward Seething Fury.  New expressions: seething_fury_threshold, seething_fury_spent, seething_fury_deficit.
-spec:RegisterAura( "seething_fury", {
-    id = 408737,
-    duration = 6,
-    max_stack = 1
-} )
--- 4 pieces (Havoc) : Each time you gain Seething Fury, gain 15 Fury and the damage of your next Eye Beam is increased by 15%, stacking 5 times.
-spec:RegisterAura( "seething_potential", {
-    id = 408754,
-    duration = 60,
-    max_stack = 5
-} )
-
-spec:RegisterGear( "tier31", 207261, 207262, 207263, 207264, 207266, 217228, 217230, 217226, 217227, 217229 )
--- (2) Blade Dance automatically triggers Throw Glaive on your primary target for $s3% damage and each slash has a $s2% chance to Throw Glaive an enemy for $s1% damage.
--- (4) Throw Glaive reduces the remaining cooldown of The Hunt by ${$s1/1000}.1 sec, and The Hunt's damage over time effect lasts ${$s2/1000} sec longer.
-
-spec:RegisterGear( "tww2", 229316, 229314, 229319, 229317, 229315 )
-
-spec:RegisterAuras( {
-    -- 2-set
-    -- Winning Streak! Increase the DPS of Blade Dance and Chaos Strike by 3% stacking pu to 10 times. Blade Dance and Chaos Strike have 15% chance of removing Winning Streak! .
-    winning_streak = {
-        id = 1217011,
-        duration = 3600,
-        max_stack = 10
-        },
-    --4-set
-    -- Winning Streak persists for 7s after being cancelled. Entering Demon Form sacrifices all Winning Streak! stacks to gain 0% (?) Crit Strike Chance per stack consumed. Lasts 15s
-    necessary_sacrifice = {
-    id = 1217055,
-    duration = 15,
-    max_stack = 10
+spec:RegisterGear({
+    -- The War Within
+    tww3 = {
+        items = { 237691, 237689, 237694, 237692, 237690 },
+        auras = {
+            -- Fel-Scarred
+            -- Havoc
+            demon_soul_tww3 = {
+                id = 1238676,
+                duration = 10,
+                max_stack = 1
+            },
+        }
     },
-    -- https://www.wowhead.com/spell=1220706
-    -- Winning Streak! Ending a Winning Streak! Blade Dance and Chaos Strike damage increased by 6%.
-    winning_streak_temporary = {
-        id = 1220706,
-        duration = 7,
-        max_stack = 10
+    tww2 = {
+        items = { 229316, 229314, 229319, 229317, 229315 },
+        auras = {
+            winning_streak = {
+                id = 1217011,
+                duration = 3600,
+                max_stack = 10
+            },
+            necessary_sacrifice = {
+                id = 1217055,
+                duration = 15,
+                max_stack = 10
+            },
+            winning_streak_temporary = {
+                id = 1220706,
+                duration = 7,
+                max_stack = 10
+            }
+        }
     },
-
-} )
-
-spec:RegisterGear( "tww1", 212068, 212066, 212065, 212064, 212063 )
-spec:RegisterAura( "blade_rhapsody", {
-    id = 454628,
-    duration = 12,
-    max_stack = 1
+    tww1 = {
+        items = { 212068, 212066, 212065, 212064, 212063 },
+        auras = {
+            blade_rhapsody = {
+                id = 454628,
+                duration = 12,
+                max_stack = 1
+            }
+        }
+    },
+    -- Dragonflight
+    tier31 = {
+        items = { 207261, 207262, 207263, 207264, 207266, 217228, 217230, 217226, 217227, 217229 }
+    },
+    tier30 = {
+        items = { 202527, 202525, 202524, 202523, 202522 },
+        auras = {
+            seething_fury = {
+                id = 408737,
+                duration = 6,
+                max_stack = 1
+            },
+            seething_potential = {
+                id = 408754,
+                duration = 60,
+                max_stack = 5
+            }
+        }
+    },
+    tier29 = {
+        items = { 200345, 200347, 200342, 200344, 200346 },
+        auras = {
+            seething_chaos = {
+                id = 394934,
+                duration = 6,
+                max_stack = 1
+            }
+        }
+    },
+    -- Legacy Tier Sets
+    tier21 = {
+        items = { 152121, 152123, 152119, 152118, 152120, 152122 },
+        auras = {
+            havoc_t21_4pc = {
+                id = 252165,
+                duration = 8
+            }
+        }
+    },
+    tier20 = { items = { 147130, 147132, 147128, 147127, 147129, 147131 } },
+    tier19 = { items = { 138375, 138376, 138377, 138378, 138379, 138380 } },
+    -- Class Hall Set
+    class = { items = { 139715, 139716, 139717, 139718, 139719, 139720, 139721, 139722 } },
+    -- Legion/Trinkets/Legendaries
+    convergence_of_fates = { items = { 140806 } },
+    achor_the_eternal_hunger = { items = { 137014 } },
+    anger_of_the_halfgiants = { items = { 137038 } },
+    cinidaria_the_symbiote = { items = { 133976 } },
+    delusions_of_grandeur = { items = { 144279 } },
+    kiljaedens_burning_wish = { items = { 144259 } },
+    loramus_thalipedes_sacrifice = { items = { 137022 } },
+    moarg_bionic_stabilizers = { items = { 137090 } },
+    prydaz_xavarics_magnum_opus = { items = { 132444 } },
+    raddons_cascading_eyes = { items = { 137061 } },
+    sephuzs_secret = { items = { 132452 } },
+    the_sentinels_eternal_refuge = { items = { 146669 } },
+    soul_of_the_slayer = { items = { 151639 } },
+    chaos_theory = { items = { 151798 } },
+    oblivions_embrace = { items = { 151799 } }
 } )
 
 -- Abilities that may trigger Demonsurge.
@@ -1087,11 +1149,30 @@ local demonsurge = {
     hardcast = { "abyssal_gaze", "consuming_fire", "sigil_of_doom" },
 }
 
+-- Map old demonsurge names to current ability names due to SimC APL
+local demonsurge_spell_map = {
+    abyssal_gaze = "eye_beam",
+    sigil_of_doom = "sigil_of_flame",
+    consuming_fire = "immolation_aura"
+}
+
 local demonsurgeLastSeen = setmetatable( {}, {
     __index = function( t, k ) return rawget( t, k ) or 0 end,
 })
 
 spec:RegisterHook( "reset_precast", function ()
+    -- Call soul fragments reset first
+    soul_fragments.reset()
+
+    -- Debug snapshot for soul_fragments (Havoc)
+    if Hekili.ActiveDebug then
+        Hekili:Debug( "Soul Fragments (Havoc) - Active: %d, Inactive: %d, Total: %d",
+            soul_fragments.active or 0,
+            soul_fragments.inactive or 0,
+            soul_fragments.total or 0
+        )
+    end
+
     wipe( initiative_virtual )
     active_dot.initiative_tracker = 0
 
@@ -1105,26 +1186,7 @@ spec:RegisterHook( "reset_precast", function ()
         end
     end
 
-    --[[ 20250301: Legacy items from Legion that reduce the cooldown of Metamorphosis.
-    local rps = 0
 
-    if equipped.convergence_of_fates then
-        rps = rps + ( 3 / ( 60 / 4.35 ) )
-    end
-
-    if equipped.delusions_of_grandeur then
-        -- From SimC model, 1/13/2018.
-        local fps = 10.2 + ( talent.demonic.enabled and 1.2 or 0 )
-
-        -- SimC uses base haste, we'll use current since we recalc each time.
-        fps = fps / haste
-
-        -- Chaos Strike accounts for most Fury expenditure.
-        fps = fps + ( ( fps * 0.9 ) * 0.5 * ( 40 / 100 ) )
-
-        rps = rps + ( fps / 30 ) * ( 1 )
-    end
-    --]]
 
     if IsSpellKnownOrOverridesKnown( 442294 ) then
         applyBuff( "reavers_glaive" )
@@ -1140,15 +1202,15 @@ spec:RegisterHook( "reset_precast", function ()
                 demonsurgeLastSeen[ name ] = query_time
             end
         end
-        if talent.demonic_intensity.enabled then
+        if talent.demonic_intensity.enabled and cooldown.metamorphosis.remains then
             local metaApplied = buff.metamorphosis.applied - 0.2
-            if action.metamorphosis.lastCast >= metaApplied or action.abyssal_gaze.lastCast >= metaApplied then
+            if action.metamorphosis.lastCast >= metaApplied or action.eye_beam.lastCast >= metaApplied then
                 applyBuff( "demonsurge_hardcast", metaRemains )
             end
             for _, name in ipairs( demonsurge.hardcast ) do
-                if IsSpellOverlayed( class.abilities[ name ].id ) then
+                local ability_name = demonsurge_spell_map[name] or name
+                if class.abilities[ ability_name ] and IsSpellOverlayed( class.abilities[ ability_name ].id ) then
                     applyBuff( "demonsurge_" .. name, metaRemains )
-                    demonsurgeLastSeen[ name ] = query_time
                 end
             end
 
@@ -1160,14 +1222,15 @@ spec:RegisterHook( "reset_precast", function ()
 
             for _, list in pairs( demonsurge ) do
                 for _, name in ipairs( list ) do
-                    local hasPending = buff[ "demonsurge_" .. name ].down and abs( action[ name ].lastCast - demonsurgeLastSeen[ name ] ) < 0.7 and action[ name ].lastCast > buff.demonsurge.applied
+                    local ability_name = demonsurge_spell_map[name] or name
+                    local hasPending = buff[ "demonsurge_" .. name ].down and abs( action[ ability_name ].lastCast - demonsurgeLastSeen[ name ] ) < 0.7 and action[ ability_name ].lastCast > buff.demonsurge.applied
                     if hasPending then pending = pending + 1 end
                     --[[
                     if Hekili.ActiveDebug then
                         Hekili:Debug( " - " .. ( hasPending and "PASS: " or "FAIL: " ) ..
                             "buff.demonsurge_" .. name .. ".down[" .. ( buff[ "demonsurge_" .. name ].down and "true" or "false" ) .. "] & " ..
-                            "@( action." .. name .. ".lastCast[" .. action[ name ].lastCast .. "] - lastSeen." .. name .. "[" .. demonsurgeLastSeen[ name ] .. "] ) < 0.7 & " ..
-                            "action." .. name .. ".lastCast[" .. action[ name ].lastCast .. "] > buff.demonsurge.applied[" .. buff.demonsurge.applied .. "]" )
+                            "@( action." .. ability_name .. ".lastCast[" .. action[ ability_name ].lastCast .. "] - lastSeen." .. name .. "[" .. demonsurgeLastSeen[ name ] .. "] ) < 0.7 & " ..
+                            "action." .. ability_name .. ".lastCast[" .. action[ ability_name ].lastCast .. "] > buff.demonsurge.applied[" .. buff.demonsurge.applied .. "]" )
                     end
                     --]]
                 end
@@ -1178,6 +1241,7 @@ spec:RegisterHook( "reset_precast", function ()
             if Hekili.ActiveDebug then
                 Hekili:Debug( " - buff.demonsurge.stack[" .. buff.demonsurge.stack - pending .. " + " .. pending .. "]" )
             end
+
         end
 
         if Hekili.ActiveDebug then
@@ -1217,35 +1281,6 @@ spec:RegisterHook( "spend", function( amt, resource )
         end
     end
 end )
-
-spec:RegisterGear( "tier19", 138375, 138376, 138377, 138378, 138379, 138380 )
-spec:RegisterGear( "tier20", 147130, 147132, 147128, 147127, 147129, 147131 )
-spec:RegisterGear( "tier21", 152121, 152123, 152119, 152118, 152120, 152122 )
-    spec:RegisterAura( "havoc_t21_4pc", {
-        id = 252165,
-        duration = 8
-    } )
-
-spec:RegisterGear( "class", 139715, 139716, 139717, 139718, 139719, 139720, 139721, 139722 )
-
-spec:RegisterGear( "convergence_of_fates", 140806 )
-
-spec:RegisterGear( "achor_the_eternal_hunger", 137014 )
-spec:RegisterGear( "anger_of_the_halfgiants", 137038 )
-spec:RegisterGear( "cinidaria_the_symbiote", 133976 )
-spec:RegisterGear( "delusions_of_grandeur", 144279 )
-spec:RegisterGear( "kiljaedens_burning_wish", 144259 )
-spec:RegisterGear( "loramus_thalipedes_sacrifice", 137022 )
-spec:RegisterGear( "moarg_bionic_stabilizers", 137090 )
-spec:RegisterGear( "prydaz_xavarics_magnum_opus", 132444 )
-spec:RegisterGear( "raddons_cascading_eyes", 137061 )
-spec:RegisterGear( "sephuzs_secret", 132452 )
-spec:RegisterGear( "the_sentinels_eternal_refuge", 146669 )
-
-spec:RegisterGear( "soul_of_the_slayer", 151639 )
-spec:RegisterGear( "chaos_theory", 151798 )
-spec:RegisterGear( "oblivions_embrace", 151799 )
-
 
 -- do
 --     local wasWarned = false
@@ -1592,7 +1627,7 @@ spec:RegisterAbilities( {
 
     -- Blasts all enemies in front of you,$?s320415[ dealing guaranteed critical strikes][] for up to $<dmg> Chaos damage over $d. Deals reduced damage beyond $s5 targets.$?s343311[; When Eye Beam finishes fully channeling, your Haste is increased by an additional $343312s1% for $343312d.][]
     eye_beam = {
-        id = 198013,
+        id = function() return buff.demonsurge_hardcast.up and 452497 or 198013 end,
         cast = function () return ( talent.blind_fury.enabled and 3 or 2 ) * haste end,
         channeled = true,
         cooldown = 40,
@@ -1604,9 +1639,14 @@ spec:RegisterAbilities( {
         usable = function () return target.distance <= 5, "target must be nearby" end,
         talent = "eye_beam",
         startsCombat = true,
-        nobuff = function () return talent.demonic_intensity.enabled and "metamorphosis" or nil end,
+        -- nobuff = function () return talent.demonic_intensity.enabled and "metamorphosis" or nil end,
+        texture = function() return buff.demonsurge_hardcast.up and 136149 or 1305156 end,
 
         start = function()
+            if buff.demonsurge_abyssal_gaze.up then
+                removeBuff( "demonsurge_abyssal_gaze" )
+                if talent.demonic_intensity.enabled then addStack( "demonsurge" ) end
+            end
             applyBuff( "eye_beam" )
             if talent.demonic.enabled then TriggerDemonic() end
             if talent.cycle_of_hatred.enabled then
@@ -1614,51 +1654,16 @@ spec:RegisterAbilities( {
                 addStack( "cycle_of_hatred" )
             end
             removeBuff( "seething_potential" )
-            setCooldown( "abyssal_gaze", action.eye_beam.cooldown )
         end,
 
         finish = function()
             if talent.furious_gaze.enabled then applyBuff( "furious_gaze" ) end
         end,
 
-        bind = "abyssal_gaze"
+        bind = "abyssal_gaze",
+        copy = { 452497, 198013, "abyssal_gaze" }
     },
 
-    abyssal_gaze = {
-        id = 452497,
-        known = 198013,
-        cast = function () return ( talent.blind_fury.enabled and 3 or 2 ) * haste end,
-        channeled = true,
-        cooldown = 40,
-        gcd = "spell",
-        school = "chromatic",
-        usable = function () return target.distance <= 10, "target must be nearby" end,
-        spend = 30,
-        spendType = "fury",
-
-        talent = "demonic_intensity",
-        buff = "demonsurge_hardcast",
-        startsCombat = true,
-
-        start = function()
-            applyBuff( "eye_beam" )
-            if talent.demonic.enabled then TriggerDemonic() end
-            if talent.cycle_of_hatred.enabled then
-                reduceCooldown( "abyssal_gaze", 5 * talent.cycle_of_hatred.rank * buff.cycle_of_hatred.stack )
-                addStack( "cycle_of_hatred" )
-            end
-            if buff.demonsurge_abyssal_gaze.up then
-                removeBuff( "demonsurge_abyssal_gaze" )
-                if talent.demonic_intensity.enabled then addStack( "demonsurge" ) end
-            end
-            removeBuff( "seething_potential" )
-            setCooldown( "eye_beam", action.abyssal_gaze.cooldown )
-        end,
-
-        finish = function() spec.abilities.eye_beam.finish() end,
-
-        bind = "eye_beam"
-    },
 
     -- Talent: Unleash a torrent of Fel energy over $d, inflicting ${(($d/$t1)+1)*$258926s1} Chaos damage to all enemies within $258926A1 yds. Deals reduced damage beyond $258926s2 targets.
     fel_barrage = {
@@ -1770,13 +1775,14 @@ spec:RegisterAbilities( {
                 applyBuff( "inertia" )
             end
             if talent.warblades_hunger.enabled then
-                if buff.art_of_the_glaive.stack + soul_fragments >= 6 then
+                if buff.art_of_the_glaive.stack + soul_fragments.active >= 6 then
                     applyBuff( "reavers_glaive" )
                 else
-                    addStack( "art_of_the_glaive", soul_fragments )
+                    addStack( "art_of_the_glaive", soul_fragments.active )
                 end
-                addStack( "warblades_hunger", soul_fragments )
+                addStack( "warblades_hunger", soul_fragments.active )
             end
+            soul_fragments.consumeFragments()
         end,
     },
 
@@ -1818,6 +1824,7 @@ spec:RegisterAbilities( {
         spend = -20,
         spendType = "fury",
         startsCombat = false,
+        -- startsCombat = function() if prev[1].sigil_of_flame then return true else return false end end,
 
         handler = function ()
             applyBuff( "immolation_aura" )
@@ -1866,7 +1873,6 @@ spec:RegisterAbilities( {
 
             if talent.chaotic_transformation.enabled then
                 setCooldown( "eye_beam", 0 )
-                setCooldown( "abyssal_gaze", 0 )
                 setCooldown( "blade_dance", 0 )
                 setCooldown( "death_sweep", 0 )
             end
@@ -1875,7 +1881,7 @@ spec:RegisterAbilities( {
                 local metaRemains = buff.metamorphosis.remains
 
                 for _, name in ipairs( demonsurge.demonic ) do
-                    applyBuff( "demonsurge_ " .. name, metaRemains )
+                    applyBuff( "demonsurge_" .. name, metaRemains )
                 end
 
                 if talent.violent_transformation.enabled then
@@ -1883,7 +1889,6 @@ spec:RegisterAbilities( {
                     gainCharges( "immolation_aura", 1 )
                     if talent.demonic_intensity.enabled then
                         gainCharges( "consuming_fire", 1 )
-                        setCooldown( "sigil_of_doom", 0 )
                     end
                 end
 
@@ -1892,7 +1897,7 @@ spec:RegisterAbilities( {
                     applyBuff( "demonsurge_hardcast", metaRemains )
 
                     for _, name in ipairs( demonsurge.hardcast ) do
-                        applyBuff( "demonsurge_ " .. name, metaRemains )
+                        applyBuff( "demonsurge_" .. name, metaRemains )
                     end
                 end
             end
@@ -1967,78 +1972,53 @@ spec:RegisterAbilities( {
 
     -- Talent: Place a Sigil of Flame at your location that activates after $d.    Deals $204598s1 Fire damage, and an additional $204598o3 Fire damage over $204598d, to all enemies affected by the sigil.    |CFFffffffGenerates $389787s1 Fury.|R
     sigil_of_flame = {
-        id = function() return talent.precise_sigils.enabled and 389810 or 204596 end,
+        id = function()
+            if buff.demonsurge_hardcast.up then
+                return talent.precise_sigils.enabled and 469991 or 452490
+            else
+                return talent.precise_sigils.enabled and 389810 or 204596
+            end
+        end,
         known = 204596,
         cast = 0,
         cooldown = function() return ( pvptalent.sigil_of_mastery.enabled and 0.75 or 1 ) * 30 end,
         gcd = "spell",
-        school = "fire",
+        school = function() return buff.demonsurge_hardcast.up and "chaos" or "fire" end,
         usable = function () return target.distance <= 7, "target must be nearby" end,
         toggle_terrain = "player",
         spend = -30,
         spendType = "fury",
 
         startsCombat = false,
-        texture = 1344652,
-        nobuff = "demonsurge_hardcast",
+        texture = function() return buff.demonsurge_hardcast.up and 1121022 or 1344652 end,
 
         flightTime = function() return activation_time end,
         delay = function() return activation_time end,
         placed = function() return query_time < action.sigil_of_flame.lastCast + activation_time end,
-        terrain = true,
-        impact = function()
-            applyDebuff( "target", "sigil_of_flame" )
-            active_dot.sigil_of_flame = active_enemies
-            if talent.soul_sigils.enabled then addStack( "soul_fragments", nil, 1 ) end
-            if talent.student_of_suffering.enabled then applyBuff( "student_of_suffering" ) end
-            if talent.flames_of_fury.enabled then gain( talent.flames_of_fury.rank * active_enemies, "fury" ) end
-        end,
-
-        copy = { 204596, 389810 },
-        bind = "sigil_of_doom"
-    },
-
-    sigil_of_doom = {
-        id = function () return talent.precise_sigils.enabled and 469991 or 452490 end,
-        known = 204596,
-        cast = 0,
-        cooldown = function() return ( pvptalent.sigil_of_mastery.enabled and 0.75 or 1 ) * 30 end,
-        gcd = "spell",
-        school = "chaos",
-        usable = function () return target.distance <= 7, "target must be nearby" end,
-        toggle_terrain = "player",
-        spend = -30,
-        spendType = "fury",
-
-        talent = "demonic_intensity",
-        buff = "demonsurge_hardcast",
-        terrain = true,
-        startsCombat = false,
-        texture = 1121022,
-
-        flightTime = function() return activation_time end,
-        delay = function() return activation_time end,
-        placed = function() return query_time < action.sigil_of_doom.lastCast + activation_time end,
 
         handler = function ()
             if buff.demonsurge_sigil_of_doom.up then
                 removeBuff( "demonsurge_sigil_of_doom" )
                 if talent.demonic_intensity.enabled then addStack( "demonsurge" ) end
             end
-            -- Sigil of Doom and Sigil of Flame share a cooldown.
-            setCooldown( "sigil_of_flame", action.sigil_of_doom.cooldown )
         end,
 
         impact = function()
-            applyDebuff( "target", "sigil_of_doom" )
-            active_dot.sigil_of_doom = active_enemies
-            if talent.soul_sigils.enabled then addStack( "soul_fragments", nil, 1 ) end
+            if buff.demonsurge_hardcast.up then
+                applyDebuff( "target", "sigil_of_doom" )
+                active_dot.sigil_of_doom = active_enemies
+            else
+                applyDebuff( "target", "sigil_of_flame" )
+                active_dot.sigil_of_flame = active_enemies
+            end
+            if talent.soul_sigils.enabled then soul_fragments.queueFragments( 1 ) end
             if talent.student_of_suffering.enabled then applyBuff( "student_of_suffering" ) end
             if talent.flames_of_fury.enabled then gain( talent.flames_of_fury.rank * active_enemies, "fury" ) end
+            if talent.initiative.enabled and debuff.initiative_tracker.down then applyBuff( "initiative" ) end
         end,
 
-        copy = { 452490, 469991 },
-        bind = "sigil_of_flame"
+        copy = { 204596, 389810, 452490, 469991, "sigil_of_doom" },
+        bind = "sigil_of_doom"
     },
 
     -- Talent: Place a Sigil of Misery at your location that activates after $d.    Causes all enemies affected by the sigil to cower in fear. Targets are disoriented for $207685d.
@@ -2084,7 +2064,7 @@ spec:RegisterAbilities( {
         placed = function() return query_time < action.sigil_of_spite.lastCast + activation_time end,
         terrain = true,
         impact = function ()
-            addStack( "soul_fragments", nil, talent.soul_sigils.enabled and 4 or 3 )
+            soul_fragments.queueFragments( talent.soul_sigils.enabled and 4 or 3 )
         end,
 
         copy = { 389815, 390163 }
@@ -2225,7 +2205,7 @@ spec:RegisterAbilities( {
 
         startsCombat = true,
         nodebuff = "rooted",
-        usable = function () return target.distance <= 7, "target must be nearby" end,
+        usable = function () return target.distance <= 7 and settings.retreat_filler, "target must be nearby" end,
         readyTime = function ()
             if settings.retreat_and_return == "fel_rush" or settings.retreat_and_return == "either" and not talent.felblade.enabled then
                 return max( 0, cooldown.fel_rush.remains - 1 )
@@ -2330,7 +2310,7 @@ spec:RegisterSetting( "fel_rush_warning", nil, {
     width = "full",
 } )
 
-spec:RegisterSetting( "fel_rush_charges", 0, {
+spec:RegisterSetting( "fel_rush_charges", 2, {
     name = strformat( "储存 %s 资源", Hekili:GetSpellLinkWithTexture( 195072 ) ),
     desc = strformat( "如果设置大于0，当使用 %s 将使你剩余很少的资源，它将不会被推荐。", Hekili:GetSpellLinkWithTexture( 195072 ) ),
     type = "range",
@@ -2386,7 +2366,7 @@ spec:RegisterSetting( "retreat_warning", nil, {
     width = "full",
 } )
 
-spec:RegisterSetting( "retreat_and_return", "off", {
+spec:RegisterSetting( "retreat_and_return", "felblade", {
     name = strformat( "%s: %s 和 %s", Hekili:GetSpellLinkWithTexture( 198793 ), Hekili:GetSpellLinkWithTexture( 195072 ), Hekili:GetSpellLinkWithTexture( 232893 ) ),
     desc = function()
         return strformat( "启用后，除非使用 %s 或 %s 能够快速返回你当前的目标，否则 %s 将|cFFFF0000不会|r 被推荐。"
@@ -2418,5 +2398,4 @@ spec:RegisterSetting( "retreat_filler", false, {
     width = "full"
 } )
 
-
-spec:RegisterPack( "浩劫Simc", 20250730, [[Hekili:S316VrYXX9)w4h8E7sIB1UdjVtk4idItqaS(G(qOZx5YH7oKCc3DNvZm7DIchwiLa7il)iVKHbsmcIcGnusKDmSrIvSLI(JXhPo)j9Vq6EE2pQh9mC5D8IoabrEC6P7QRUQQR6xvDpho8WV5HhmXpn4W3WBG3UdE1b70FWUEBV7UhEq6flco8Gf(Jp3)uXVm3FM4)F1)1)2LV))XbHZglF0ftJ8Ni7IKOLXJfp(WdoEz400VX8dpgQF9g8AI2Uiy8HVXU3)(hEWzHtMeK32GerpoCyFVvV(Qx)Y3)dV8Z)wFXp9D)Ip4JU8V9h80F9V6jFYp4YV9V83)bF3V8tF3RZtp8GPHjPjsA(KKrJJIMoj6rZf)Z3iJvem3)4Pbto8RF4bJJdtdId9p8GURos8FLTTFWfbJooWFw)4Gz(HZtwD0(7T6iVbRoQtwd3y1rP(tdMN2pijjy(yrRJd8pVFrFV6Oh)4vhnj44LNCIrlwUy1r9Y6MShEsW0rh7hhly)9LJC5ae7hozuWdLJG)Kjj9dfpz)vhTZG8UgOf1u6QJE18wvtLQdtfnMtg(JtdFyWOG5bZcdYFDVSNP3dJpZpknC8O0y)5jNefpZpnmAU(e(4OKKS(8KWtplDuff9GvhT9aTPD485bXJMemt0fQt76XloijDQG1n6SLZfRr1duhLLPJN6pjy0eFb7vB(F64j9N5)wRoAtXiNtBlIdE4i5FFy)jb(PNnk5rbb5Rf50v9qhkOT0qFTHKDbpN(pliosWIcc67pDsS)4ZcfCb)hgexWGKZ9SzDYY4tfuEnLuWg6v2tp0xixk66(rlelnfm40WzbztWH7kA6Hhix7IMF4bZcs9NffV4SOKWKdtfkKuc60SV8HpJs162mj3oK6iRdDJSPz(RNCMFQGQdMi4tjPHZVqVlQ51cP7KXcP7AH6VIQB196REXRRunuyQlklHisa9CuFPRlQmDqLwRu50FKkVRYsHoduza9Npp8SWP5ljvkPRj90Tr1tPwV3fDQvoRruVQPKfrz)uqc7yqcrIwLeKw30YzO83MUu8JG3Cz4Ifbsg3KrV5YGG5jJM5px6kq(Ox1aXkRynvSgVmjx4EwOuJ2OvjN7hp5crNCQqcWSlscpDEq6OOtgLEwWOfXHrXxy0K)ILZpFMVqGoosqibN6lOg5lz0Std8JpnoC(KG4Krjl8JdgDEWfjgTAMW1bHUZ0OXNpprifFUXZJfsNZLZNZIMhCXOJx(2VDqCgtAuU3tsxFc9NkMVHZpxWhfS4DnyXvIdw8pBxsu3wkuOMjnOyyzixJV6Hvwrlfc31u6grDiVPiswgBpvm76NoSV4HqccgTZRF1ghtwgNPnLjmpSWQludvPSY2THwtpZpz0YeHaUGGRmSQ8C3OTHUsBdDN2gAtB9G0NLVU3awB8dhG8aQf08be0wq(YPCqT7YDldeaq(uinFpePzeLDvr6nuv04mE40ch(cm3IMX82zbhobvJ(Thixw6iqfBgJXj413hHxRBY0WQHlCzi6bIjyAB(AYyhY1NUXuXukD2YIvd7H7hr5YKbpxS68QyRoa7zPUgLBz(bWbuc6ovHn(8NuecPQdsmEQd6LnH1gVkos1MiEdQ4dqZob341q4gyBpR5TJ1EyLJg6BlgXHdqgsKT6DBeXEz5aAcGqTTVmzSHncsbv3pHdwyiPJE9ycOHwd5U5ENk7FMWD6XV7gN80UQrzZzmWQniwITAhQ7Mv6yvERB4LMB(GKPwiuaMgLQSKlLlmJ32qUW72PCbObXRLCHPhzTsUaBJhR24GCH3AvUazhpi5cVm5c847i8klNQkw2NejdwxgsSCsgFE2awSZwrFO(4kR7QH6R8yJqW1E)tN6lTeQseRRWfwNrXO(xy38SCoUC(XrlNpzKeQLefVFv3yvUOF6PbXMeVlG6Hm7jL)3tcDJITcXUPs0yYeCmJk3vbhxW2Rrqwi2TpCQCZ(KfHz()NkrvhcmDj8(XHlYFT)0GP39GCm5Q7RX(tNok)FmscrFoq9fXnRcvpjcMvEpnmxain60tftMYxUAAABHTuMQ6jWGNWc0lNJv6ii1pj1F855i3S6OTQ6)K0Lte)mJ3kEdXKB(P1dtD78hDsOWheXcy4evegDNVMTohtJ3uXGPRNWOgv4NjT6N52xsXEVY1iNyfDi3T8U6W97LpcauRw0de60km2tcMMPhbHt2Zbw3(zsqph5C6SMrXltodcFldVSTdOQStIxoNsUv(IqioyX6H2ubZiGgYl5wqKCbv3sg0ViPr2pWJJPkzHAVMbDGVzAz8Q0MWFGv2T6bUplTGH24uzI)KPcoVj8rDrT3znNvKK64iH0Xb6qJyribz6zhALAg6X2E(XV4qz3q37epLT2fUqFAWjlfAmbsFrfc6sxKJo5ezwwK7Kca1JLqU7msCPYYykCzrfsqRX8Rgjm7b75rM4aeElMOE1sxmROrZLjdXlZPerKxSt77dhHLc0oKGbxZLkxRHqGPM)qzg0q5DhTylWZGKYmdelggpwv7QSDzgLiC)(8aqywS0fq8jQ2Qtys0ur8GtgTio4cOgKjuLTjh5wU7LfSnTYLchSEofoBwuEsdh5lITgeLG6P1jlJVq4Y4jHJdtZ0FKjJElfx1Lny0PbZZwI6k3jsS11RaL)shLMZPZ(LE4u5(C2WM17DAKVj7vHkbduMmrtXzwQN(QbIfi(fSSP4w6I(TXTkSnT0S4I4sjb8aUjUPQWkiEPqs(ZV)Gm37KvgqZMxDB6uJYtILv1mWDlS(MRPlI0nsiVlF8M5ONCxqr9EeMiWDhhb1lHMGuvq0rYS6NVnnVyIH4Xq3dG7MJzkBfqObI4VdLfltQCcMMGfbHhTnkgF5JwMnFJ9NRwuneOO8IilgrBfpmecwdnCnU6QQP39G1CK2utTfQoMvMMVUe71THTJjbVLSKknzp2UOne3nwdDVhqkyWY5yJTRiyG8Xmz0jX5eT)0C)t7pyOgiOWREqyVRIyxC0JkGnnBYJ7GkkiKIb5wlJHE2RIaWqCxpBTUr(UzzU7Q4VRF8y)5cwvuCCqgwPPQqCrwJVy()tf5auftH7gxfJVelxBCEW9CTA(UZaydqSG3rL64woRvbLMfbmu03n3AOGRGAace2ikh)4Z4DnPauAKgi2AxZFWli47v2sgsxDd45EMRHdcKk5kQQx4wdxRYwbZ2OGKiDsEueZ1QqI1f1RXxCcRgeajRahAhMfSMnFbtCvXlJNfdCwtxBRg5pdgt0HwrLbG6rZaddFJ0wQzbxS4S7bXYeDiqutv26eGW45kSrh8DA7IUMwjWOTpCTwcktaWvVjrrZya8bIqqsoMUAhmgAWzPBJMS6acdNIJSQubdcuOssMZm1kv3YnaK6VVMIuEBgSJCMGSy1MgAioVgGRNumqwNvyHW74LXZfbbn6rwG0by3uxyfkWwCVxuC8YbtcegEP2PfjMYgM6SR7EASAf1KP1zvGl(xOsGafjzt2j8Uq06VYo3Dta2o3aK1meHYspVeKNHOv)IWOYCEDGMkHkY8eHf3c2JIA3XxKK4pD0P(VTseOq2qug8Q41avE1BO3a9oukAn64q5jvqVDMgm5pgjPXldup4e5vJsEeD(GHYX3NN4pnjWOuu(Zte(CLgjfefS8zcv3vhfEYQJEK8phNv6tY14GqrSoXRoks8iXVj(LSqkxDu2HjTpiLAfkipfMTGkcDDI00woEMgR254jiCfyzCbiPy6SfptZJS9QQoSkavJpviqpoRPWNSldg2FubU8Ro6pldyE1PEEFbfnk)uNc7Qowb)yJELr2cVF5Bzft0EaGHULnMwJfBSKcNhojMX2dhwlfo0)Ad49CHlqU6JgyMCGkpO2C1gTh6o11rLoNo0Ei5v19HaLw7Ql9njNc9yM5DucqsnfNMy)ZSN5ZcIf3XhMnj1PaDfFsRcPNfhonZbCjKm55eEI)mkfKDYK6rNE9kFSnQvy9yEraSzzHSrd1O97w7BhXr7TNsRHPDa7BtsGsvRPTsK3YJ1RifDBUfdLWtWogTfp2Y(mmORpOKzWc7B2J9JRoAgf1ZBr5hUF1rHhWBnTmeyKjbWv2YIHa(KQPOFeRvCX0GN8mrdzNNBRK18whRTdBEh2joIScqfg9lxmPbq4wDL16A9UkMT117AtRkfv1jUkOxz7HMwK(A5)0ll93fd1BUmC85sVlhLb4IsDKsvt2u4vuNx96T8ZMI21EKIKhrHzkyWgEpqaobSoq9gbYUqgY1nrQonYRgduxAMfWILLX0PEPZdHcboSiTItbv)ya)zndm7s3K9lpyfoakyZWzHgBC28w(mQyD5CEVO4gvbpOsfR8mHnsEhcefojVhbAHNsl08kbUhs1p3DID0fRAZVy0KfGpVCkusIKNFjB30YSuZCKNkUZrGODpeA376r7qNjVRfTBeXHtNf3sFnAXXjQdHPffJgUKDecudHT2x4NsXSkdfNrzU5Mab8kra6GbMIAm2inCui22WnCWJYQzNOc9modEenkws1YFo7(iSZxnqGz8igjLwettgtELL3PdqvupotJIoxOE6pF05cpMbDdYmR0itxMQKPDhxeHqs5XfHRyuAo)u91CdhD9qnO3yBxU1S9bLp1GtYHn5kR9)QMIxGWAVYwulME4oyF9ZZdujBAFKbYzXnOQprKyTGmK2voleVjDLdQ4mV5GUezIZmHikpD7Wu31bvGoOoVsti4ojZMti2JwrNx602l4oT1aauutbNhEGjuME3dcftmWOQhzJthJxtXSgh9BpCFFaS7STgieovGhv1YRhUFjgNxL9yoWkLoCSbIhYyPh3d3vHBolNQcqfGrMgmBrqswrq6H7CrJpNtBJV5jShv1gufS3WSRZczjiNGJEsYybvmtkADC8sXFlm14w0un)1fOtISTlTHxL9wmll6TX3PK2PhJn6ZPTSJ4YQJEvIeeTT74rPM4mwhwCqlsREDX3hRbBA7Q3kDAXP9yBM8(1MY2EnbEx55uGAbJitN4w12oZuC5ZXROHTzYK3lAfZpXckKXgc1zMWvFrJXqp7vRC5TzICTnQlUFkhkJWL)moGel)dmoguS7xzudIexjlCi7YFLZOzuqT0jR3HXAHhhZIUowwJ1YqATXaTK75wJRrgwR1G1WxBZeMnL1HQg6ycwYim)m30Ywzils1vML7nO(7ngqQneSu2crLdWhtCICzLHOqeG5(BAvgcykXMbKa77bx1UkDxE7bQIIoDH7JDyfCKv23U4TTEf(JsGgtqjyp1LdjpOr1wBZSsYUrLA3vg9d9CsrQxVkRXf5mFkoYPnSkLAocPCITSBzxHlTlwAHBmQOYU93vJ)wTlL5Iou0mQAvRDG6766gAqU2xTvJlOIzdIX1zurUiOW9pYimt4(EiU(KKqjdLHfZFlLkg5rswgQgmhtfOG6W1sjQEfZRq4SjPlva1(w1iyhMYAOjBtzArc0roZesySdbHfDIYCPcyG6842uDcuJjAqhtfJtdoZEMjhvl2bqISJj0o0FEuOdpANgdLQ1AHNEC0Oh1G2EhOc6v7HGy726RltwPeguOUNALGyzrBncjPMDcBujjQiayB4UzNf4(DG9U4ljAz2PqdSYcWrTS5BhuTaEZJGjrg653sqtyPYma((dgolwDoWP8NRz5uxv6ExetqScc4B4cEzw1PfO)32I3S5ZgIK5c3zzJJTegJpf)H0l(pdSK020cdk4PBONiTT3AX(JyXfYGeSxV5zwSENqeeLtLp7e)LttRGWR6DctIxUi1KHAWpD(ewbxGxvxVsVs2V4jbps83eor4p(8rN5NKMxKSBwgwIAVLFtgBfxVT3FQNpKHEL5SDRsvFJtpzXztq8g3RUrPY53y)66sr2VBM7oI(LmDML1tLf7T8U(B1rlKNxVKGXrZNODyNkYfjeCq8m1UW1aMjmg2qFQ7Y48GXc5zFbLK4lMccRJA9JGggDC08LjYtHZJ8JFuy6zHZhLe4NiywEJ2zX4mnvngW3muoH3EBjwQ5t9uPyFGKNEsuCvw1LhIX5blLjVx2VIF8gLuZQJoOKCuzzY(B7TfJAyWyqaL45BBW(v8kFpHQgDwuo6DJeEpuwJf6fcHqgdQr6TaESkQ2tMQmO8lXKEnmWnSEopSOFyjmwy)tIwkyLRos(bzyz25xTCH8mXRho)0I13Ljz)UVyPp1pT2UOYl4pFI8)P0x5Hew1e1L9jzJ7iHeNOLqyOPrLheSWpo7RUqUqW080VLrzYV4c5x7gYbkiOwqXQk(KjUDS0Lc1TmqVMinQ6pA0S2G4(MuBGrjoTBK6CR4leBNfn7y)uOuXWRxOlTgoBrC0ddtKN4JaFbRlC5Srl8hlKoox)O3MAwLrTCpcnP2gp8EAdFZTMQp7X(8uP3k6pWF6TL8R8NEtb)u(b2NXHZgnoAsWBzOa81Nk2(skHOBUvmAYZBUuvvrrSu3Sud5BuTLrHsQQn5SAzi3S9DL7si8rrwocz65c(uSAhlwdNgmtSlKFfp3uKrQr0oR46IlSRxEny9YZ91lpxxV8mxVaeGlzgM22KmJ4au2HYrGxi8x5l3bdQmbHeFHUxD3xTLM(BB6Wy9HzZ0LXIRJoApgnIIjg5d9s2dB45Uuny56Riohs22Z9lglqCL0J5gRAwTpIrkBD4sYiB)5SNaBx9LdtObWrgIo9SfpQnFvlGCxMnQoZ4TYUMSGbgOTN(JN3tP9nNrvHq6WfkxT8Qff3KmgIlOqE76RQv5EwCX1J5tAhkU3X3YonUwiJZMkQMMLWMKH(MLH411QeSEkv(RCRGbaUGm1Ke13McenIgRLsy4H)dtWTHjuxi0J1GKgYWeAsDjoD3TCs7GahEoPDiTfN42DSFxkkH4ZuqTgjtk4CkxD0JLSBGVG)6zBze7dFIdUlr)D3d2zVgCL6r4uwlwsXDPbY8EtgMyRBCdUB9oyx2O353SE15oaOGxBr0dHX5pHi)qfchxJJPhGsKoxf6AcGztYwSDKDQA7q5SVHpfiBTkvfWU9xSlivKYvs3wqaCnFQOKPn5ZIRJ8Uw9g01OLWttOC2Wz6M8(lHl)B2sxA0CtQGaRzdAIBPxV6q60fY9ajXzS09QvPt2so61(QR76GONLL5SRXknHJX5ziS8X4LmIEc1Os5OJNLdRZmNl4ErD7uQDHe0kuGj8qZScuRAk6h4ef)WRP4I8IffpAjy57ZtJA1hLNwFpwitflgDAqFSuaPI)KbBe1dkKQEmW(G5foc0bawYorYm(o43ERmfsmiLbQDrOBW4MH5yaRgrIKamVYtXnq47Ud20TBKD)TmlRrGT)zkxfqok0cD9GyxtumEyGZrn9DcFZ3Qs7z4GQQoK4ccft6ZuHN6UzAhuN)ScGt9ctH9RIcEGA6sfiUK3WpTDC9nq9gXyLXu2TtEHxzmYiupxGmQFEYQm9L)fwB3sxO6uhmp4zA8bv1yADxPyHo)rkhVvJ2wFEQLIBVQ2IT5DfpU9k2PZGBbthGYBe36i7m62WcKPffNpy9UPTyDAbPI3RAgSZa0TqxBLB2Roah9a6ciKAnDNCPuVNVlQM(VqeKwJNqQEhApP6W1GhKxYWDuMAz7qHUtphBCtqEYDzELTZR)R9nVz8TUslg6KB8Phw9rb)M(mWAf4VEi5ywEzrkL9R8xg1O8fCq7ZUIdqzvUu664PvPFnosxvhtKBDCxSixqEnZdGkbEYQkfoEXvHbVzpOp8RuLTRANMxpJYUURdG6W7(8ERS)Ws7ej0dgsLYpppTnt8DHYY92AaIqE()qVipuTEvARz8fJNMvvDN5lwiNuwoO7PhwcERm(63ZbbLYiZ(rsXSvQNKP8g1tJPqLCUUea2unlPPOEia(JK4L2CSQT7EeHAx0Sl2U0LMADjSsyiqwfW1xEHB4ODUcT1SjpylTW9cdPL9ZZhcIyh2T7NJk3v)b42BaR41RCtqrpK1EgLIbssnR)ZCYc7B8MASewbZEgSomFa2t7yVaRoyQTOfsSQUQYxGNYDxySvsmQDCAxU9PoaLKOdD9ps8D4qo)bGyFPTqUMos9UB9L0aBPYpDgFl4XZ1)aOr5CeDkTB3PZVlbU)StYo8SlxSPDB4KrV2pi(0ouZr7oShpbd1MPtFtg0z94ZU2LOaRTvx2jxAxcK)RYO4NK7aC9eZlwH2DzZXA32jn0vYI3YLCOTjaORvykYGW9lOsO4jqGPivQ6C70D5SO69mz2vLOeBf3nhT(iXk13MAdCTBIZL0oaayeYqVpqyMSjAEZv1FzU62EVLSCMd4svv3gKL8FV6E75YfLGdQpqPNYnXI9D4kaxLgYydKbfRSCyI8H8r230d7sKzsIChXQfXItffZFV6ZJhLQOb0iwR(SHgA64KoMBgHDz)DqM5qxOC8zlukCOOvuOMXYFj7gCn7c02j7xMbiWWLvBQvciKMnGUyFjZV7T6l9dWXqZihIY1dYmh4QNqEgaIUzdejR6FmGi60MoZfuyv3rY8JllE0JCdbWLi0wood2Sji2Z4glEktXd5I3f0gFbFqSPptGnFf(EOGiLMDHCnO2XeWCQIExL3TiIHxXcX9on)kmPHFNLXx4Fr7s1LqAfYrj1ueRF17quzO))VjVAmnEEUMuu1VVJKjgTB2S0DVUkmLAUBimidWP2A7MMybuZ7kSwWYdRlzL9j7AGwaS(wtLNaD5L3dBzS(6ySUhKARPHJfMj8NNCsu8SCW409(e)(xR4BEbNlloug78EmcgrgrLVxzpKaYc2f8C6)HSxo0K1gpL4oBak56duFFxREMhXZ22(zaBWQguSdqeyIUmKnTRTALIEo9hL5V6Q811Lqga)0eRtqT9qM0tHqW02uwgXto26qDJOmmj4L7wjeGOw4GPFWVn8fxdca56KV82RU4HWUvlQAGm)BJLq)iV7cLItZcLAkgTk5C)4jxi6KtfUgy2fWxpqAnH(AZOQzK3yg1ZPq590YOPrJpFUi81PNB8CIltJ6rc8E0izrW4qryHf3NgqPvSs6XIXA7oc)XxSq5J(ikQPmsc0gIX5Cn2Afn27PgJ2PC1onreYIKbSQSq8YOwGgQszLTBJvMF9TK51xsWv244VtwSMdosBixlwq02qBARhK6V81lDOK8UMf5b8bQs4xVCqbr7mxugq(ei9RvHMaBfqvKEdvnqoRkoTWHVaZTOzmVDwWHtq1OFHXuwUNCfBgJXbKi3kyw1SLAy1WfUme9aXemnAFnzSd56t3yQykLoBzXQH9WC9ucDrHHDDEoqsmlxD0Vn8W85wRYLqS6QKvccJdY7hVCA0yKbY9Ncq9wB4QvgKg3G6DjJMrzFO6eC1JCAP6YIdgaRNJGuougblNQyooOoDR86t7MDmJwQEK2T)hMXZA6eDyHsAujTI49YnmPInQq5VPIsv8(5AtCm3Y6fuz9icLdLscd01ndLqcYSRHKmmcynR2SGc3bpoeeNSqCj92IFwUrEoBS(fpxTyCMcwSekrD1ouLnbhAhuavYl0ZxjeGQC720HcWc6vY7UQ6RvgdCg94xh52ryxvy20Dj0o6U8MvR3xWBZUTdH7ea3uSAdAKVv7ywnIgXf6M2Ox(jdkzAuQI8auYgneA8UDk0aAD6Aj0yABQvcnEnsOXdwObZFzR2S2eAiULMnfA8ysJlBYFU5Y15RPIKOkCGyxwl03elApZ8Q8CnIaY6eyg1)IDVVgpelQjsu5SMINwDw5cxwWkKDA6TRt9Ys(jEYPlEWm6InVgk45cu7sL37ozPpuspYh)gEd82DW93w4o6J8ZURNeEL)0F2p9Y)U3)l)0)Xl)p)0l)w)K7Cs9h797C579JE6h(r)(F8780F67(Kp5DEYV5F6P)1)7x((F0t(8F(vFW)ZV7D(lx96FXh)X7(0p87jE)N(zF8vF))17uQAJaSXDEYN8BUJXwD2n6l)03B4vF8h(LF63HEqamgRpaqn4gTZfDSZ9AXYjANw(8wqWU21oqUYnNYKS9NFHz)P9m3jtUUSCVWg0LoiSH1ixhea3fnLMBVWwR6C2vp7Txr70MkS1IU2bYfxYyy7e247scHT79SWYg2G0y27nyxRSYb3NRzfqSbPX23Ub7AfEY9X5j6EtdWpmAGnbd35Tyr8gSRz5faHJcOV0sErlw8Ub7Ah4fTWuVReCR6CwsUvUc5kj3QoxHKhoC9XjSP51zV7crZTDfXoGTUpj2ceTpxl6Zu9o3UjUVdl1OGGKbWqH1sNhVwyl5MSVvfg946u3vmbi51yV7crZfDbLguB7tkniS(CT4DavVZPb5U)yuJItAqKT05XRfEMCt23LcJp53(tEYN8DV6h(Ex9p)JV8x)lV8h)rx9(VZt)R(SC4tEYN8ZEYN95FXh8rF5N(9EYN9TV6h9VC1V6hkBZFZF)t(T)3x9d)fx99)5x(B(hen7QVZ)7LV3VqqARE9mOIeYAIF71TrOXrGz0NP)bRo6poA(ddIZ(qkgTiixLkz1rsumVJ6zOy)DgSL1zNyZUd6V7xRaK9ED6wXoWUgl2FVCyPQprWLVYwIEQdm4GD0rPDVHp(XBa3Yh)y07ZHh)4kIdmnN96u9CqyuRFSzIg2FpbPVvbtyZUoC(MQ7l4t61d2RKLENvzFuXCCL4vE5kXn3krFi9UQVkGUQ(H71b9hLpaNpyEbBRCegSBYG7Ylyp4B)SWRoIbbRUvagk0M2ObeP6tagpSw2OHdmr8adgC7A0qvxXkqtM6hA3P78SWXeIbXnHa6M2Ob0jHaYw2OHZbHaI21OHctiW8HgDQTj0IpPIoAaTjUVuy)h6dJ9MDh(1661)EBQ(HWU3MD7Q(oAF(R7awKa92C7Tg61R3w5PNe6dD9M3l)HaFGR3C4GYn4PP1x52bT2NqOit5xVqnbSoy0axL4YroaOcjHayaQzUpqn2J)BWUwjYwcnrkMoudCLG9CJPJ3m3hOgduXnyxxY0TTuPCKBD0A1ltdEtYmzlwSAbb7Ax7a5YHauJZmjFx(Y0G7wNZU61cZXTGGDTRDGC5aSVXcB8D5ltdoFxF1ltdofp5LPbNJxSMsBgBEuDDX7gSRDGx0ct9UsWTQZzj5w5kKRKCR6CfsE4ZqaJqgRwnfUz7DEgulKTBdj7AF7cbZ54ivgoBBFsLHtS(0njVgHsfQuEl03Vz7D(fYwSddaj))XEpT72ihh5ZIqaMqU6l(HyYUoI0y9UzVyhhF58E(YpcCKOihTIyPij4qUYlaH(zqq(19gK)FpbhUNhF55iv19m90D1v1Dtsj5nab(hEfNz6U6QRU(UQ(bBStbGJPf52t5fFmdr5f19lPVF94o62ixPHngIieYDxhZDb5oHPsJyeM4)oB3CS)6jfA0tkTf22e)5bZXupMJTnPyupOKUKwgq(bC0tbOJjcl05NDDmdD(jKtAcF(r4D2U5y)T5k0ON05NTnTFEW8XYJ5y)3)PkTFu3mEj6n62p3E5gj4znuu4E9ZYnBslvumjfuZSd0XBYR5Pwf6R9CMonHzIn3ngUmv8gpBwo6GuPtEYh19uMWJcS2Hx7V)PAu3p86JaSE)x93)l)3)))1)MMi)h))(ZTB)J)V)p2CHuV2F6Tlwo)6jyJX7N9ZU)YBwTArXND6PVBYQBwFfm63EAXKBxRdq8OLdVEf(3Jo9QPZV60v3KF3WL3bV6KzN(svwK97Xi(nz1h)Aq(uXPLH0)uvKP199WlUz4hMp6eCqU)RWz87wOp(RBEt4GD)LVDYTVcyl97gUCe8xVaR5BSY2b(FVO91T70BiU80PTwXjMuV6W(NwXz4iSPu0Ven1(cuw58jJlos17)6xZFFsSeyAlMMosttc5jfGkU)YVy6WrVFkG4U)s45McHVqJFUb2Nn)wDnaxu(YFPPqSrHeWB(n5JYlkgI9zqSk5Fp87tboIhJLPnWJTyYy4xavhMnge0BnWaGon)28zRuB5BX6x3Sj4qX((ZEZgNxqkhBiVMqQXqElwVfqhjtEPSflWoClqbh2xpFbtIiYRfDbk7oe6iTvlWLV7cGQT80A)whnFr)L5fa1a736MHK8VdjRsSoVcpC8KILRxSsF()p(BYF)KPt((7V8YL56wTa8jRMFHolxUeOibA8zZTjnZhFc(XWxdCVYhcKVFXAvnRF)L)bSPbuDOaMevLWJkYamXwnrp(aD)O8zagyEHggQbnoq4i8CZfJg3V9rLpCY19VDYSpRSQ(Vsp3xCho1v8HpcENY8YX55zmj4tMvheW5LpVrXI8PtR6afd(8Un3la(a9FceixGnrKheySplmE)LVrDViuEDBJAwUa7bifajcWDYIyWLsSsJoKeeiaRoS5dpPN4wpsjbLAr(FobxuD7ITCb9YdznFtoEFHyZdxZ7D9IcTeUcx2Zdb(kGYT5YOfN(4vjsPrPsUwnGd7SWU6NBMPFXzvt4ffvZN(laygOgMTgmgZsEokLQaqhDGjDKEh91QgBgi9aonPATzMfhkBsD6tFQRq9VhQeVyjQY6dusOgoZASgpe4iAnMIOcN2RwjQ4GGnA3S6h7MbuB20WrQa9PopKBKBMv)kufXg0PL14ZK)veo2HhFF1hHXxTR8DQDcubQCq9d4uoYV7AGotHmv9Be80xoSRIuOZHhb)lLHEZWFav4O4KAU4dx6HY1Tk6sC91dNcZioZVnhKqP0At)TQrQKgaTQxFFzHqrUdP9Y1WPm1FDb(j65y4YJWMN9OvatlGTK81XPwOXB)iqc)9kvcFZWPtVAO5e3I85lqQ0P5FaylHuIXM6RlCM6dcm34)bt)ll)97V8BlFqn2RVNO1jZg5YotDEKPLHR5uPBQpGW11lbZExVOU0eSB3lWVJ27wsm0hO1mwfRNYmHEkovO7Ija3Z1lWB0I3HYwdjW1i4rtLq)0JSUdI14sKD(59FrRGKxwn7Dw2(wp3QEwSBr8LyHZRQ4JFzwd3cuzqFsZC6q2g50Mn(nXP6bL7PdErl7ISHTov2SHamDAUzJAR2EnaIKYoObTUAYoGoN5)aEmRjbJQ6ssL0siINJediz4jWAyt6mUOFhgiod1KAqB6oP9LAZJY8sPx)wqUoAJtjL4jKwH1uqnauWW4lnYHxDdkecpnOiKnYN0hD)5aT()M6BbI7Rv9Pml2Ju(IUZMzb7UYQpklEgF1nlNmDAfZEDFCtlb0Jw(Sd9qtnpSMIRQrx59DDrnCQFpAjsv)EvA75DbqadG3weHpZyKevG)K3B2H)nlbOk9ucGAuQRWZwdEaH)xtsnQDE3mXU9v5upCPr(Bj5KspWbDlpUYE6Eqh76yJILBdimN20h8l0ZUpHevN9iJKrKbAzrgDntzxbYS50bWKx10J9FZCLbeQlYJzyNhCQQjiIg2vm52c1fZ0S3P1bD58BHt3RHhP9j19x(1kNQGkj9kyID)9FvjJc13(QxR82Y7E3uLVOW39M8PlU)Y3RUoogbd9A1HLuxpA2ikdTa(NN3UxME0nQZvKXCgf3deKPGpIRf7AvmKKBqdk5MBFGdbTaNloGP73z4st74DdaI9aD6Ub97CSqhUZ7ibVkIxyRQaa41bcWsfbQaZ1lidoXypCGOuXv8eXbeV4nRrewZK1EeJYidCUGYAgL5JF3ymixNEuu2USQ8rvE)K5iCpPhnON8AZxB9Vn)U5yVrCvTJmb2zQ1H(eQ(XA)aR01rDWercRgQm)e47TE0Q1lZPkvskWzFTr9SnM7Sx1QcwWwkyFERtaPaU)qh5cqwxUWL)rKYyguQcK9DGFV7TYDYzEpR2vZwcz9)UkJhltNd0ACmu1xmEH3ZQaXSgwpGAYzTod12UY8Ad62QPpC1HbU6SlWLVPWBbCvQhBNw1NOldtOwgQFxhT8uixhhLZZs4V)aYnR2JoooJJZYiglke4qHMAia6eiVQNaOSlMGV8mvHbbwP6VJxQcWkC7Hk2nhyoiaBGtQyxoiIfCvJ205ZFpqtoC2fGAjt9SwPDQB84KyaEV(n9EVyTFnnEnKI3OsHYSb7fOllWSHBm5ncRr40A9al1AkmV6HT9Sd8BMJoEcTT7OkPflwoFub8xFC(AqSc6DrLV(rFdD8Q5hR9r0xAetcQbcYjluEPQkOz44HweIx72yg2G92z9GRmkeu18ZQJr6D3D3jOmXRMVQOksPW)g0NFX8LRoDCNrDNn53(HXV9)6JV(Q)JXfdFDXYV406iFgt8DLgJEh0k3UhQUtWb1WXy5LX6i)0opXn3jpf(3LVg2XDYAW4Xe)pW7GeXznBVQoKb4b0DqmGFcGhXCOEbpqsvt7PujQQtRiq3iixdg3HHYv(xkYKmCTFkYKMH2w7C4wQmV8(1(dsYld7KlhLm(uf7yMtUDnMqYznHOKrNueRpBoIHY5LsmmYix66Lv53UiheB7dL7b)dFFHqWJsxeMUFL9nLndaAesal)jQKReF)IATElgbJ7T4w1vlxd)2KvFeeARVDRrhXYWwpe7Gy(JwMWZiSqNNFdEof)yVn7jk8awbvPsbXWPojo(Xey55vSONcuWRxQpgYPbBVdj60Jc3PhFbRBG8ieIcMrLjqlrPhcTKLjIEUH216MzFaERSxAPJpQLEGXNQtDzS)j5skcSpCjO9lavZxcSJxTtKxQa31Uvl7eTZY9SWK4OvPsDHgbwn9XOHxsXsUr5d1g3A3TznLUdykiMWyAl9IQMvv0ZWq0l5wRNxB7T1G57X7M1Vh)LonRKAqeELDAU3R02(C15gJoOoJdS0CG359yArtStKfXAfYhDC)H9nvO)C94yysHGQ32OHu4f4VT1T(9UU)oR9ZCg9q0VQPmn32sUzOQ9dF2)8qi2qGsustW6jIqJkt8btIl1hFymAUdKF6BbCfBoMLhi0JZb74oNihetSUj5kXKzFy(7bm(palvGBSQ4EsnFjSHyUXr7COfZVd2dMm761ftSIOUpSZSu73PLekYnHlix7wUjDrG7w3nBIDNOB9gUfqK9dys0jRhlNQSXUd0TEdVYJY6zcPplZ9EUe2edSaOi0TASPpEsln0pv8mUs2jL9ueB9AYggOkwa9y51HGtZm3CyZhAYSscndBVQANtfGAMNxnX4JpO(52v8wtscSfAMzQ6vNzMXgxNz2TwvbMjou(dAJAxWAom5hKrXbcqhnc(9sJUq4iIYv6PDilmgLhLhaJ6SkIV5fGQWzKAsWpGDgPHGC5qOo0egXqNgAgu6mE7aMGPWHtglWslh7uM1ZzJiJRv)Yys3el1vdmNKkGDo4DLKSWeYUid7CJ3RzIZMB80kNEw94kJu3EbDsstqiS2XE2zxDM5NDY0yktGubabzvpDZVrA2omLr9WO88YkLvrzkadnCil06FwteZ1FWdXXMvj(MuHLSa5tL8YitEm2iFciYKrWirH5XQePMtm4fRgweS4EK0DoYqg2zJT7fkYK92vwn4DrRPm40A)jplvH)K6ehjUZSgmgGk5yCrkAlztrse(fFp0Tbo6CqvT2pQo6kbK8De5QUpuyh1oAseJwcEkStlrJfz3Z68KUNXWwj99SoB5EgF3IGlsCU7zCAu5(W9zpJTCze3ZQYXzXOJOLwq2C2Jy0OsQF(uFK)2zUzMZVADVmV7M1TT2pQ))pe51K4gXNKPoAKyPRDEeXp2w(rZZ7iLLS48LxSEHRRrmtK5QsHWFWs4IW1is5lMoWmA8fJbkusbrA82BNaJeBTzy7KpI5fUFTDMaO(sFhzs5gYKpPShVoJCuNmX20sYZECZLChwlVrkoOb(CMqfsx)DeQQNaHfXjcsh2neAXpM084f6MsGHKKCaBlk5A30xuf922TAXk77fTcvBvYY(oZ3l3HHOO5khZwuGr0psTKMrZwoEEqO7xMrg90PNXp8yJGxdBJJ72BqlMCdTIFuxR8BXMXNjy8wpVktkg0(5BhHQiS16Pg2iu8F6G08dz7(rNzRYKcOGr4bubPNhKdovWJeA(SwQeX(PeptZlLiGMTeFk4Lf6Hk7OlziYkwqEz)mV10XIVA3onheCRWjVnCEpu0PGyXGXovmSzuJ)Fdwn2xVwLKH6eQDCzRf7O7V8L)(V((lxM)HjyyUkQlsZ5JxJv31v5RuLI5Y8I1txPF(mtLBQYf3HvfxvLJc0LYUUMWE5)(V2QjF47pbMfVPNz0Z49s7800MM2qb8Kw6wva9ovNlsbv1cyTqggp8enX4LIwEyp3HjD)Vi2lH1ftaCz22GkTNxH0UiKve1jIERt6z2ejX(oPKk4HYOSsAbB1j4Mbg9FIHHeQNxkM4zDIuwt1Vzxoi3tlFf3Y(DBLfl7x8ieAeyLFIBtrr9BHTy0a3CqnRjv7c7YkcJqp8CmJvdbQgQfBt6K5MiJcJrAjrlrq8X4vi7FT(QZvXinDFj29UEN0Z3lj2BjvC28tQ(xn)2RuDpLoGyR8PGWN1f3OBCpfcii3memocQrm2PEg7Szt4SWVoRT32rMLFcJvUMCc2ZYY0sZ2GhDiKUX9aR9cL9ereMsMHHD57XuQkiMkGnE91BYcVZcKeAdIZc1(SkJy56sOIWQlP1KIrRJYTbjSeoXPCSHGumAIg6hYxMKYLmXwzQonX6cecNbNLsDrWO(hlMZYdyrkzrQ2eCdNVDXPKxWHY1ZQuM)xGUR(HZ4oshQOc(Jw6gD2ogc0ehVA7E(6PfJgUuOagsNjeGe3NYzGejteSmn6OIKdCPaZVW8Wk3u3SXDspz1CaNmOvO(cW59Cmlv7LAEgd7im9Gm3cfabp)YEcPWFmTwOEqjLI)rgaJWbijOJr8k)htkTGaYf)Cze3dktHiL9ihrvmLM(jR8jeW5uwl8ImK8NI2zehwLoY8pZ2TCkOGlIHQhSfD)h(PAxCtGYPaS6UGkNfuQURTQ7Gn2KUTrB(v120VXcOVMmA76aD8GY)0rHhol532UEGlH3597icAMZo)0aAdeGm6UIb4m7)(eeHSuLFw80K1nLXyT0NNuoj7)F6IGDCkrbjxu7lJ56K09iW(G4IVCs0vvmPeilyfQ5kTdNTEcHUg(kmz04IE0lbYKeH8i7TSktKOU9Ss64R)MmX(SQyhjS(aU3JKhTnBQFeGSqBlGVtibBeeXXLWnX3oufrzvO74KtUTi1LEDkqooo7YiNwX8NO4aU8kWR5FM2qTxTMegYozmGZ7jyrseoG1gMlO)JuPDkw2CXsbAPeDMFj6N(wpmI4cNKlrySiaREPFK)(yGofHe(pSnUCOYudoNSwkP4MTSd44rLjZTJL4mGJXISjWVuK8pgREFsdbBFdWYmfN0DthDsZvSX68YgU9BYNE8B1iLOnW6eDoZ1f9tR)vx3wr6A5fXRX2joFB)86cR2yAAV)NaTj0szD13Bc6MF75DpSIiC16XW)xX)aEZ8LaJ2d5yg3KSQz0qjf7uOM44PjNjWFCqMCWyp2WL(CUo7GHBGOcfmRpQUJ7)6Bq3h1LhDni0y8tTt1PgJDXJdpnnGZiHDtv4mPWM(zDBAP3i3(s0maoQiD7iSNeba)8elAQd632QVcWndrt(dfAt(usv97rOs89SAsRs(nyLz6rWN17DjTGsIoOd98JT6kjN5(MPIEYXAtQvaw8nJedp(w0w0aKPwqeD4LpMAixplqMH5kfCBB4vQVAlTeysb(2GgtGM1F0eljKKtXn0VPkgFfgqSgjudXUlmT23K361twTJbQ(emhKOo(HUA88ewGdQX4u0mMNbcG5aq9Wk6J0eNju3ev7b0ZDuAP47IiDAdDYg9lBDC3wHHRgPcyYm(HJCn1zWPgyxDt(CLjWpRtRJ9iuOlWDTfLLa98ZA0oKUDpuR99OzP5DotHg9JCJSdw(KblevkOWst2e3qYURus5F0Exl72gXWa)BkStqnIBs6PUFc9uU7Iu000EOja5rbA)67UR3hIuZqkPDDmSRrofBVsususKdjNnx6Hl93)m6bKoA(hob3lYgEGvZTnXEBi5i77i6ElWnwe8yoS9wU8O1beBzLh2EPHy4mqBBgxWR8S)lH5uwJOLgRB5PqynqHLbRieG0uMon9hopSXW))GrFJXoB5cMCgCWMHU0cpLjg2KGpw5wv)qnOXfLDrRQAj6QUmehrKtSsxMaVWjLZ3aEHt2Hs0xpXlCr8XcBI7efWDIc481lorbCotqNOaUCOaoZzYzGg2CTrloKri6scI8Bzu0w8HLP1MgSUgQjtM1Qk5s99kHvrMK(FIWQmjEkWHEVDmtvcloh7mtLjdtzT4SZPGk5ItEuqv6jotitAp(fhz0jLp2eajg7kZL0Z2YHBQgw5Hivy4EPOZBe6Q5J)ee(TlAIOEnC4(ThF8xErrTT)c8Qw8WEydAhFKfqWOiMm0ROE5fVpg0C7OHFUsn0pcATpkshF5yiP4NRoeWPg7IiiUXV2wg3wJgxIJ(KO4H71jlHAgJlT3hMQeTZxQxrhBtfOQEcUc)TT5gXqNGdvOp(or6QryvY4FH6JQqa9fJ(jetPz5yocKLo7gAseJu2f09pQDcNTE11E5KY2PD03jZdbCeUQVnyPjlMzAJAOOJ(DIePCClG6Cvy6rc3vAP)eL1(YAohU6i(9dJdCA36w(5vxZJvzKhzrdLB)6FE(5ABzU)2)E3wp2qkT2XbLNVb9wskKIMNbT8Kpryyx7i8NFIeOb)0cZJfA2wWRpHUPOhckMPLLuLnPmZUaQ67i8KkbYAx8UKHfghDfuutjygh5YgY9b0PaV8PQHDrExjg80rDjLD9aEEQFqAlWxjE3gBVCcBGA5EjMG(dNuoNf7nvIYnbQt5nvlqh7oAjen0i6Y3kbfIpcNAsHMuSwYsAh(e3elgs9P)MKsrWoOMr(vkVOoLlkv3rh8gnLvxO7e(hHQWfJqJZSLXRE7MEPDiqmfh62JDqmy(vAQSvuQU0(UaKRLwngnyBRA13bk9QLyxjJcgcQ7bZcIw3PneB4RTVhvBscvVDNJwzzm90)tejv6AqsLc3B21C2aGeDQsZNcpokWKZcAsl3j)0v(x99HbGcoZuvyODWEWyLi9Ecbo1tjUP4nEgoFZkLdpZhPiOLeZcN1WVjY2mIjXznPCryIDFUDZXkLSGn5EbESTD(lJeyFzcKPdEPe99hFVcHXM6Eik)ecV5791SyvqUvfzYrOHx9FmOnukPdJX(GUSkOA5Kf7rxf2JBZWy2iT)dh5JsK1uaGjQy3RwJJ0phOadWfW37QntjcZt6qlBAWG6duSjVU8XY(ACh5rdwo9tII5vSkjoaZhhoXHxLyMxW(PT3QidjXABI3D22SbbmJFMQnEoyqfKk2n1ISJfO4bxKZw4u9TBvsCaUjVYG7TiKfJ6mqvGRrwKhJhQDPMR6lXYAkW)RLufs)K0JoT5MK6qnORS4)aMNjd7mlYXmP7e2(QEEQX15oRalOvgWDR4xXpOTWtrl48Lq)LjtG7BEgzuVsOeS9616UuP0SQZmWQlikzt0NE3nS(7WynrGPMWRdT5kKn3C7RV8JhFAZnF(Npu7LYZ390VVBZl1)T5F)]] )
+spec:RegisterPack( "浩劫Simc", 20250814, [[Hekili:S3ZAZnYTr(BrvQWJJ0kUKdfxVoNiVYND8L4YNJRSoXF4QSJgroKASiNHzESYYLk9B)AG5fE0naif1JnrFXYlh8Or)cD3aO7po6J)0h)WIWIOp(d(d9Nm89JgpWF8zF8df3Un6JFyB48Rdxb)pjHBG)7Fk8tPZz)6TRtdxW6AEAz2C4lFiEt56WI40KVolCzXh)WLLXRl(ZjF8sKHF8xoXh662O5F8hM8fFXh)WvXlwev12OCyco907V4NUk6(l(5Wm4)exCvCY9x8HOW8u4VJV)7yd2PdF)PJg)hU)IVj60FmRmjs4N9HF(VTLnXlU)ILPWG8t)8pdJWya4ZsxgVga5F3V7(lUQOyB(F4TVDfmfLxoyE6M3M3UsMZwjS)983E560lFBXvr3eMDdhAE7xnN1KFmlonlU42VpoVi)TlIwgwUUa(7M0KRktkIYcUIHYgWgK7)o2mQGOU)IVoDZMy4VF42K5aup8SWHJF)IQg)nWca(T2L1O7)o4d3FXFpmlo8Y1r51logwPmhWxfzXjxhva)EycBLd0Gi4NwbnPSGJbH2hxU5(VlKd)5d2MfbR6ldloz6B)u9W(gg1EA9ynkihgJ04f5V5tHRlB)9bJgCvyEW8001lsVjPN8pNxewmim52GfBZ7Du33IZheVbibFkopArqEd8eamArBcVokBhGmFkiZhhY8naz(UazaM))EnirSgO21y(oeErkWobZy7VD)fnqqdz6pNexed0(pfvtF(HO5r55Hz3cKgOxxd)(64KOtl3Yjy5XlGFba4KfHzIdmaORJ2eLuWzKU)cG9(V8n)fg9(xRaKBsZUggILlV)IvrjalWCg0KSiMJAHbibqDHlynbMaqqmE5TC2KyOnFkErz4AX1gh6xwwuMfbyiOpUtKgfmheq0yDaS9MWfb)ZYOOK8GnSvyr0D3j1GFPm56nHr5fzPqtIwfcTBvsuHsZwffMTc(Hfrza1DBywuW1r3MR0QSWpfLKwMhCvAs0Tbxw(B)wuM6iLfVbyBwe9RADUyzyYQGI0Fnor5BxUomVytiJvC8WHdv(68Ymo7ubmRbXlsxR89TrzlJxeZamaZ(lrZls3nraeSRVnSRVByxFNWU(oGD9PWU(gWU(gXU(wWU(peS7Y8GIyygplWFBmiJwJGZJkcUmnPmFG4wbmDfW(sbJHgp3LrpBvaOYQEZIPdFt62PzrWyJ3384vXRdsxgSCn0z82eVztA1MkbHLzHSDjQBg8XfX5zLBl4QV(2sMUgUkHQ9gbmeOaiIPBqSpkOdOxbqNyqkaNnSBHRbnqd4B2fa0jyR7J7p6333FW7ooSOa0tcB(beoVJ73xST5LzRI6Dz5YLd2eveUjnB7vP5a1QCR3XJpzKVN3j8VQSQgKZgZJFx1hlya78W1bzrfzrGk9YThpAiFr(bM(mMcS5xfn)6ATxDB9DXp2Qr)c2qb)3iUUp2iYunZB))lxyOAB5RyFMe7uZX1TrbJxBoMgpZ7ViSdkFpkMKnSQuyPDCm8vgJJI(NLXB3gTWLn5(PygUz8yylG4k(JczKz7grSDRk3c7qWefYL3qleM8LXZJmG5yYyJdotugRFfPVDNYkOVM)P7NV7oE7sAMVG8MPRInz20j9iBrgSwHDapF4GjN0Sh9aqb2QOLLDmu1TYRxFYbIdBM1k4dlV53Dx70eDBuWLrHBAg(t8NPUIBMyAArElhEiZQprsZMA(2fLrvMc0WCdyDbJuCJMuVLWUrAoeimVEnq1aCXRE9DYuHE9fSWt0OqrPQwAtnIFM)qpV7URVtBxkmdJiMHr4ZaN8(nPLCcJQf8vKjoLJtwlZROICZbfmTuOdClkdtegRfHamkmMKe9fCOiaW(q)QP2DAmGDGGfkBliGEbyFWLNB7195RGTxJyFDoyKAUaEJtzu)Q0hXgzVEgXBQ0fQX33(4Js55uL)wETSYIiWWJnGsoWYyyJIB4itWwhMzh3FreW4YKjzgrxWCxnDlBNvMArWDWb04BE7wuJOxgUgMo(gxrG9vW(YvBfLMWhMAgGOW5xbmfG)omqissRk48Bq1)kG1LQ5im7naZA88IPJEt8YPSEgW64GW1lYGblgu0XwjvEA()9HBbr0)X9xaEE)THRxFzyRgLTrPBzSORJ(u061kBfIo1lZLM6Jmm3819xv)R3FXFT(NBmYjmdZ6P4K5YMIW13KfLWeycyt91rd4U(X)WQ1HGAjW(PYSSBbvq9Aj7CRwcweMWvn1B18fnCctbgTwvqvtzpWIRpfWAZiWqMWIRcYVjkABf(tcG3gd2(uUnyzw4kMxAVHfmLPaw9nv8QlzJsfUHzA15t)YHgxYlJwhCzygmArOMGj89E9BxCc)A7oEmOFt4VE8x0RFL1obaJ4M4O8ztbZ3IZaJcka79bN(ojlmEraqYHXpCXcWw70YeW5a1FooPBqX(6SVCONaqjBXxnyD3DkaJVx9(7IRbW8WEhPa2th17i15m6xzInEky05xfMMxZBWq8ySmalaodtFrwHf5t9rG4EfXBIMnsLsgMKeFvCLzSpkZBT87Fk6641X)dMi0MuMvS1SKdQK0YdQg8bm)PyA5xCrRDdfxX2rHXDd4qMET6nBQeg)panq)p8(cC5llyQ3e01nqz5kpBTly5vwNOjPmBXvzXRx3O5Ez8QRkcQ2otJx(St0qtEN0XXX6plwCA9BmZBJ(KgM11UE1Iz5aEcw)GmciRueNClmaAKif9glySOe6B0APpElvme1aQHBEfUAk4dk6Z86jZlD(4ElI4Zay2wemXbxcuZRRikvtDyw7MP1StvgBpUwCfv6EMVbZFpFeGWUmnpVx1cP7NvfGFc5So7rgtpZxE1oB6OH04Ec8JQ(ny7fmJaAThvvpXpKY9(h2IFdJld2FhMfwaabtmJ3KZ0oeMSQYc0SuWT5)Aj8PQWEF)fFppeOmtK(AyIL)9)ZAnl8((1Fdp2ORwXmH4MywBVkA927V4A2ENxmhg6sU0LRRNk9om6ptH75JM0RA0BnMlVhIqnJErSje3f7kjCjKFNWOmnb2hIB1Y3Z99Lfr)vXRRmc8dBJlIQCgMHjvI27zNYDQc(oSHqexJ7YOSmoAIHj52S3g2x24jbOkiO24cLZMug(Gw61KALggVg5RnHzx3k6o1)0AudyT)8RzwTgWN4Cdo5zVZU5eOb1gZEFJ2qzAzT8cPUOtOuLpBQTLZjKRgpujuFvjucR0deTUdOIT6oeTQt1yn)EQw9aCIYtNs0ZydTMwO6feBkwcg)X8LvZIsbQaIfLZYIa9eGfJbmPrpR7GSBKRztu3fyFwv6OkTFQvT6eQpnBc9AdXfagQkRm)Q29PktUemGEra3ougiOb297cLsugO5WHGgjpOTXn6IoLt)96OAD)f1H1Qr70F82i2iYdHuRtM)edOMhk2A254Uqv3JASY4AJvJdudDqnsTvgk7pexnDVMyfNbcMRbCDq1bPsQ(UH(awm4PHd7HGMey6QBf4BA8QvGXSDwjOZNQYjQHd08TthJCefkH2m0zalPGFPNpCaySL8piy2OM5vtfAAp7yqabQg4TUZ)TN236obwbBz17xFLiBhMCB7U1bAMBlgJiYMpB8qp950hzo93T50qZzZPxh37JkRgtHIo)ZtdBsFufwvUEcouQESms7am7DIHeUwpw9)EtklyiLBSgpGzmNcmzZslHZVvDb1KHU9cycNOYI8IYfWF5gtbnMFJjeaa5tGRvnBJd)p6YmQrPexurTvSym7QeIlZaA0sBr36(gBLkF3DKXfSvk7WzcvhBP4bw2dlcACgg5ipryeelKueYWkqo0l(mYJhQIIdzlbMocttstiIKo9fdwBT7qfQwkyouawd6qgoyInAEZOTon968G5HjbG3OR1IQ1inN)ji8SjPf4vLXF4lwXMz3tkwCdOvqpHg1zWyotHozATuA3atDgMTn9enmlIb11iHWaM1Zbq3b)rBWmxwMLWcRYnmqThmvS5sq)VOMzKGbR3bnAVsCODaEnpahWiDJa(oaEkbUzIzVXvCEbX1cHErfq5ovaAHuwZTdd8xN5CeZA4ePCEAKO1(6gquZQFegtMNYYVbmf1Kkh3M291zssGD2GaEysopqxSXXMNeNp5KXhtTTMToxzeTzoYJ9rzUgpSjadZVD(A(zAcZo0pGzi56J9hm5yo5q9R8qWk56t3LKWQMHztm1ie(fd74RikisO6BuVjYbhX2z1kA0TW0UlciSF3JI6qJ9pEYNvEozEL4QrJ7eaz2TkZaear6b)wWbjfP)ofAsMfP56WjtmiLt9fQGclj(Vxm77N4lZtjv7jpsZfihKUoz8dzJrl6UENEKziCl2GFMv76MpDypNCeLlsQVW1b)gu57F8LHDXpRNjp5WLYmz4HbBDN2kKPzE3uFQZ6E3v6stlNscBgS3PfO98ipdX96wfqDYn84jGyblqRmeRzsNAy3LeW72LXZJlMn9SHN05hC9f49yMlAhr58tRi6LRJb)qyDY0rWOfB(AsAr0MTGYsK11dqbJ(5DQG5rryAOEWuH0BeocznRHBIhqzg)wJZBFRr55PLRZNhMje5O5W8SHrSVmRe(T4cgkRwrfW8J4GKPnhSDPvOjgTxgc2CMD7SPFXWt1j)1T6un6CLA6rtCiQfYUfYV)sNPsCq8cYjVPS5mOM1OwLS4mfPL8y7bRXv1M(z4yQ29JaZFIkC7(1sQ6gXhCj7CJnZQIeJaoatWDPP3ZWsMMT69TCZSlZgh8cxpB0GHJQvrQJAvirJAnhrwMsNtZ05L98UsvxskWEy28WeaQsZan)f7fxhxmA0WHcVCJbc3DdysK82KV9BFtBaleAwLnpnegQPJglyOMeysSJuBaqfLlQq1ic8NXU9UKMF1ziRWGPH8v0i01jkN9roAE(54uVliSnyaxiur8x54hng0MzcgzrDNGA)DFIFFS4VdWhLv9kE70QKV6ofduD(PsiV5SzgjtlTE97FywreNddwGQvShZJMJ9XM3dF4nZr6TVSK96tWsszlA3ePDw540m(HEP6gggBL3EWxTnL9RCTFilpylsSlacZFmsflTxOw5qGkoPXjFk9AGu8RWQg0xhWgPQdhyB6naAmozzzESWnVvF6Lb0PYN5K4CjFNSRFcob1ovjFVSBFBeyVcZ2pY8KFo7mWyBkYyr2exWPEDV8IRdZwCl05vWwsIDf7Hni8zT3fj1AIDNfatp2uTM0H2QnAWcnrnVQ0BbQ1VBAHAw8gr(kdC8uEtp6qdQJUladmzln(nj1GlUvrkP97SNQdhqctU1t5zJyAMhzzMrCFxAMhjpZEk3e0r(u3hwLFGgfB4syHo0tCJ5qJNQI3yFj1sEHoq(LKX)nOngwhO7gQYbPbYwyG83BoihE3rknPm524i(l8kaAkOfaAv(gvordRaugr)9Mt0HxMLstiwb43gYDH)9HWLsOtL7aRBALnl8JRDWakxAvyxpJb2pPrsnADGtOUHGK3sHldBgXOonQS6sJ3EGjgzyuSHfqz2TTHGW3rV9gYbnIgtk)Ydnhr0gBzPUns6MSkyAkw4WMqCPJDLlar8MF0)mpRrUCBYrRNdXhrBTbyR3(Hjew0TdGlEmyedocjoXmu4i(jeyCvyvLO53sQd7ky(XUsOm1vQmw6VGrL7okbXh7D3tUw65aJRo3riqk1ECyMAhNzI8wYHbggr6KGcq0MYtoCZlTZqYZn4d1GFzWWb5vbdnGX8N)CAppka9KzsVLz32(h7MXu4M1V)wezYI(9s6anF9Wzoiys7lP)NnM2oODtWmU17QmmOa5tfdJLj)PGF5z0mAL0U0Ht7LltovQ2GgkAYfh4attGKOqi0AuxWVEYyoueueMFT5JKB0etxEZjepAmcleDxVpUBzvk(TAvM2DUAuBacLVYUnBkSg8riPG18Sv3w)AGhnc(AFh8veZ6PgPPzt)YH2USDNpDIwEAXYmHi366mPjK6tqdN46Yx)6MiCPo2ZexJtHzWYfDrwjL(mtARQJjzkYyi)mXj7eX6ZlEvQWT74I10MSvWab7PEItY2mqUkjyd9eD90cFMhIBH8ltIHRo071UiuVkqBfrBvGoFDArBkb1vryDjycEAlce0gjztwQ6G0jAd7vKHYFzG1(uSOriY6rgEwDEs50Q7Myg9oyD68RtG9HxFT(fwSkxSQ0pLqVj)rcRFuAfbpPY8Gf9db2wLduZIyHuWz0vG8Ld7HHhxfZUHwE7g7Q))UWUIOR3D2v1ZdXa7QVJSR(kSRyXBw(JwzxnPcvzE2x2v7zToJSR(7a7AtQnI8(pYA3H89pD2KUtLltmFHy6EvpLfOvPUuN7GQGU9n2s7AqSQ(7H4zBtsp2LuYckAStmMmxJy51JvDjnuUgzc3GfT7XqDUaonlOCR8LyODIAUfOQk8S(ePBAO7aZ8fbla(iLmnC71RY3WiHMO1eVmnkNRJCVLESs8UQETFQVyTNnPN2TNv7XumBesshbxIYYBFXeilYu1UI1UTseHtGCyfUVqKdQHUJC1Fvro(3HNC)mCFgLU6NNm2eAr)wOJJxuPyggsSxC5oGswk)605SrJgoeDVyMJp6)CNehLs2Z0UA0MWrU8uOrirAbHsFDAoN3Wx6(dXhBYXv)wDl9shoBxhpTvVCp7Pm6UlRW6y3TUVvz2PJNmBisAfOrl5yHh3JO64AnoVFOW3BUk)Zg9(DtiGe2g(udBkstVCqA63JBN4ZEyYegGhrZ7Q27z4H0yU3p0iYqz7ukY0zd5jdNNs6K6RIXcOjAhJk41Z0h5N2sTYA0TSOx2hRTMoLSPJ99MzKui9grKAhBBDITSXDTSDFeIlDRP7DbXLnwnVs(TD1kgEnNH9mHQCZ5n3FXx9JFpl3I9Py2LYnVl1ZMUOKLyeVmI5UgRf5LRlQ(EsB(OTGL2zdBYaKncDvzB7Qex5x9x(J3Fr(8Oea7NYsa3kYMi4lwfmiGLXUMWqDnPuYwSGOyqltZtr(LefWvfkjERc1owOMJHjNpQedMI2PAGqC7tmFPqSLGyMB4kPsrUTFV9LzAjfM11YXuOqrfYVKHEDixZE)Qh634H9S9Kv0JaLHv(a07IRtRqmOg1TS9r5uJWNPpYQOhgb1wV6fDl8XqWGIxsbXBMHWGhr8STK45lJZAk3iuA3Kbt0dCIijP()3JyjlBEZdEjR6gJb549gzBkJYn2caEOXcpeyX4ZHTb4qCiV9bkR)ynD6DNBu2wr2YECZfxMOISw0A2omOCOAAnBUIRCG1EQnQ7LvB4PQnZUoErLjc2FOPdvvxStRPg)QnN5rArueQe4XGbXjfwdvFoIixiy(pi9OxvMyHNnVH0QKwSFoJ6ffyXuyumNqy(SK88uFhEydNUB2U82Jn9cs9R9l6DiPrQhGVEkPt)g43AMOWF3uiO(M1Bi3n5nH6)T8lbxpLKzcjEyYTcuAWmRiQMYC3DSfuB1DjFqrkSWMHF1TAyxNi5Qzv80n86hDJAzqJ0eQ3NVumnaRhrYsi1mJNityAYws8zpNdhnzocBwdjpN7CMjXnKHf55NpmbYoWeqKm3SHTo)VOP8hu9gws4HyIrUOxGAtMNTm8ab9qZ8i75YcmBcFPVSW3iLkOtvHF5KMx8n(3AIDj(x)0EK705hTjQryIPUiuZtKp9wIm)Gjv)kPw7r4RkLWWzolayWoro8PMFSWNYDP6szWwxT9ZBNGLgYBX1)tj5ySJtVChZDXYSNNp1Ne0ALWEEaTzeqgry6ey505bfzILMysN85XjeB61Cpq(XBGgFhCXkZroOXSE8leID(jID7vDv2w0TCpOnpKvPwCiq5d)mBjzJc5yasrECqOGLPYdZEi0)ecD91nEV1RavDcesL7bE1cTf18p3RsnpiK6(aAMTuOtrL2WswNaiRmFDA40ZGRKJMybjaqjmpwH(rCvZiS3a7QNzNFG5(W5nNVmMrlo6gE7GNPvS8WusVpJS6HVwpQQwC42gLyxSgRzSC8H6bLh7ry7OXasTJWlClQG7c3dHXOuPHmYm7KTxJjXBU0wUQIG3L8IoQydGb)wSORWGYycJEeIShb50qwvLImyoEqyyu6nXD1AnxIHBVJWuv1JwPhkpQHOUUxQYPc(kQHXudbA(WuW1rPlmAvYjRPAiNvkNLurb9QghaiT2sVnVCo(TrRp9dv4XUzEPET7w4UzCWkgZkQ4M6B7nc4CftwzPGxvnx29MGCT9v0dUw24NPQWz9cUIJPmBvDXO98XTf5rKY60jyBkOILikQ5UuMHmwxg5dU9cyYNz1LX9EvPJQo41LrjyeXcCxcqGASfKxxNpTRgKHXW1Juf7PTgbCowarBL0PRsw6RpvZ4F4RVzJFuxEUk6XydjT1svF9EeDrdby9qwz9mRv396E34dq5RZIfJI3BjNyaWNhB3rLzthjK9vXMbpl2IWkUqALlUhQE8N(YfNOZ5AQRmlJ(4wY4OHku3v1J2LyZShR9ZpJwAAplIAN6RViS8sfEmxc9RGfQcCc7GKjAH8ZGXN(OKmDFkmHNCyB9oPL8aEsy5Sa)6CeKHYb34MiKOSIQmbHw95yYOIZho0Nn15SBmYUylzRgVje9Z0R)DS3XMhwpfBXEy4yAi5eZQj9ox6sGqn1Uh0KN2I)NJwz(Cv8)Oap10MN5JzuXczLHx)kpyAFzt3D0vn30w9iBA3UabrAQSWR1nSD0mhFpK9ffJ0dka8AbaCxQGyhWca4d1Kuf(DP3Kl2It38gxwWthzkhjiezFRLTDV9SuVTVCh0u)xlaH2aOdEbiK0Qy6nVnyujYbwQyPuBaVu7rRwD5l7FZ5Qj9D1YPI05SQzA8Z2kPD)jdRM62Olo5l79L0P1oZ08QP)rnY866GmzNVYOPCwx0DS1V7Z0wAJ7u(Qx4XuRszAX(v5K7myKjjzJ42QQov7XAvzeEQQLCegwPI37zAJnl4zYB4RMLn7ObEgSW7mBXmHNyXS)2mOV4jEE2cmG09oSlye6hU99xOmu7zv67XRQ8DHnZ8n51uCoR1aN62SOwHuofM7cUESCSlUyy3hLNSoYDAUpSpWVVt7PdgmvnzDktB6YjSlTTYwbQRgT7AMHaABlwH2IeOjmhaQN0OSXTaAtKtBe245isvOIpQDvTR0XbPDQjQq620OBNXHvFi7x9Ur)IHNoEOzurFxXf0M2ZuuuBCfhyH9Xt5xRJJ9rkqLyU7ThlYXclYtAwHS7pblzFfvLZEoEYWt9h24MNsLW07ySJx)0XV)fh(6bJR8nTnaVzUj2yFTpX8QUxhFjjD5jJc0mjYXvqrvNUvMaz6SHEifEvFxI6hT6eTd)enCuoSXXX9hz60Xpu4pBX1ZWD6YbBj46kjTM4LdwWQvMeln6JOXKvO7ZLeGLbR7Rz)bvPRft7SiLYKnu8nGnFOj422GEHGqTs8L(RSX6JhYLJMIpYpBRu1LKcS)iviCfUEsN85xHWvfNz7kxI(yNhp8jUG16CbOTnJt6k1YeC9zz1M9GrGFjv)xTqw7k2RklJdwDEvE(oa15veK(u5BmI4ekFNp)CTyVkVMETyV(AXELuI(1I9QZCq3zVS(5urB41I9QdvPktCPVwSxTGGETyVUlf7vtyYx6f7vJCbVwSx)xKI9QjQ8ttXE1ee84wSxnnZpzf7vJaXJCXE10C)AXEvAR2xaf71hOzrpoM1)AzF1gRZ)6x2xnXFC5JDzF10K)Cw2xLHRxQL9vtyVNSILjhox)VvL919Qgs(ALHTDM3Rcj5lcMDNiwFEXo)ALH9HuzyFvQ(rrQ(1Yd7UwVnvdOlbJ5R1iwsvjoxJyDGN91AeRl8SQhJInE2xluSg4znxOyL5zlEwkuS7BGK21iwv93dsLDLkjiGYRoDSXi09KJ0)YHE0vN3JOtJm9K6XN7fNx9bPVHhCa1sapxqs)CyqzqmRiMuALm76HW(0ofOpN8yTQb8Y8xqvdyBaJ7vdyTrYHstJHEl9YJ5Dv9wF9CxnG1bz1hRiky7WrGkpS7w1awR7p1vdyna4HxnG1gsSKw6oGswkN8Hww(uxnGXGiRP0hesKL14bOsaRnU6xHELN7g245CwjqJpB8qtOnI7ZFx(ieKEZwmpmVOzbBTuY6ojszjQo6vdK(l2JTV38c3L3zJ7ZsX51bbzsy7XUIgBtJWlhK2EwrJ3F5Ad9T4jSAgB1Caks0JF1mwd0uFZEwanr7WubVEM(4Zu1mgrddAHLzz(HVAgtKidQSFJ(12146AvM)JxRVkU5MXn9dSen4Y0KYCwsP4MWSBIlUkoHf3ZCO5SZMCUN0nWxc47z6rdRUbIyHcewoK9SNshBXqSRJpDVi9Mr5LoQ)E(MowDkvH1DOI80bhupb970VrA74RZX2tlF2ufRRRzg3Tn5nyNHPhJLPU1h)POAz1mE4P6ULH2023Y4jQEnBLQW7kMF9EDpzy6iI2(o6zNle(BlY076skjozyW9qjRQljNsrSSXSzc4zbwfmgn0k0ZADlOE4nTXxi8VYt6RMJPGOMRk2tPcyENlGecUSg0L8erRR4MgBKGVGyMqLEus1b0Y2wy6h9EBnrkB8QWWF8ObtS5Qqf2f7BYQyWdaYSQltanBIXBoIiOJ1oqSZ6fPvnxPpBupD(CvkOcB)(jozzRl0Tf0anSPEjDz1zhNZMBBJAkYASuaE7MwQsMZopT6Mbp(o6uyLhb4qHfOMuBskJmu2Dmf1X9RE3FywtwsUXe7AJkAmDOflC2rUIxcGmsgROMuCGwmV45P0IsAvohz8qRLKn9tO1aoza6tCZPvO4PvSS7GhSU1RR1jacVSWTY0c7KADf02Ddwk771Txg(1c225yF(0j07DO5WGoc8YBZZdxhSk83IQ270fECUGPvdJBt0iYmfng3yWbqnNM097YLuWNXc0VrFPnZKs3FchVAml10hpNN3kjK)mBpltmJwJsnYpr4mF8OurvAOgl6cM1gCsOFXK5GDzXuJefRYjTddklIwKLruRRiz4WPrI7Cc5s1sE0D6eMP57HFW15e19ZDcC0H2AbfGpJbWos1qhawUA1d94PfrkTzXi1uX8X(ue7DTuL(OsSvndXbY57ql4Mm72nyZCpZ4X3DkjES1UdRMD)yJp7JwY3m4XyZZUh3esBS)vSG6HKu0kuAvxmcffg7jJd8ZlmwteRWYNXyRdVD2A(hbwvd5XRJhV7eaBj4ZNooQN4fMZeDmT6oCjl6EIdYPO2wNyeZrTgsEPEgRKCiHXWurczNtsQQYk78aWat3nuwP8SBI3WjZ42jl1uUxH1WzBGfxKMYVDsgOgQ6HK6RTful)YZ7HsC8yxpiPQ0o5ECqcJFqhKaEafKoOwuA9oudumEIH7Oaa)KZ6WF))S31xZTXTr8pl5HkzknvHK2Xj1Pj9H(wMm9f3(uNAXZIuYS2uhNJhJTNrd)S3dh59pG9p)wC3P4gR3S5T63UayXIDbwSalQzVa27uND1cy1VWFYKXsnPkjxm1xsNVP1JtYD3ufPrVo6w79VWB(sG(Zlis3pTj6spJztQCcH5mGOZJwQ8TTUk01fi)IjJ3Dd23qd05E6)n)JukUkrz3lQGKhtYNAJMHq0fvfQpVES4ktBS7nU)rz5Q3T0SML5MnxsONRIKoP7ZmIQbpPnTwz)QsRGPyfsR1)tFpy2tOjusQIXjWmVJCARt5urRFNtf1bRXH(ObLYCanHG458QdDY3eJEnO4VjYA9w1RPjv(LVOU5WMlhITtRP7ZdwEtv6DQbrSLUMeaQHHWCJeXElLTLw(Mx6iZljEmZ6rs659ceYVyJF0qsVXZ0Ek7xDO96hzEcr8xjh7TLMlkczhSp1b)WdLQr3MLC3McjQq1jTq2(z6kcrmRzZ5csOhrLkisRLY1z3EZfEgnUhBVxH)YKm5m)QgPyar1TzLfaceSbAX)WoYUr9keG4FJFyAqN9P8aw(ioy2jNlKNhr9D)52Lq)LuDsNrJiW6Y3qAfsBN7)sVzr7PGZBnQS(nDRlpQVSDnL(KQIseo0OCl1dsqvUN7Cq8Bi3imNA7F9ftPXSDQRZSze9ww92IsMzlNb4Hb1HDi6yC3XpVNeWosR18bzmK2adIsV3FtOBkMEYLBC4lmAJGnzliwUhAE4XyegFVg4LeG9TMCve5ShH8yj8mm3hv2UJxvVv9bJ4mnb(SkQz7P8cPtS1gSKFF0V5pjZa38NXu(z)9VDhSfM0YPAvIL59l4bLNdHjtasAzvqKtRgPPW8RFQm329hXmLwpFydwH44L1(fmkjGBcEPiDgvWXI7(rRLVo2z7CBRY70Pxnto11cckG0yHFwftBvi4EIgU8kyiz9XIfzg4XB8LS)wXICWAUNPSdr89YelMrx7cQwh6y7Mjl2pJ09iTTVIFmPxISAFExPKyUtLaw3411u50k8uEo9Fzty0aJ28g6rS)Pv(o4x9qkBtz7nSEK6)XU3WQbKUjgBZIZbIftEeqozGAxClH(KUT7CNADRdRwoly1Vtx9dxTa068wnxKcmFton9)p6DA54ovJRCPwZDGTJKKsI7S4JF(SwTXCHhpj7jxYJgxsfrw6Eqc69uP8HEryBhNiNJKL)S3ZkTycPi5tO8zvWDgdyHWf2aQFZ75JcJ)Y9XEKhIM1yKvQRxnZr3UVz3scYl7OC3wWLzYmWriKvU7iirpp(MaqAU60p(29z3789)JLpA3mwB0Db90gnPFoLHE2ZVMjnB7qfFGDKt20dMmYycclUvu2HyIu1)mGdhayo0W2DSEnuL00wEANVBnTSF2rj642bKg(YExTgZugL0r6yV5hFc2narpNQYZaYvQpJFzjsnrPxsgcRNTVapLgw0I5Ysq0ygP43Qo6JIU7QaTo)ywJuTmhRlsCq0AR3j3TItTIJvDTYFE5PATwE2(vV51U6cyXF1B(hZNo)7M(dZE(BE9htkTgU7nV(F(UvhwSEZ20S8dlUnn7WIZVTPC2D(HfzUQeSBo9IDPBkOnzFE6gxYMEyrH2FXQ47U6WV8RfJchw8DV6WI)E69f8R8ZNN3U4Wg(EvvaEEAlYY5P7zZ(0ev2quXndybnnJk8wa(KUUeUnKyvQnaoaSTRfSeq69zqzfau3EX5ibhumLpE6GydrjkMq)oALVyH3cWC6hKKyvQnaoaSI6jbFguwbaLt57Lsw(cETYOn8rrgetI1W0idVfGnyAYUuBaCaybmrXP61lqTQ6XwDRPT8XqjoROR220mJLwC2PpPILmiMeRb3rgElaBWKRDP2a4aWcy616KkiqToPI9zoG2KEFMuj8SlqZm8jv)RIyW26843XWQheHQ4jpS4Fx4zV)0M)ZpEyrrSxzF(WILR35c3yznKFVulaWZlq3(5ztmkLJk4QWoWoLYZgvPxFf2Hf8Ay)bX1T686pWSILpnDKAo4JBaDubhaw9UeAAGK64gihvWvHn21pbL6yHxf4yDMguUJf(AGNn9XBLpwEfNoZ4IocUO9qWoClmAO2g0TInWO3G7miFmOEXRLCZyM42ls(YVsRBYrA3ohGnuZ0uSXgFtiBqXpc52a6i4ceCmxWb9dvUOdeqfwtuKumUf7IuJn(Mq2GbMiKBdOJGlqeLM1eHqLvtu0LXHp6rw(fRvRXgFeKX7PmS5vcJm6TeKzTdn(iiJ3t91Uov7xIvMvxA9zu5fV))RDnvX()GpJkV49)dJ()4OfPU6iGxGdl6i4I33pm6(JJgKAVdGFpdl6DXvpSn6owXa3(l6cSjda(Didn(iid40gRRG9cvwxb5rDnXZWlTflkYmWL(VhLY47UnweV7V0mINydCe0KJfZ9Y9Gi7Fe(oSXXR4mtpUORJBSZNrL7yXhb5Mz2hFTNfTzutcQCdIoNTJ5a7vQjxKhB8rqgydE4Sq3puJOxgYcnlzg4s)pynz8rTqRqSbocAH2GtHk9GiwOH3HFwEfNZCJl664g78zu5ow8rqw1gkjjOYni6H2oktq7Bt)Whs)OReoTWLj67oS4JRYwv6HEbBwx4zEUJSk30)qHrIdlE7(8k6UpTm7U3FFhQxU0r8YK8K3MSB1Ro8lhw8Nl(57)SRgVqMy4NBkFWfIuPW0vUZeA9y1186Hs0Igz0Jl)MBGFY0(7k)M7XV0TRooFA3rTOZnwgPaEuc)5F60nT5w)3(4llqY7AlF1Q7lJ0mOAeeuyBROu4QhRDLcvVFkn)5b1ZZcrV5nvS6w1qDb(RAq1yX8w83U4PoCLxyhhBynt57EsLgf2G)3(0G)FOg8VIzTHTzRUjDZBtYnUeHyinvIdHrAX9Fte0kZFxVClL1FcsabVqDOOpjl93wxM7KRsk6zwVFZ1Bl8IEtY752Nc1)MU2Kf9WGTdtEZILbvSdJKeqWrA8e(vR(30H9pxA8cifmbZovr28F3F)73KSAxEwQRK6DxsbkUydOzMa14S8Uvjz3v8dlxLvm8SnjB11VF1NPu4fjgNHyP9aEc4i36YwVPqBE5QpX0GA)DCyl8U52c7txNN(P1ugDiibh8Iv02LVjXf((ZNoDkn8HeHZa9Reblz4mHkRTO5ddLDy1le3re9jNG5hTiBGNCQrnolrNCQqmodXMCINtsYTo(jNHFhhw5jNKKGdU2KtgIWzG(KtwYWzc0KtjkpXksp8kC1pz)hm6F3CLiip5p8XluFPp)7Q8d(INn7p9S5x9YlsYD10NRFNRJFYf1pEnTk6pvEox6yRFDjyYfp)YzZNm5ss3ElRxqx8YJFm3flXnjnbMSF7fZAugeL1V9ldzfZkUQlu92pvE2x6R4nzRDsmbN8(meOyUfoAUsoxUnf85oGkMvZWRnPrnel7vmedBEbpQGdaRL(EnQHAj9kG3HntyhvWRHv8Ep(U0JLC1RVjjBjtqlb00rQ)I4gCgth0OcUkSZb69PPbsQhHtqBylaaJk4CEwLK9ub3zaH3cWgg9Sl1gahawGmpGlFg6fOpvWDSaVfGny42UuBaCaybsmrRkFqGgvbAqpwBSncdW6VjdtJm8wa2GPj7sTbWbGfWefNQxVa1QQ3JQVnRhJeF6PcUtetQIZKRDP2a4aWcy616KkiqToP6rnCn8jvY0gWo9BvXtfCNEbUkSdStPdBnXzubVgwXRwv)Zl4H9wjnQGdaRExcnnqsDCdKJk4QWg76NGsDSWRcCSotdk3XcFnW9PG78)yVJTDBBLJFl(fvRyyFKOSoXhaB)qlqbAFiVOZZIw3ITqKLeiPs6biWF7DVqUxNz2H6IJlQacqsexo7SZo3Nzx6XjYWY3r(kX50cDoWLlfITd3h5ReNtl0TW98fUtAj4Jo8BfKBbJ)EG3Ta6CGlJGJXco4WG65lCN9c(TcYTqbZEG3Ta6CGlJikBnNilOE(c3zpHphiZNs1IKxX5ArOvsvNA4ZbY8Pu))op1b05kN5upcCQhq3R8bI))0WfL06idVapUqNdC5t7po8(NgoOKuhg(9CCHUpCth225lCNfmDAd1vWdcQNVWDsFDoKyWTygzQYPnQ7pFH7KYiWXwEMlEVVWNdKTs2NVWDoC4ZbYmsWdMg6ddQ7bvMLgA0H1Iz5WlS25lChgAOzNH)J8vIZPf6PH7(kpZfV3x4ZbYj1HE(c3rEusQM83AvtHNfCebJoZD6pUTEFi2LBE)8N8UrpmxNlD7CHcsld(c8Apcuh4m9BmMPBq7P(2r16JDWkpv3DqFuMVt0Dh0798LL4ahYA(Ab98dZ89Etpp6Z3B)7)1RnjaPFMVovP854rcX2x2umE0OLV(pgps97J)ZXJC(ovl(VFPV83QpDTJ)7JhjpVLleQvgp6sXCP(JXov4T0ZBp94dsRjV90p)PyrOp0UZ(RzRuhXPxMiCCAEZj39TN6Kes9h82tDvdumRxyGO)DlKbEY5e8la)UTnGr9WVUyv(0jfftQ1JQEI)1FKy6fZUgK25vOSBt1YzAF(e6hFvzpWhbMUPSubWVU85xQYnlN7F7Pb98qJOVg9rRZIfLvRelL8x2TwShat5a(G0RW(AL(V90NeZSg32wS475YFV)nUFr1LiLgVSt9s)78PGNISbigt1sPbcjXBOGHtXcoEK3XZEC14VKrXJrVY60WeITy8wOzepBq8Zu7lHhMC7og4DwLAR1qS7MIT(Jdt4Lj4dvpSyXAvyhLcLrFRbt9riuU00SCgebJRZrnccpx3wW2naLTdGonup7xIYvWqDJfT6zrRTBu)TaFUnaF2SD8OYfv2H24pN8FTAN4VKoITD7I5a9wRgHmdajg1Gr5hYC4dbIdmyir9BTcNZxp5vbYwUDXSLtwLxBhtUIhgSInBvrlNydpUkNwk4sKIkbS9A2zZdB2LmBddd59rKO1dfrJGwgWY6A9czjupphnoG48uCC9BmBcmqxmRzCx4nu3GWuyxaO4HBazjeg3IJYgf36hJBDHuojF9gxhiuGjNcWhqTHQNqqPvRknIjvOvrZtdWOkyR)Dx26PXSUhlETlm84A9Knm4e2TnVBIfFsJ7im8rAa4ZVNDez4J52X1E5po4CRHicLE1IkbfTAparOa4WB1suRNgHYtKOhxHRyRjczRpJyYaXaNRW3fowQsAWKL2rCTOP2wdw2S1oNs4iaU1u7yvRzgQmgHtqRVdHw77MqG(nouzi8buOnWFKdKWcu429HOIj2Y28D0a7IfuXUTnBtb0CXUZFGS74FhIGfnvCOiUXTGy)X6kRauftwopFX3L2iMmFUVjS70GiCiYeLQ8kNJEallAWksS2foqJWAcO4ZLeO997EDwj6e5ijq8grwynXgJ72R(npyYnaf1aqUHLYElR)q69S(d998GXQNJnjgIFaogWcCiAiY6X0(MLbeKRsYg2h1tptU3vxs0dYVvDjrRMjZJMVz3uzUWwlTLNeD6BqhOJCIcDctKsJurH7n44PflniP)CkXUW4TBWoKRIZtlEkdbxJOytVeLddj3GYMlBZ3nS0oJsedlYzWJIrGnac08Ya9DUjaYQld6UCxnQJqqfiXvaUUIg6VSyP5HES9v4aIf4xu4081kaXFk5O)Deo6GRh23l5TWPvIIyXEGDlfMgxRhijklnPztCyYLGHuJIvYLYDjsrbthx0m445PUwCF1MnFRu49268VTC1kGKiejVJfykI7cwXjzDI(JEKolzxjp0KdWqhwitfaIpghkoyrd86o0ssvsDJUyASsVMxia9ytLsQ7dB67do9D897K(wMT5Lq99TXV2Ei(9g48DADCzd3tgAT)0wfe63llxQ7zZY5LnRC0DhoM2Q96n20vRrS(4iw4(ghJA(UJZF3Trnhm(RuYHfHCZc5qu7HRZJu6nP6aAlTC0O4wZDIWfziBql8EnEmJWYoPsHjlzRlcfSI6K0MHfZ3k3THbcqsHIgdAj0GgmHuv8KJfjBG8xqb04l3hQ3gwxSwvCNe(wkcgE1Mkhziz97XYgtJQSZcAmf0ansFqcAqvgP1cAWTSnMGwgSGgwgDJgdxbTuMVIN8JIGgHDSyhK4jObeJzOGwMsqdVBSic9UdSt6piJxVu2iN5vtkEErL4hVkMfB2MDRRG5(Q5EV9uuhD3SYEOL339xIHECNnPG8U1tLnACUSbBkDllSt(rmTmRlYJU2if9Eq2looAofmOYgOrTRJ3Fu076gMpSwNcSpzmFF8k3Uuvp7kvtb60Hsq9fy6MvXGnMVdHGQ890Mc)T6Z9fC7WKNfm3cPSnf572c1xzPXrVUKlZd2ZMNpxiaSMUZHQ5oSTqLScont3K1Rx(Ys93EeOg(XZiPcsXTfMK8iBNBJKxhdR80vlf8RQMapocByZODIfQBeJWe27PmiPWUWw5u9Lurr7gQuG1SUBSXd1YpbKoW(GdPWygW7Y9h1)fPNdlKC6jnOAn7T)aqqZC0q4ojE1GHWZNhL9wVqFJqzCUw08kvZA6qkd(41avLwouuiUbNSBVAI8PvlED7IYkOAnYMI6O5bSUDo9CxdtD)E9s4UutkdGECOQekpMUfJwK5rZD18fv0hiP)WJtHLj2NRWBkuukWQ4eaFFdt1q3q9QRRzQzlVyx5lGvLXFhP54KyK9HHDSDvQVfRbk5bfeunMkGrjLHaWAZeqMSFCOeQNkMpBszLlXI5cJedAHUSeZSEsI)c9MlDfUcHpbxnNMB4AhxAnMVu)SSBwftEppN2CrxxdT1DlUfuowzdShDxVGX2CWJ0c235TLgOSnk76Ty507dWYjwPzFCnZjxrFe2Gc1DJBeyVeOMumBYAbbBtrXIAhDXToaQ5dwJgrqswhN6D6dl6oFnym9OpfNXT9CvZ)RI1i0t2mARiTAb5gNq8IQtQb4uetppkq9mlfz8tG0KRt8kdYu(8PfIDOCkE36ZpHIYPmJz1jknALpvg4Ld5SogS9lURAdYUiQBWUjP437F4H(mSttpO8AQdRCVj3kq86IYdAj5PuWyTvVq)NlwD9OzIbiieobQf4TgwlXmBYQv56)tU8SVPpbCnWW5mWrgUNPDY6xhj2MNFEL18DjUt)nYFejouLmJuNWklKJo0jgkPZ3jZ6q00QgUIP3A2Xnj)RcnJ5IDXLZDyJ6YNUUzRufeD0VwXn7EjsSQ2jUy3AQ5nGTa31nygZogsGecsIqOqK11xqjnV9Aq5S4O)0XmMmZE0jCk(Hb5JJo6sCNm3lcfu2ga(zpT5dPhYJn51dLqrUaXD7SED471H7IbpCm68lgs5U3v5jljYoKHpDTVg7m9maGTEAKLzCxe06If3mzLW88SxwkJ(471fBfkceC)BF3iDpQuK9lKY1f2j0ejmbpzwjuJjFXejsHiT5ygJCLLQf3KKbxPWE3u7lz8dYsrvL0qVxJNBcpA73j6mzFF0XBUlyLeArojWs8mqA8G7gYM1SdRuhMishg4HFcuGrb1rMVUVX5se66p907mDCQGqMtXlekPfQ(3z(iApEKU)9)Q8O)kDHLolAWM)9xfqFUWDPWeE7c6CjQ5zBUBrmZYw0nWdeI08zjaL5Q2f828mVE0vqBLexpNfIfcmM)d)IN768aLyRJU1ls5kQzYqkkW9Q0T29W8Q1t6AityDjV1zxfzl1e3fXpnANOisYAY9AAC)Q0cRDnXeNajXDiN27FRu30DfRLvI)hslLEdGbhRXdiK8PabcKijJsGtIvERIgic4DoXjscAHNybrKAyGZvIVihAXIHDRNgrs6DDstHjKDFiOEp09naFZ3GAttQfmg(hzFBYsvveCFYVmfXXAViUPkmizOT9a3ncxtKz1aXfvlwwjxOZMyNmccng17ZWYwE1KLJu(Nm13frmDa7kJ7yunDZ1s1xWE5RfgcY4ISDUe6fhfghpV3TLREi0odhTjUVRsI2KVBlr7Amh(uJ0is62RdevmH2SpraW1cOGLy(se)98sgy476PkT3nddeGBkBbW408XGjZaoFbe135dk9aURKGPjp7FPpbRwjlouJGEH6Xu4fsghik7fTA)oPYiGtVHf1QnevYIcObbhFlbfBGNjJYzIz(vPpMtl2j(TLv)fKJOLB2TQC2KcWuuhuxtIAxL05Cs2l8BdQuLd6GPN4l2w4Q7rZbwx9JXLjpRvPyEqGlcu(ps5OugUNPi7BeBA0f6pQY4xbwrXpP4OuAw)niTjmDbtJKXTsIAAvqNwHAin)H3IV05aVOeiYFSNkp8iR7K2V5ekRAmnDLV8W(KCy0wpfuvVRJAXkl8C4buxcDEAmiv4iqmkyT4I7bsBuNOxbxAkPU45FUNP1BAhb(Y2sJ9yEcEd75RW4eNs2uyHEJqWt(4pP7TGRbL5i0epa3zf6n7oTkq(0m0bmY95x32th1MBExa0N8ON7Ha5myqI(Rm6IVg3pWybO)xHedlopirRHctAOlGmptPo65OYWEOVTGv5U5UEcWFVhA6k9lIfIw8FKxrXHKNyl7du(Z18C0oQ5ldWD1korLemqjPW0zW6r7D7JAolZ)AHg5NSs790n96)MBniG3LbKZ6hSbl07PU0yQEPyZpkJ9ss975Ap0uuOen4k0rKPtu2X)4q9GirWbtniXriyFe002ovPlWXF4OUGSYTnziVaUXYvhv4E2j2EVZYieoteVrfPhVMaM17T9q0MLk3Wu3hx75Q2TlmtwVJ2MVHYfv5t3SExPKE9Jjf)yz1llxlp)6Lc7BY78JzwyaEWvP5Gc5Fjs1cUK7h01gsfusNVeK0HGlaNYr8)l7DK1BBJC(3IFrqkbjWsooafi2ffOV2IIM2xJmJeTTwBDerQM17d63ENdo3Fxus2XjTVSRri1Wz(UVNBj7DGHLVYm9FyIjHjVi(qMBfizuQnHlJn4EJsVDf2aG4EtLFyIRSx3zUu(lvxTXwvq9L0d1ibCAnKdEX5Pi0mHTYQYPGojSs)wW8I4(GDGaKHKmei2MNAdXRwOwOXKyAgaSg)NjkfXW1I4exS9tvSWnR9JR6i2t9bS4degQbozy0MJXiEZU3hretyIs7Hom0(Ij6dmeQ9dnd2L2TK5XLKGEyPribeAz5XnUi2waPQmaofv8u4MSDGIucbVtXd2yRQEZdOvWWcffObc0QM0FmSB1WsBjQ1go(cA5aMhLy4FNZ6SqjrmTCXhnvAbw9hq5ymrb(aDYtYsgLfcCf9qPf6cOxatNprhiX1mMrhGOgpS0FgQlzhr4ruIScbN5najJpNmgPnuaaosYykEMcWYwcphrzHbiIp1IaOAkIRTk)KV)(Ozlj0rGl5cTRT7zfFZOJrG5dI1OK8Pno83ltRcsafboHvysZxRxC5IgasOAjhacrPZ441L5sj2FT0ILmUMoisZoN6Lda8HShoIsh2(zOkicBPvRZG(02V)9l4KpmjlCRbzAPHBnTrhtwLSx8szXVTiVXcAfYT7QJ7vqtu2MBd6wfy024xtdmd8EXYHu7s59TpUBBxoPWyD7EwInKwQrn2XJB3ENIU2gUf4luRSoL8V0Lp2938pnjKngeyxlOWaYF0PYeWGc3uf2zPibc6eujcLFoS38A7mgHZWgoxU5AOvNPhhAIqiA7vgJGZOxJvhbsTomL6BUpQwKN8b7HVYZYt1kZK84LyZIlFJXUY0DqkJpPuH273U4rJb66ysBlQW5vlPyq(GHQh94nY94YW2JTI((E4IIFl9Gz8nUkXXL7W7R0ZOpfdQIrTDXQ0rq1BI6KeG9oG8T5X8aOYkr(vtynokpqneiJiVxOUJjpdq(msbs6agSonAEC1w)el0sR5Ql1RtBYh8cnppg6Gywbtw8SwiXwCpnr5lKXbMNBwLp8ddLETJMlFO7FLVr5o8lBUyjNLWCSzspzF4R0A4OgyIy)R55BG0PoG60gM6ayZe6SPEyQbu6lVz9x8Z6xA)nRVv9N6xB)n60GPVa4DrcurBOVC6)W76m6(7kvj1gYSBR3QlOI9MlZzZG9F9UwTZj21l1jTiuGWm8G11oD)ChHZYQTzDi6etTr1Hh(2UfZEqBt8ud8Oj3EoZATsDYAAQ2(00Mk1(82fjx1WYxYoEm6mloXMzrgbyx7g)TrBZdzIi8wjk00hrEaXBfdhgXkcyY5mzej42x2eZaYuAROQdDwAO4MY7KvCxIrfu6I22)BnmniIB)bbPE9nnniI(otUFSpfVJVgSpUzZPv8yFgxeDjupfdo6UG(aIX0PC2bpGG0lIOQi7q0X1NgMFMmWoTxbx)InYiKJRgueR(FfAVUrW7OFGDo3Oc38fDTk(dGnbkjQ4E2dRoTZELUt1pBtGca924(RrJ8qdwfawnnthjvThLsgzN3KeWGNNkq6PUDaXXKr8KRxAeeFWW3b7MWcj0uJ3Jvk4ezbdaS1dJ70)qjj0Q)WZ4FMupyIDRNwj0LC4SRbPp9pMlejXvWF8hcVBSs(jVLczsKqUJphRVQh9gePttYIp45mFbihCMdeXOD9fD0Bq0wRd5(KN8XMWGEfxo(iccfkXrKyY(0O)d(L08rPN(xz2ykDB3TZLpDgiA1AgLnxvi9euyOpulaKSbVupw6viA(KTkXjHXiNIJ5Oelrb4qdqA59Do0Ar2T19TFX1qibrZOx9iEwFDFftJD7Sv8meNBGQHlORZf(WGEjUrg4wm(8PaLP1)XTXS3nHpr)6YfBn4(Il(nkNNe5ylYbtHbTL2oigzvWwMrRBoc7w0VE4gtrt0a0S3fD6nmHT)x(oi62TvRSYPIVFPkqC4wmXwoxdK0Mz4gc1dR(KAU7GdPJNzkaIdPBdprbr31RUOU8txFk4YwVqyvEX1jM)S1dQeiua6MJUdEzckYpBqpiqucxFOdEzIpYHWtjVdEDXrHV)DrIy0NYMxaOZsOeUyWImMT22JzdtQi9tExMeidG7XHprxYpWrw5nff8dgmn7xDbI(csJ(S6eV48yRdO6zaACZq5bmlQOvW(jJ6hOlYTO8w4IrH0Xq0Yk3iE5C2ntFMIYzqABnGtYL)u8WL2Z6bS)HfLJSLvck8G7JGfR8LrjvU09QDhoFa8Zr6q2NgZvXOg)zbSrBiwS2INVChGfFTYkP8KEGW1(L5hcLDhcCAgWAw28guWJYqEtcSqfiWbolxwQMGIia9otKIV5fLuXIL(DnGPct6JwVCbCXn9gSgXsfoekiiQ5h)1UfqvAiKBav2us4NPSGLqlzK0SGMvmJZb3KdY99hVwX4dytyQ4lSgqlXftsDLcRdCiQnhb5HvwRjrulkYDsaKk5AWGU6j2(45ujM4egpRe5eax6J9yaB6yHfiNfOBEX1Osf0k(qE1)TPhb(8hIlIS8ZRsiHyr)pyAYnL7M3TubtAEF762oFoppsmbU(JmBt9JIdNP6SXWSqntVsQFmRXLiYV8ONYawFbvaRJZBDobXBcurAIXgdzPlCFKKSIVbrp(4PdBfkrI2fic81lKLRRuH35L8LmwI9NPzjEbK)EOjKhKJlv9ircZPS04vBSYiq8Ow8F4rAKiBQ)QaHG90sy7k3QF2Tv7ES1huq)VzrZ2DBAZjhZGNIBhx4ct8ngi3yZSLw9htE)hn)BkdxRM9W07RAAT1iV99cXLk0p7LHMQ0JJrol41L7KpHXV1jLoRTZd5X(JHxQOuK1R7BSMaNE)VA0M3DJgR3wB0JA6M6zRxLEHW2j9fk2EcaQHsSqDgxSCZ21)Nfn6U4OU621BxSB50nvZuKFpO)6dkRjdnFG3IGOkFONR2eGvtXTw)TDl2SPEoZALb6(8M6zl0meZUVwJbuV((B(S7NT)M)rypOXjQ)BTP1LSCfDV)FR6Uv1kP1F(PvZUx94yyE32oSbMQ2DZGISipgyyzWNGIfkX9zduF64AIYRsSDISJE(uy4I7LaHx9FPUPcTWrNItrpqzB4ORjcv3OmYG)1cng(cf7A7clVtBkjrhAC)npAAaUgB)UP(F)D3XrH(DNNe8VE0tOhkK6UGdkQPpJO9tpG3UI51evgXT7RMkW432T6HLvkFd3UwF5DEx10LDSnd8briWIRed7BmZcbgEuFSYUjNhx8tdZLW0Np)yQp)y6pVecRgVqNkD3pgtN52uZ3PEGU)iDYB(6JD)d3R(4OeyDhkOWmZtNflevzyTADCHTBJYcinf(GujT3V22lbtvUw7kZVc8o0lL(gWFRr56qqb7G4BYp7eXFwuITm88FD9odgA9QUwA1lWqJVmOqd(DxJfDQicukXcsXI(bM2MTAv0AzJxQ)vIX(ZnF3Pkou1Bcf)EE0(Tvp2K3MV)7MoQT51ktxxQK5T)MfkTFF3SlmnqRwatTsgHMQw32UQ)s9hMUlwlLSPT59GdyMIaYNQpUEtL2iM9DZMOhTfqHb2vxn7E785tVjQRdNPIc5xxtnZ0(zhB9n61YrwH)th6(ZiUFps(WOBUKld1V4YsUJs4lKzkFOZOukl)VkWx0PDiVUjJnGLzLgFX(KkbUBfRH7tDIG9K4RrCv2e7qdIZUFiWMt1VMfxXVGL7dAbuu4yE6InJzUKYe56K2edmqYLqzr5txsqI7sLa1qEW)Sjep7I0N5pp0TjflzJ9C7TRWkSOJc2p3CslOZ0XeaGBIjmn0aRboUQtn8bj0PXTcMGKYnIJp91dxf(2qc)2ONhwUiJGjhJTGnAr6gISfQXOEgfXOmeNrjsEncBYOtdNcr49iGLH7QeekAbY(bhcwH7FH(7sS3w0LvZN(TD11R0t2JvZnMqO3q(xq7u6mTMBDO80KtlxOtvz2B18GYCXNulYDk965lbSfJjVYSDBnbEOD9Q6PlMV(XyBG6S7FQZooaVb94SIJtPvac95hWTrpA4YC(dY8QGinZYNeiVtmUhcVmi3E9qU53T1WH3LQ3cZ2bng39ELEqQDbWg2MrflLS92yP7ne)tG2BJl3BJGy60)CNDCmdJkWhqHqTFWdFumD5x(SLMgGqn35ZVws6EQO1YY6L8sdCi7HN1Mfec(cjaYP3NCcj4lP2XLEL(E7w90IAJpRtvVVsIP6vBwIWcXFAr5GkoThblu26i70oM50oILl4qz9KYCvQnbWdFFEOGvWL57QCfMIKoIlfLdTMDSflDMJ5iBD7G2LIwN4HYyaoGyv4G1PMjKjFtcugA)aY0MzpYrcyhZTMYaQySTIvFx8IrEpuwaYDwpLcZbcsJd7Kg7pmpbPRVse9pjLDNaNMWkEQlLihiqIMDIAbQdtpPjGGpQQ0C4HwIGNrz2R9xE0GBaiQFbL6sTyu2yKEi2HZgN1t8co9s0jjG9dWWarlhtUk6bbiivvBE1VMyPxilrXzOW8L8pkj81SBNX(TZM6T3UyUPSm2SD9VvpRDTrEDXyLZhe2Q2BRu64Bx)7lw98Ul9BY0VzlqzN62D3vxT9ofsBUEWu2SPAB90hQFQ55DFQDb3UrX(8TavXQFlVDXYPZwpV(3FX2LHVylq1LgW0koxnHX9kUXNu2h(h)rQrqXHpPCBomtExCqIcYY6xF80pNkq8Ra8Cv8Q)W8Lw22tSTchHVa)GCNwUubi6ZwGYy2rr)1hRAAxQRlPTxCUUFlFz43Y)STa1CSBlILDD(9ACA4X2YAvAHahYEe8GA0DvBEbgdeIcHgUyjWbcU94okAl7o20oZZSxWVJ5ykI5cb2jDs7(tNtASu4KCv8SUzyotTK9ail9HThcBd8CM0tqfRSX4DkvjOm6GGsSY(W(85LGYiiRU5QAUrP6tqBKd2zNJBMsRFliRepq6yRz05vt0KIrlfksrIgToJDl1y17nw5mVcfDjrxwQv4YrQoPBW7FJSnmhJDhKJrAhUOosMwwPa0kyLiijUUhi8sualbnp77WDveMLHlYLuSuNLZpTCHMkC6JRN9WQgL2LhCVwj5QgjdViaHaQ4Dqtyg0ltWmv(XX8BnJTllDzYz3ZLsdl51k4DaJLKkxFFCDBeRtlqVZKXFn5)ZFjK)cuL8rXFbLheP8xt6f)1ey(lSW2w8os5V4uwv(Xpj8x9QGlLXFb4izo)1ed)fE9VX2rmfSpNSgU6dXM5aDzI4s(i5mimeeXKfO7cnk(KCcZr6bwMa)327QP324Mj8VLCzHLdsRZA70CWrhkEV0t5srp(QiBjfiuhBd9rDDpOF7Dj3DjNz481UYWXOTOhAGnnxYHZ3C4ZuwMaWFs5S)8bU5O39ABN7kYyixJxMmgpxT)LwcrIHxeOAZfJdk38WwRtFPF21tEOVgQU6IH5XqvqBWJz0DEIxWUoE3ayQgltslcKvUk2yXbviKd8Ux(b6L3vwvEwLRBIGc1P51jbGPgkOGM)ekaSryXL)I0Ny9yX8(UFfwQ2qOhUGhk23t1Oh7k65Tf8rnl)K4FDVLMs3roqVM02jlcvSI5rygZKqJCWJPu(K5PKlB(tomYk1rwlKUIckIUWBXoVvwwaMig9g6Hdfsw1qALkz3NgNJJsXlwPaXnw2(fisuUHKKHWEyYieQu0tO09PEfTHGr1LqudueBC6roqWDSKQepnKQHTPDWWj4)Q2Ex4itfJYLxjIVvhOePbSf9gpdu)BfMM8VUzJfGJMnOBaW2pDhoCP7dpVx1ka1dasHL5gsmSd9iv2deoL1d5ZSPO7GA1uC49Ws3qnf)MTaTgwGVx)tCng84vWnMoMJJO9OWieHPQCykIHrYryoAkh2Uv4odul5BSnTgefuEEgeTTc3VpwxGIZt(dJq9bnzMgKI0pq3hQ95a57Y2Nqwr0SAXNlWC1sVCG4qsN968saTMYV8mFU6IAygYMsnC1c7t6BKmku53OJGyg2h(HZhO4yCla3Wfiljvfi8GrdVH(aEcLqa9IUqH67dI8YJ5oJe25X3w0SLXNfD3RJoHbk7ZPTb2e5yE0U2pEjfV7O1gzAOyeVI7paU37WeM73mBplowBVgrpI0A0CFtdd5M5RzHtMIyLGbIkh)OTtELVTWyg(7XZUlUezRJPXHK02Zy4Tf6N460tA5f(mN9NgbLjgP(H9XuYk0RiYAG5W0VbV0TAcw4jO1aNtxX2jh1nxnTavXElfGAzCkXWnmVppvqwflr3sdS9vMIs9Ot2bQet97plvQ2c8G9Lqc3VMQkr7o1Uq0L0IWk912RndFeZvm4W1jqoioqfP5Mbpgn0Fr5DRoqb7q5UUIsKRTNWWwktsPA8hhEZTtJyWzvofdR4AqjxLEI)5PcO7NOL8JNrgBgxgdSBFeDytubygTOY25SxbBhgGQvw7O5o61WbevJI7E1LpPLIU6HwCUzdXNjAN9z7gzdujPCAOdWQANPx0YLw)99qL6zKsG2dEdb97SCtvznaqrsJSqjAP3ImEkln5Dg)jN3IQITIFakhnRm1V3v0f7cOXZlvVQbqrOqbz2PwyTA0S0ILn9fZQ7kX7jOzPfQlJO48UhF8C8SOdTBNNG2nsssqBY(ysvwrPZ)mszodc2(DBCLzOQycq02mcuOph6xtIY1nfMDo1vNZT042Bh1fJdx5YOPiDsW(s7k9uISL4KgWNeSoCIu2bbJCabiGn(1V4M5B3roz2UB)IM)FmZsn)fn)T39vukpmV2eVt0jWrp4eebDCURjLYhZUWFgTRyRClmN4I1anHa(e0Lcmj(TGH1RhcgAsZ1RShETkR5owqu0kk01syYbJMQNitOYDS0UEllVK(M1R85JEiSOzeO0wiBbFch3S8Oo)aQylTsSl1CrRqi0rdscge011oOjiII2DA74lYEjypJLt2GupAj325SMNH2Z5M(bkI5bKD(hyQRoDTyDYIXnp7il0RlLbXPGNHJZCZCPBrxK5RYX3Pyc9lLRXbG7b9GxCFU70LU15Uye8bjg9OQRmh(8i6tG4wAylo5W2vijJyDlLeh5GS9yc2NVxf(frzIffOr)LiMvtvg68TijHlToUzDUJtf61pTD78BN915)1sOWJLUZJXXZPKcQcTol1ZAeOGHBYYEHlJWCJiR1XPYrWCvwx0OJNxb7chACwFaxb6wHom6AzPV3SGE9X0DgFhQkcNGPhSr3kQfxodhYjvYZEPYMQ4XO2vfWMQ5rVlH)IPDufrPGcxSzIsrF94LSw7vQemcfvSadVm7AJPYEl91Oo3PP(zp(PfuVWsCzPcIBYlYBYbWZioDX9yoKlvLv9K436PSboL5cDY3xXZEDV(cY)vEt6U5N(GGLh1AQufPU5UtrKcC5I1klMSEBi9GnNIpSzjPUe1ZoOrD80)zeS0gMFHwwhP6SmwjjRiK8CweIqkRfJyY6C)q9wHvUfrwZCMs8JWyYZUTcLlUmLCEMe)l8PNYKogZ6ykvJE2o9nItwu2nhRNZfo2tBGSNpoNszUiRkLly)kx(z)wT32hsQX64CsMc8DPvUkOGjPf0A9pTOXsw(XGHCe3PQPldWLmWEPdEeI9tHot1SGstVmCr15OuHau)EPPmN(7lZtNhBaAhMFI5rFBNI2cUjZKyr3jP0uT4(7)gnapMk4qo)g66LkjI90whvLky9Et4F8TqLvhSP7ZccnKAJZb4qlUk)GIBUwTPUnrZsWxB3RcM(sY0n7JFkjo57MjbIoG6MZQI(vKAo29MGoMRIk(8gVrn5kJoDaclP5xkzUvJzY8CpvUc5AYlmNGAQdS2EuFbQrbrPs9o1799pcQ2yRlaq4fBVP5devjD9M9n)S17WLoE)Wk6o24vYXxBbSopLTiF0lx5Ivtoxk(nk68vQ0gX0RSMWUszdXhORM2rn7Vkpwf7uHGiBHFWX2oYvQJQb9evkDfT0B6epJpVDujIYrZ5ZjM)n3DRTF7amuNEUVIQIuSRLFsxE5(XIAsOkheI3lfBGprgz22)RLCVuRLCl7Q4)uOq85NS(JER9XhAie3)TRNVJR6hTFMq72iGeIb724FxS7np)UNMT4HTPZveaXnOo48V1TuAMRyxIK2bo321rnxT(2DrfXndz)oqtEg1mv7q5TespYvqBdGAqbSsi1O2MA4O3yZS6RrR(JTrFl1blWJsU96wowb4gNBOcOknZCMahC(PbGe7Cd4AmwhZnebq(hpiwCPhZV(Z32eRyOfGEa1zPB2(9D330plRmPN5(xszMQJRg2(PJv8CBhQ(DHGoAyZd3RqSvZ2CWTboXnmv3Um4Cv0yZHVC4l)6N)FFoiL8NTlKhVFZVhASRRo02y5xFty1C3I1HX3SCAuOTB58fT9(1isYT6POWvZ566)y9I9bvA59wC1VA)U9Bw2qyUFfRqxqRmxD0mawwXohd6SYOJqxowFSSAaHoZCkXYwBXYwBZYk1CMkhepllJsL(tNH3aZTIrS(HBGFrQ7TCvpu4JUzP5B)DZxNfAamno3nF)TnJ9Su5Gi4eo2RlK1tQpNelOT)3))Vp]] )

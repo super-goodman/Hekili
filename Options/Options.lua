@@ -596,7 +596,7 @@ do
                         hurt_num_gap = 95,
                         hurt_num_big_gap = 85,
                         tank_gap = 70,
-                        excludeList = "461487,461507,1235060"
+                        excludeList = "473713,461487,461507,1235060"
                     },
                     
                     oneshot = {
@@ -8185,14 +8185,14 @@ do
 
                                 defendence = {
                                     type = "toggle",
-                                    name = "大秘境S2-|cFFFFD100自动减伤|r",
+                                    name = "大秘境S3-|cFFFFD100自动减伤|r",
                                     desc = "如果勾选，则会自动结合DBM预判使用减伤，同时需配合防御快捷开关",
                                     order = 1,
                                     width = 2,
                                 },
                                 dispel = {
                                     type = "toggle",
-                                    name = "大秘境S2-|cFFFFD100自动驱散|r",
+                                    name = "大秘境S3-|cFFFFD100自动驱散|r",
                                     desc = "如果勾选，则会自动驱散可驱散目标，同时需配合防御快捷开关",
                                     order = 2,
                                     width = 2,
