@@ -756,7 +756,7 @@ hekili_autocast:SetScript("OnUpdate", function()
         if ((now - lastTime >= Hekili.DB.profile.toggles.autocast.speedRange/3 and action.gcd == "spell" and action.listName ~= "precombat" and not isFormationSpell(action)) or (now - lastTime >= 1 and (action.listName == "precombat" or isFormationSpell(action))) or (action.gcd ~= "spell" or isOfficialOpen()) and Hekili.autocastAction_check) and action.indicator ~= "wait" then  
      
            -- and action.delay < 0.5 
-            
+          
             if action.actionName ~= nil and isInBattle(action) and not IsMounted() and not IsInTravelForm() and not UnitInVehicle("player")  and not UnitIsDead( "player" ) then
 
                 local cast_ID, type = GetSpellIDByName(action.actionName)
@@ -789,9 +789,14 @@ hekili_autocast:SetScript("OnUpdate", function()
                 end
 
                 if type == 1 and action.empower_to == nil and (not ChannellingID or isSkippingChannelLock(ChannellingID)) and action.delay < 0.5 then
-                    
+      
                     local name = GetLocalizedSpellName(cast_ID)
-                    
+                    if action.toy then
+                        UseToyByName(name)
+                        return
+                    end
+                    --print(name)
+                    --print(action.target)
                     if Hekili.forceStealth == true  then
                         Hekili.forceStealth = false
                     end
@@ -852,17 +857,17 @@ hekili_autocast:SetScript("OnUpdate", function()
                             else
                    
                                 if terrain == "none" then
-                                    CastSpellByName(name)
+                                    CastSpellByName(name,"cursor")
                                 elseif terrain == "mouseover"  then
                                     if not UnitExists(terrain) then
-                                        CastSpellByName(name)
+                                        CastSpellByName(name,"cursor")
                                     else
                                         CastSpellByName(name, terrain)
                                     end
                                 elseif terrain == "focus" then
                                   
                                     if not UnitExists(terrain) then
-                                        CastSpellByName(name)
+                                        CastSpellByName(name,"cursor")
                                     else
                                         CastSpellByName(name, terrain)
                                     end
@@ -950,6 +955,10 @@ hekili_autocast:SetScript("OnUpdate", function()
             
             if type == 1 and action.empower_to == nil and (not ChannellingID or isSkippingChannelLock(ChannellingID)) and action.delay < 0.5   then
                 local name = GetLocalizedSpellName(cast_ID)
+                if action.toy then
+                    UseToyByName(name)
+                    return
+                end
                 if Hekili.cycle_state and action.indicator == "cycle" or action.indicator ~= "cycle"  then
                     if action.target then
                         if action.target ~= "none"  then
@@ -1083,11 +1092,20 @@ function autoHPPotion()
     if UnitHealth("player")/UnitHealthMax("player")*100 <= Hekili.DB.profile.toggles.autoHPPotion.autoHPPotion_threshold and Hekili.DB.profile.toggles.autoHPPotion.value then
         if Hekili.State.action.invigorating_healing_potion.known and Hekili.State.cooldown.invigorating_healing_potion.up then
             C_Item.UseItemByName("焕生治疗药水")
-            C_Item.UseItemByName(211878)
-            C_Item.UseItemByName(211879)
-            C_Item.UseItemByName(211880)
+            C_Item.UseItemByName(244839)
+            C_Item.UseItemByName(244825)
+            C_Item.UseItemByName(244838)
             return
         end
+
+        if Hekili.State.action.algari_healing_potion.known and Hekili.State.cooldown.algari_healing_potion.up then
+            C_Item.UseItemByName("阿加治疗药水")
+            C_Item.UseItemByName(211880)
+            C_Item.UseItemByName(211879)
+            C_Item.UseItemByName(211878)
+            return
+        end
+
         local item = Hekili.State.talent.pact_of_gluttony.enabled and 224464 or 5512
         if  C_Item.GetItemCount( item ) ~= 0  and C_Item.IsUsableItem( item ) then
             C_Item.UseItemByName(item)
@@ -1401,9 +1419,9 @@ end
 
 function isInBattle(action)
     if action then
-         return UnitAffectingCombat("player") or Hekili:isTankInBattle() or Hekili.forceStealth or Hekili.DB.profile.toggles.oneshot.value2  or not action.startsCombat and action.listName == "precombat"
+         return (UnitAffectingCombat("player") or Hekili:isTankInBattle() or Hekili.forceStealth or Hekili.DB.profile.toggles.oneshot.value2 or not action.startsCombat and action.listName == "precombat") and not UnitIsGhost("player")
     else
-        return UnitAffectingCombat("player") or Hekili:isTankInBattle() or Hekili.forceStealth or Hekili.DB.profile.toggles.oneshot.value2
+        return (UnitAffectingCombat("player") or Hekili:isTankInBattle() or Hekili.forceStealth or Hekili.DB.profile.toggles.oneshot.value2) and not UnitIsGhost("player")
     end
    
 end
@@ -1450,29 +1468,6 @@ function IsInTravelForm()
  end
 
 
-diiffenrenceChecker = function()
-    local counter = 0
-    local prev1, prev2, prev3 = nil, nil, nil
-    return function(inputStr)
-        counter = counter + 1
-        if counter == 1 then
-            prev1 = inputStr
-        elseif counter == 2 then
-            prev2 = inputStr
-        elseif counter == 3 then
-            prev3 = inputStr
-        end
-
-
-        if counter == 3 then
-            local isSame = (prev1 == prev2) and (prev2 == prev3)
-            counter = 0  
-            return isSame
-        else
-            return false
-        end
-    end
-end
 
 
 function IsTalentSelected(nodeID)

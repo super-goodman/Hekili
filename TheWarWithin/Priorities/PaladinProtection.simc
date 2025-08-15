@@ -7,9 +7,11 @@ actions.precombat+=/blessed_hammer,if=holy_power<3&bless_out_combat&charges>=1&!
 ## actions.precombat+=/consecration
 actions.precombat+=/variable,name=trinket_sync_slot,value=1,if=trinket.1.has_cooldown&trinket.1.has_stat.any_dps&(!trinket.2.has_stat.any_dps|trinket.1.cooldown.duration>=trinket.2.cooldown.duration)|!trinket.2.has_cooldown
 actions.precombat+=/variable,name=trinket_sync_slot,value=2,if=trinket.2.has_cooldown&trinket.2.has_stat.any_dps&(!trinket.1.has_stat.any_dps|trinket.2.cooldown.duration>trinket.1.cooldown.duration)|!trinket.1.has_cooldown
+actions.precombat+=/guise_of_the_phase_diver
 
 actions+=/avengers_shield_interrupt
 actions+=/rebuke
+actions+=/hammer_of_justice,time>15
 actions+=/tank_combat_wait,if=time<combat_delay&moving
 actions+=/tank_combat_wait,if=time<combat_delay&time< combat_delay/2&moving
 
@@ -21,17 +23,20 @@ actions+=/call_action_list,name=aoe,if=active_enemies>1
 actions+=/call_action_list,name=st,if=active_enemies=1
 
 actions.cooldowns+=/lights_judgment,if=spell_targets.lights_judgment>=2|!raid_event.adds.exists|raid_event.adds.in>75|raid_event.adds.up
-actions.cooldowns+=/avenging_wrath,if=fight_remains>35|solo
+actions.cooldowns+=/avenging_wrath,if=(fight_remains>35|solo)&time>5
 actions.cooldowns+=/potion,if=buff.avenging_wrath.up&fight_remains>35|solo
-actions.cooldowns+=/moment_of_glory,if=(buff.avenging_wrath.remains<15|(time>10))&(fight_remains>30|solo)
+actions.cooldowns+=/moment_of_glory,if=buff.avenging_wrath.remains>5&(fight_remains>30|solo)
 actions.cooldowns+=/divine_toll,if=(fight_remains>35|solo|raid)&time>8
 actions.cooldowns+=/bastion_of_light,if=(buff.avenging_wrath.up|cooldown.avenging_wrath.remains<=30)&(fight_remains>30|solo)
 ## actions.cooldowns+=/invoke_external_buff,name=power_infusion,if=buff.avenging_wrath.up
 actions.cooldowns+=/fireblood,if=buff.avenging_wrath.remains>30
 
+
+actions.aoe+=/avengers_shield,if=!target_incombat
 actions.aoe+=/consecration,if=buff.divine_guidance.stack=5&buff.shield_of_the_righteous.up
 actions.aoe+=/shield_of_the_righteous,if=buff.shield_of_the_righteous.down|holy_power>3
-actions.aoe+=/avengers_shield,if=time<10&fight_remains>10
+actions.aoe+=/avengers_shield,if=time<10&fight_remains>10&buff.shield_of_the_righteous.up
+actions.aoe+=/avengers_shield,if=buff.moment_of_glory.up&buff.shining_light_full.up&buff.shield_of_the_righteous.up
 actions.aoe+=/judgment,cycle_targets=1,if=charges>=2|full_recharge_time<=gcd.max
 actions.aoe+=/hammer_of_light,if=time>5&(buff.blessing_of_dawn.up|fight_remains<2)&(debuff.judgment.up|buff.hammer_of_light_ready.remains<2|buff.hammer_of_light_ready.stack>1|buff.hammer_of_light_free.up|(cooldown.eye_of_tyr.remains<3))
 actions.aoe+=/eye_of_tyr,if=time>8&talent.lights_guidance.enabled
@@ -70,14 +75,16 @@ actions.aoe+=/word_of_glory,if=buff.shining_light_free.up
 actions.aoe+=/arcane_torrent,if=holy_power<5
 actions.aoe+=/consecration
 
+actions.trinkets+=/use_item,name=soulbinders_embrace,if=health.pct<=70
 actions.trinkets+=/use_item,name=tome_of_lights_devotion,if=buff.inner_resilience.up
 actions.trinkets+=/use_item,name=unyielding_netherprism,if=buff.avenging_wrath.remains>15
-actions.trinkets+=/use_items,slots=trinket1,if=(variable.trinket_sync_slot=1&(buff.avenging_wrath.up|fight_remains<=40)|(variable.trinket_sync_slot=2&(!trinket.2.cooldown.ready|!buff.avenging_wrath.up))|!variable.trinket_sync_slot)
-actions.trinkets+=/use_items,slots=trinket2,if=(variable.trinket_sync_slot=2&(buff.avenging_wrath.up|fight_remains<=40)|(variable.trinket_sync_slot=1&(!trinket.1.cooldown.ready|!buff.avenging_wrath.up))|!variable.trinket_sync_slot)
+# self
+actions.trinkets+=/use_items,slots=trinket1,if=!trinket.1.is.soulbinders_embrace&(variable.trinket_sync_slot=1&(buff.avenging_wrath.up)|(variable.trinket_sync_slot=2&(!trinket.2.cooldown.ready|!buff.avenging_wrath.up))|!variable.trinket_sync_slot)
+actions.trinkets+=/use_items,slots=trinket2,if=!trinket.1.is.soulbinders_embrace&(variable.trinket_sync_slot=2&(buff.avenging_wrath.up)|(variable.trinket_sync_slot=1&(!trinket.1.cooldown.ready|!buff.avenging_wrath.up))|!variable.trinket_sync_slot)
 
 actions.st+=/consecration,if=buff.divine_guidance.stack=5&buff.shield_of_the_righteous.up
 actions.st+=/shield_of_the_righteous,if=buff.shield_of_the_righteous.down|holy_power>3
-actions.st+=/avengers_shield,if=time<10&fight_remains>10
+actions.st+=/avengers_shield,if=buff.moment_of_glory.up&buff.shining_light_full.up&buff.shield_of_the_righteous.up
 actions.st+=/judgment,cycle_targets=1,if=charges>=2|full_recharge_time<=gcd.max
 actions.st+=/hammer_of_light,if=(buff.blessing_of_dawn.up|fight_remains<2)&(debuff.judgment.up|buff.hammer_of_light_ready.remains<2|buff.hammer_of_light_ready.stack>1|buff.hammer_of_light_free.up|(cooldown.eye_of_tyr.remains<3))
 actions.st+=/eye_of_tyr,if=talent.lights_guidance.enabled
@@ -115,7 +122,7 @@ actions.st+=/word_of_glory,if=buff.shining_light_free.up
 actions.st+=/arcane_torrent,if=holy_power<5
 actions.st+=/consecration
 
-
+actions.mitigation=/blessing_of_freedom,if=find.slowed.exist
 actions.mitigation=/cleanse_toxins
 actions.mitigation+=/lay_on_hands,if=health.pct<loh_health
 actions.mitigation+=/word_of_glory,if=health.pct<wog_health&(holy_power.deficit=0|buff.divine_purpose.up|buff.shining_light_free.up)&time>8

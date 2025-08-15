@@ -226,6 +226,7 @@ local enemyExclusions = {
     [165913] = true,              -- Ghastly Parishioner
     [165737] = true,              -- Sinstone Statue
     [244302] = true,              -- Binding Javelin
+    [176551] = true,              -- 宝库净化者
 }
 
 local requiredForInclusion = {

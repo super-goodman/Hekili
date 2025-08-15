@@ -38,7 +38,8 @@ actions.cds+=/lay_on_hands,if=health.pct<=30&debuff.forbearance.down
 actions.cds+=/ringing_ritual_mud,if=health.pct<50
 actions.cds+=/chromebustible_bomb_suit,if=health.pct<50
 actions.cds+=/blessing_of_sacrifice,if=find.lowest_hp.unit!=find.player.token&find.lowest_hp.unit!=find.tank.token&find.lowest_hp.pct<65&health.pct>70
-actions.cds+=/holy_armaments,if=buff.sacred_weapon_ready.up
+actions.cds+=/sacred_weapon,if=(!prev_gcd.1.holy_bulwark|moving)&time>10&cooldown_check
+actions.cds+=/holy_bulwark,if=(!prev_gcd.1.sacred_weapon|moving)&time>10&cooldown_check
 
 actions.aoe_healing+=/judgment,if=buff.awakening_ready.remains>0&(buff.awakening_ready.remains<5|health_party_pct<judgment_party_health)&target_is_enemie&target.distance<30&((((!raid&find.hurt_num_big.count>1)|(raid&find.hurt_num_big.count>3))|((!raid&find.hurt_num.count>1)|(raid&find.hurt_num_big.count>3)))|find.lowest_hp.pct<40)
 actions.aoe_healing+=/hand_of_divinity,moving=0,enable_moving=true

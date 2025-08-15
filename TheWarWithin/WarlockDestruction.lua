@@ -2039,6 +2039,8 @@ spec:RegisterAbilities( {
 
         spend = 0.02,
         spendType = "mana",
+        -- in_flight referenced in APL
+        velocity = 30,
 
         talent = "soul_fire",
         startsCombat = true,

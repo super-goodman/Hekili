@@ -1409,7 +1409,7 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                         slot.texture = ability.texture
                                                         slot.indicator = ability.indicator 
                                                         slot.target = ability.target
-                                              
+                                                        slot.toy = ability.toy
                                                         slot.startsCombat = ability.startsCombat
                                                         if ability.interrupt and state.buff.casting.up then
                                                             slot.interrupt = true

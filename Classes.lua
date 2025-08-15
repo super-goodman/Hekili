@@ -31,7 +31,8 @@ local GetSpecialization, GetSpecializationInfo = C_SpecializationInfo.GetSpecial
 local GetItemSpell, GetItemCount, IsUsableItem = C_Item.GetItemSpell, C_Item.GetItemCount, C_Item.IsUsableItem
 local GetSpellInfo = C_Spell.GetSpellInfo
 local GetSpellLink = C_Spell.GetSpellLink
-
+--self
+local playerHasToy = PlayerHasToy
 local UnitBuff, UnitDebuff = ns.UnitBuff, ns.UnitDebuff
 
 local specTemplate = {
@@ -3184,6 +3185,30 @@ all:RegisterAbility( "gift_of_the_naaru", {
     end,
 } )
 
+--toy
+all:RegisterAbilities( {
+    --相位潜者的伪装
+    guise_of_the_phase_diver = {
+        id = 1244178,
+        cast = 0,
+        cooldown = 0,
+        gcd = "off",
+        toy = true,
+        known = function () return playerHasToy(246903) end,
+        usable = function () return buff.guise_of_the_phase_diver.down end,
+        handler = function ()
+            applyBuff( "guise_of_the_phase_diver" )
+        end,
+        auras = {
+            guise_of_the_phase_diver = {
+                id = 1244178,
+                duration = 20,
+                max_stack = 1
+            },
+        },
+    },
+
+} )
 
 all:RegisterAbilities( {
     global_cooldown = {

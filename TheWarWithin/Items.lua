@@ -35,6 +35,43 @@ all:RegisterAbilities( {
             },
         },
     },
+    
+
+    chaotic_nethergate = {
+        cast = 0,
+        cooldown = 120,
+        gcd = "off",
+
+        item = 246825,
+        toggle = "cooldowns",
+
+        proc = "damage",
+
+    },
+
+    soulbinders_embrace = {
+        cast = 0,
+        cooldown = 60,
+        gcd = "off",
+
+        item = 242391,
+        toggle = "defensives",
+
+        proc = "secondary",
+        self_buff = "soulbinders_embrace",
+
+        handler = function()
+            applyBuff( "soulbinders_embrace")
+        end,
+
+        auras = {
+            soulbinders_embrace = {
+                id = 1235425,
+                duration = 20,
+                max_stack = 1
+            },
+        },
+    },
 
     ravenous_honey_buzzer = {
         cast = 0,
