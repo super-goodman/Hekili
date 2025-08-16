@@ -12,10 +12,9 @@ actions.precombat+=/guise_of_the_phase_diver
 actions+=/avengers_shield_interrupt
 actions+=/rebuke
 actions+=/hammer_of_justice,time>15
+actions+=/call_action_list,name=mitigation
 actions+=/tank_combat_wait,if=time<combat_delay&moving
 actions+=/tank_combat_wait,if=time<combat_delay&time< combat_delay/2&moving
-
-actions+=/call_action_list,name=mitigation
 actions+=/call_action_list,name=cooldowns,if=cooldown_check
 actions+=/call_action_list,name=trinkets
 actions+=/consecration,if=!buff.consecration.up&boss&time>5
@@ -125,7 +124,7 @@ actions.st+=/consecration
 actions.mitigation=/blessing_of_freedom,if=find.slowed.exist
 actions.mitigation=/cleanse_toxins
 actions.mitigation+=/lay_on_hands,if=health.pct<loh_health
-actions.mitigation+=/word_of_glory,if=health.pct<wog_health&(holy_power.deficit=0|buff.divine_purpose.up|buff.shining_light_free.up)&time>8
+actions.mitigation+=/word_of_glory,if=health.pct<wog_health&(holy_power.deficit=0|buff.divine_purpose.up|buff.shining_light_free.up)&time>8&buff.shield_of_the_righteous.up
 actions.mitigation=/intercession,if=health.pct>70
 actions.mitigation+=/ardent_defender,if=time<5&time>0&buff.divine_shield.down&buff.ardent_defender.down&buff.guardian_of_ancient_kings.down&active_enemies>=3
 actions.mitigation+=/ardent_defender,if=tanking&incoming_damage_5s>ad_damage&!(buff.ardent_defender.up|buff.guardian_of_ancient_kings.up|buff.divine_shield.up|buff.potion.up)

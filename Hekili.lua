@@ -729,7 +729,7 @@ hekili_autocast:SetScript("OnUpdate", function()
         local next_id_ = C_AssistedCombat.GetNextCastSpell()
         local next_id = FindBaseSpellByID(next_id_)
         local action_ = GetSpellLinkByID(next_id)
-        if next_id and isInBattle(action_) and not IsMounted() and not IsInTravelForm() and not UnitInVehicle("player")  and not UnitIsDead( "player" ) then
+        if next_id and isInBattle(action_) and not IsMounted() and not IsInTravelForm() and not isInVehicle()  and not UnitIsDead( "player" ) then
             restartAttack()
             
             swapTarget()
@@ -757,7 +757,7 @@ hekili_autocast:SetScript("OnUpdate", function()
      
            -- and action.delay < 0.5 
           
-            if action.actionName ~= nil and isInBattle(action) and not IsMounted() and not IsInTravelForm() and not UnitInVehicle("player")  and not UnitIsDead( "player" ) then
+            if action.actionName ~= nil and isInBattle(action) and not IsMounted() and not IsInTravelForm() and not isInVehicle() and not UnitIsDead( "player" ) then
 
                 local cast_ID, type = GetSpellIDByName(action.actionName)
                 local _, _, _, _, _, _, _, ChannellingID = UnitChannelInfo("player")
@@ -924,7 +924,7 @@ hekili_autocast:SetScript("OnUpdate", function()
 
     if Hekili.oneShotCast and Hekili.autocastAction_check and action ~= nil then
       
-        if action.actionName ~= nil and IsMounted() == false and IsInTravelForm() == false  and not UnitInVehicle("player") then
+        if action.actionName ~= nil and IsMounted() == false and IsInTravelForm() == false  and not isInVehicle() then
   
             local cast_ID, type = GetSpellIDByName(action.actionName)
             local _, _, _, _, _, _, _, ChannellingID = UnitChannelInfo("player")
@@ -1086,6 +1086,15 @@ function autoCooldowns()
     end
 
     
+end
+
+function isInVehicle()
+    local _, _, _, _,_, _, _, instanceID, _, _ = GetInstanceInfo()
+    if instanceID == 2441 then
+        return false
+    end
+
+    return UnitInVehicle("player")
 end
 
 function autoHPPotion()
