@@ -23,8 +23,8 @@ actions.default+=/cat_form,if=buff.cat_form.up&find.lowest_hp.pct<100
 actions.default+=/call_action_list,name=cds,if=find.lowest_hp.pct<100&((!raid&find.hurt_num_big.count>1)|(raid&find.hurt_num_big.count>3))
 actions.default+=/call_action_list,name=health_aoe,if=((!raid&find.hurt_num.count>2)|(raid&find.hurt_num.count>3))
 actions.default+=/call_action_list,name=health_st
-actions.default+=/call_action_list,name=st,if=target_is_enemie&health_party_pct>95
-actions.default+=/wrath
+actions.default+=/call_action_list,name=st,if=target_is_enemie&health_party_pct>95&!combat_forbidden
+actions.default+=/wrath,if=target_is_enemie&health_party_pct>95&!combat_forbidden
 
 actions.health_aoe+=/wild_growth,enable_moving=true,moving=0
 actions.health_aoe+=/swiftmend,if=find.lowest_hp.pct<80

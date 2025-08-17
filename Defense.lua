@@ -14,15 +14,15 @@ Hekili.excludeDispelWarning = false
 
 local unitIDs = { "target", "targettarget", "focus", "focustarget", "boss1", "boss2", "boss3", "boss4", "boss5", "arena1", "arena2", "arena3", "arena4", "arena5" }
 
-local lowHealthRangeSpell_magic_dps = {465827,473070,468813,460156,448791,428169,323393,1241693,426787,448888,1221532}
+local lowHealthRangeSpell_magic_dps = {465827,473070,468813,460156,448791,428169,323393,1241693,1241693,426787,448888,1221532}
 
-local lowHealthRangeSpell_physic_dps = {427609,448492,349934,346742,438877,438476}
+local lowHealthRangeSpell_physic_dps = {427609,448492,326409,349934,346742,438877,438476}
 
 local targetMeSpell_magic_dps = {446649,448787,319941}
 
-local targetMeSpell_physic_dps = {427629,446776,352345}
+local targetMeSpell_physic_dps = {7629,446776,353312,352345}
 
-local dot_magic_dps = {473713,468815,446368,446403,1236512,1236513,1236514,335338.433740,461507,438618,448248,431365,426735,451119,434441,1217439,1236126,1239487,1219704,1226444}
+local dot_magic_dps = {473713,468815,446368,446403,1236512,1236513,1236514,335338,344874,1240097,433740,461507,438618,448248,431365,426735,451119,434441,1217439,1236126,1239487,1219704,1226444}
 
 local dot_physic_dps = {453461,427621,427635}
 
@@ -366,7 +366,7 @@ function Hekili:isPlayerHasPhysicDot()
 end
 
 function Hekili:isTargetSpellingPhysicTargetMeReflectableSpell()
-    if not Hekili.DB.profile.toggles.autoDefendence.defendence and UnitName("boss1") == "无堕者哈夫" then return false end
+    if not Hekili.DB.profile.toggles.autoDefendence.defendence then return false end
     for unit, guid in pairs(Hekili.npGUIDs) do
         if UnitExists( unit ) and UnitIsUnit(unit .. "target", "player") and not UnitIsDead( unit ) and UnitCanAttack( "player", unit ) and UnitHealth( unit ) > 1 and not UnitIsPlayer( unit ) and UnitAffectingCombat(unit)  then
             local name, text, texture, startTimeMS, endTimeMS, isTradeSkill, castID, notInterruptible, spellId = UnitCastingInfo(unit)

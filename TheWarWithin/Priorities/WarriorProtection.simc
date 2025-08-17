@@ -1,9 +1,8 @@
 actions.precombat+=/defensive_stance,line_cd=4
 actions.precombat+=/battle_shout
 
-
-actions+=/pummel
-actions+=/spell_reflection,if=cooldown.pummel.remains>2
+actions+=/spell_reflection,if=!prev.1.pummel
+actions+=/pummel,if=!prev.1.spell_reflection
 actions+=/shield_block,if=buff.shield_block.remains<=4
 actions+=/tank_combat_wait,if=time<combat_delay&moving
 actions+=/tank_combat_wait,if=time<combat_delay&time<combat_delay/2&moving
@@ -11,7 +10,7 @@ actions+=/avatar,if=fight_remains>35
 actions+=/shield_wall,use_off_gcd=1,if=tanking&incoming_damage_5s>shield_wall_damage_taken&health.pct<=shield_wall_health_pct&!(buff.shield_wall.up|buff.last_stand.up|buff.rallying_cry.up|buff.potion.up)
 actions+=/ignore_pain,if=(rage.deficit<=15&cooldown.shield_slam.ready|rage.deficit<=40&cooldown.shield_charge.ready&talent.champions_bulwark.enabled|rage.deficit<=20&cooldown.shield_charge.ready|rage.deficit<=30&cooldown.demoralizing_shout.ready&talent.booming_voice.enabled|rage.deficit<=20&cooldown.avatar.ready|rage.deficit<=45&cooldown.demoralizing_shout.ready&talent.booming_voice.enabled&buff.last_stand.up&talent.unnerving_focus.enabled|rage.deficit<=30&cooldown.avatar.ready&buff.last_stand.up&talent.unnerving_focus.enabled|rage.deficit<=20|rage.deficit<=40&cooldown.shield_slam.ready&buff.violent_outburst.up&talent.heavy_repercussions.enabled&talent.impenetrable_wall.enabled|rage.deficit<=55&cooldown.shield_slam.ready&buff.violent_outburst.up&buff.last_stand.up&talent.unnerving_focus.enabled&talent.heavy_repercussions.enabled&talent.impenetrable_wall.enabled|rage.deficit<=17&cooldown.shield_slam.ready&talent.heavy_repercussions.enabled|rage.deficit<=18&cooldown.shield_slam.ready&talent.impenetrable_wall.enabled)|(rage>=70|buff.seeing_red.stack=7&rage>=35)&cooldown.shield_slam.remains<=1&buff.shield_block.remains>=4&set_bonus.tier31_2pc,use_off_gcd=1
 #self
-actions+=/ignore_pain,if=buff.ignore_pain.remains<2|buff.ignore_pain.v1<=health.max*0.2
+actions+=/ignore_pain,if=buff.ignore_pain.remains<2&buff.shield_block.up|buff.ignore_pain.v1<=health.max*0.2&buff.shield_block.up*time>5
 actions+=/last_stand,use_off_gcd=1,if=tanking&incoming_damage_5s>last_stand_damage_taken&health.pct<=last_stand_health_pct&!(buff.shield_wall.up|buff.last_stand.up|buff.rallying_cry.up|buff.potion.up)
 actions+=/rallying_cry,if=tanking&incoming_damage_5s>rallying_cry_damage_taken&health.pct<=rallying_cry_health_pct&!(buff.shield_wall.up|buff.last_stand.up|buff.rallying_cry.up|buff.potion.up)
 actions+=/victory_rush,if=health.pct<victory_rush_health_pct&talent.impending_victory.disabled&(time>10|active_enemies<2)
@@ -36,8 +35,8 @@ actions+=/demolish,if=buff.colossal_might.stack>=3&cooldown.avatar.remains>10&fi
 actions+=/run_action_list,name=aoe,strict=1,if=spell_targets.thunder_clap>=3
 actions+=/run_action_list,name=generic,if=spell_targets.thunder_clap<3
 
-
-actions.aoe=thunder_blast,if=dot.rend.remains<=1
+actions.aoe+=/thunder_blast,if=buff.thunder_blast.stack=2
+actions.aoe+=/thunder_blast,if=dot.rend.remains<=1
 actions.aoe+=/thunder_clap,if=dot.rend.remains<=1
 actions.aoe+=/thunder_blast,if=buff.violent_outburst.up&spell_targets.thunderclap>=2&buff.avatar.up&talent.unstoppable_force.enabled
 actions.aoe+=/execute,if=spell_targets.execute>=2&(rage>=50|buff.sudden_death.up)&talent.heavy_handed.enabled
