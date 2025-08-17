@@ -845,7 +845,7 @@ spec:RegisterAbilities( {
         cast = 0,
         cooldown = 90,
         gcd = "off",
-
+        usable = function () return target.distance <= 10, "target must be nearby" end,
         spend = -10,
         spendType = "rage",
 
@@ -1706,7 +1706,7 @@ spec:RegisterAbilities( {
         cast = 0,
         cooldown = 90,
         gcd = "off",
-
+        usable = function () return target.distance <= 10, "target must be nearby" end,
         toggle = "cooldowns",
         spend = function() return talent.reckless_abandon.enabled and -50 or 0 end,
         spendType = "rage",

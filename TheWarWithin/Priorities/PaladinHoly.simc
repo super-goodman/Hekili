@@ -54,13 +54,16 @@ actions.aoe_healing+=/beacon_of_virtue,if=cooldown.beacon_of_virtue.remains=0&ta
 actions.aoe_healing+=/light_of_dawn,if=holy_power.current>2&raid&!buff.empyrean_legacy.up&find.lowest_hp.pct>45&!cooldown.beacon_of_virtue.remains>8
 actions.aoe_healing+=/gallagio_bottle_service,if=find.lowest_hp.pct<50
 
+
+
 actions.st_healing+=/judgment,if=buff.awakening_ready.remains>0&(buff.awakening_ready.remains<5|health_party_pct<judgment_party_health)&target_is_enemie&target.distance<30&find.lowest_hp.pct<50
 actions.st_healing+=/avenging_wrath,if=find.hurt_num_big.count>2&find.lowest_hp.pct<50&buff.avenging_wrath.down
 actions.st_healing+=/divine_toll,if=find.lowest_hp.pct<65&talent.divine_toll.enabled&(cooldown.beacon_of_virtue.remains>8|talent.beacon_of_faith.enabled)&talent.rising_sunlight.enabled
 actions.st_healing+=/holy_prism,if=find.lowest_hp.pct<70&target.distance<30
 actions.st_healing+=/word_of_glory,if=(holy_power.current>2|buff.divine_purpose.up)&find.lowest_hp.pct<95
 actions.st_healing+=/gallagio_bottle_service,if=find.lowest_hp.pct<50
-actions.st_healing+=/holy_armaments,if=buff.holy_bulwark_ready.up&find.lowest_hp.pct<100
+actions.st_healing+=/sacred_weapon,if=(!prev_gcd.1.holy_bulwark|moving)&cooldown_check
+actions.st_healing+=/holy_bulwark,if=(!prev_gcd.1.sacred_weapon|moving)&cooldown_check&buff.holy_bulwark_ready.up&find.lowest_hp.pct<100
 actions.st_healing+=/holy_shock,if=holy_power.current<5&buff.rising_sunlight.up&find.lowest_hp.pct<100
 actions.st_healing+=/flash_of_light,moving=0,enable_moving=true,if=!moving&buff.infusion_of_light.up&raid&holy_power.current<5&find.lowest_hp.pct<100
 actions.st_healing+=/holy_shock,if=holy_power.current<5&!buff.rising_sunlight.up&(moving|buff.infusion_of_light.down|!raid)&find.lowest_hp.pct<100
