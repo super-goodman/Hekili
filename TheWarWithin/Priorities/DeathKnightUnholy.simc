@@ -18,12 +18,14 @@ actions.precombat+=/variable,name=damage_trinket_priority,op=setif,value=2,value
 actions+=/mind_freeze
 actions+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check&!raid
 actions+=/variable,name=st_planning,op=set,value=active_enemies=1
-actions+=/variable,name=adds_remain,op=set,value=active_enemies>1
-actions+=/variable,name=apoc_timing,op=set,value=3,value_else=0,condition=cooldown.apocalypse.remains<5&debuff.festering_wound.down&cooldown.unholy_assault.remains>5
+## [Hekili] This could be shifted to 'raid_event.adds.remains>6' because it does return remaining time on secondary targets (excluding current target).
+actions+=/variable,name=adds_remain,op=set,value=active_enemies>1&fight_remains>6
+actions+=/variable,name=apoc_timing,op=set,value=5,value_else=2,condition=cooldown.apocalypse.remains<5&debuff.festering_wound.down&cooldown.unholy_assault.remains>5
 actions+=/variable,name=pop_wounds,op=set,value=(cooldown.apocalypse.remains>variable.apoc_timing|!talent.apocalypse)&(debuff.festering_wound.up&cooldown.unholy_assault.remains<20&talent.unholy_assault&active_enemies=1|debuff.rotten_touch.up&debuff.festering_wound.up|debuff.festering_wound.stack>=4-pet.abomination.active)|fight_remains<5&debuff.festering_wound.up
-actions+=/variable,name=pooling_runic_power,op=set,value=talent.vile_contagion&cooldown.vile_contagion.remains<5&runic_power<30
+actions+=/variable,name=pooling_runic_power,op=set,value=cooldown.summon_gargoyle.remains>5&runic_power<40
 actions+=/variable,name=spend_rp,op=setif,value=(!talent.rotten_touch|talent.rotten_touch&!debuff.rotten_touch.up|runic_power.deficit<20)&((talent.improved_death_coil&(active_enemies=2|talent.coil_of_devastation)|rune<3|pet.gargoyle.active|buff.sudden_doom.up|!variable.pop_wounds&debuff.festering_wound.stack>=4))
 actions+=/variable,name=san_coil_mult,op=setif,value=2,value_else=1,condition=buff.essence_of_the_blood_queen.stack>=4
+actions+=/variable,name=epidemic_targets,value=3+talent.improved_death_coil+(talent.frenzied_bloodthirst*variable.san_coil_mult)+(talent.hungering_thirst&talent.harbinger_of_doom&buff.sudden_doom.up)
 actions+=/variable,name=epidemic_targets,value=3+talent.improved_death_coil+(talent.frenzied_bloodthirst*variable.san_coil_mult)+(talent.hungering_thirst&talent.harbinger_of_doom&buff.sudden_doom.up)
 ## Call Action Lists
 actions+=/call_action_list,name=san_trinkets,strict=1,if=talent.vampiric_strike
@@ -74,19 +76,23 @@ actions.aoe+=/wound_spender,cycle_targets=1,if=debuff.festering_wound.up&cooldow
 ## AoE Burst
 actions.aoe_burst+=/festering_strike,if=buff.festering_scythe.up
 actions.aoe_burst+=/death_and_decay,if=death_knight.fwounded_targets=active_enemies&talent.desecrate&(talent.festering_scythe&death_knight.fwounded_targets=0&buff.festering_scythe_stacks.stack<10&!buff.festering_scythe.up|!talent.festering_scythe)&(raid_event.adds.exists&raid_event.adds.remains>6&(raid_event.adds.remains<10|!buff.death_and_decay.up)|!raid_event.adds.exists|fight_remains>6&fight_remains<10)
-actions.aoe_burst+=/death_coil,cycle_targets=1,if=!buff.vampiric_strike.up&active_enemies<variable.epidemic_targets&(!talent.bursting_sores|talent.bursting_sores&death_knight.fwounded_targets<active_enemies&death_knight.fwounded_targets<active_enemies*0.4&buff.sudden_doom.up|buff.sudden_doom.up&(talent.doomed_bidding&talent.menacing_magus|talent.rotten_touch|debuff.death_rot.remains<gcd)|rune<2)|(rune<4|active_enemies<4|boss)&active_enemies<variable.epidemic_targets&buff.gift_of_the_sanlayn.up&gcd<=1.0&(fight_remains>buff.dark_transformation.remains*2)
-actions.aoe_burst+=/epidemic,if=!buff.vampiric_strike.up&(!talent.bursting_sores|talent.bursting_sores&death_knight.fwounded_targets<active_enemies&death_knight.fwounded_targets<active_enemies*0.4&buff.sudden_doom.up|buff.sudden_doom.up&(buff.a_feast_of_souls.up|debuff.death_rot.remains<gcd|debuff.death_rot.stack<10)|rune<2)|(rune<4|boss)&active_enemies>variable.epidemic_targets&buff.gift_of_the_sanlayn.up&gcd<=1.0&fight_remains>buff.dark_transformation.remains*2
+#self
+actions.aoe_burst+=/death_coil,cycle_targets=1,if=!buff.vampiric_strike.up&active_enemies<variable.epidemic_targets&(!talent.bursting_sores|talent.bursting_sores&buff.sudden_doom.up&death_knight.fwounded_targets<active_enemies*0.4|buff.sudden_doom.up&(talent.doomed_bidding&talent.menacing_magus|talent.rotten_touch|debuff.death_rot.remains<gcd)|rune<2)|(rune<4|active_enemies<4|boss)&active_enemies<variable.epidemic_targets&buff.gift_of_the_sanlayn.up&gcd<=1.0&(fight_remains>buff.dark_transformation.remains*2)
+#self
+actions.aoe_burst+=/epidemic,if=!buff.vampiric_strike.up&(!talent.bursting_sores|talent.bursting_sores&buff.sudden_doom.up&death_knight.fwounded_targets<active_enemies*0.4|buff.sudden_doom.up&(buff.a_feast_of_souls.up|debuff.death_rot.remains<gcd|debuff.death_rot.stack<10)|rune<2)|(rune<4|boss)&active_enemies>=variable.epidemic_targets&buff.gift_of_the_sanlayn.up&gcd<=1.0&fight_remains>buff.dark_transformation.remains*2
 actions.aoe_burst+=/wound_spender,cycle_targets=1,if=debuff.chains_of_ice_trollbane_slow.up
 actions.aoe_burst+=/wound_spender,cycle_targets=1,if=debuff.festering_wound.up|buff.vampiric_strike.up|buff.death_and_decay.up
 actions.aoe_burst+=/death_coil,cycle_targets=1,if=active_enemies<variable.epidemic_targets
-actions.aoe_burst+=/epidemic,if=variable.epidemic_targets<active_enemies
+#self
+actions.aoe_burst+=/epidemic,if=variable.epidemic_targets=active_enemies
 actions.aoe_burst+=/festering_strike,cycle_targets=1,if=debuff.festering_wound.stack<=2
 actions.aoe_burst+=/wound_spender,cycle_targets=1
 
 ## AoE Setup
 actions.aoe_setup+=/festering_strike,if=buff.festering_scythe.up
 ## [Syrif] Added fallback use based on time to max charges; this is in case you have target swaps enabled but...aren't swapping targets to apply Festering Wounds.
-actions.aoe_setup+=/any_dnd,if=!death_and_decay.ticking&(full_recharge_time<2*gcd.max|death_knight.fwounded_targets>=cycle_enemies&(rune>3|runic_power<30)|talent.desecrate&(talent.festering_scythe&death_knight.fwounded_targets=0&buff.festering_scythe_stacks.stack<10&!buff.festering_scythe.up|!talent.festering_scythe))
+#self
+actions.aoe_setup+=/any_dnd,if=!death_and_decay.ticking&(full_recharge_time<2*gcd.max|death_knight.fwounded_targets>=active_enemies&(rune>3|runic_power<30)|talent.desecrate&(talent.festering_scythe&death_knight.fwounded_targets=0&buff.festering_scythe_stacks.stack<10&!buff.festering_scythe.up|!talent.festering_scythe))
 actions.aoe_setup+=/festering_strike,cycle_targets=1,if=death_knight.fwounded_targets=0&cooldown.apocalypse.remains<gcd&(cooldown.dark_transformation.remains&cooldown.unholy_assault.remains|cooldown.unholy_assault.remains|!talent.unholy_assault)
 actions.aoe_setup+=/wound_spender,if=debuff.chains_of_ice_trollbane_slow.up
 actions.aoe_setup+=/death_coil,cycle_targets=1,if=!variable.pooling_runic_power&active_enemies<variable.epidemic_targets&rune<4
@@ -109,8 +115,8 @@ actions.cds+=/outbreak,if=(dot.virulent_plague.refreshable|talent.superstrain&(d
 actions.cds_aoe+=/unholy_assault,cycle_targets=1,if=variable.adds_remain
 actions.cds_aoe+=/dark_transformation,if=variable.adds_remain&(death_and_decay.ticking|cooldown.death_and_decay.remains<3)
 actions.cds_aoe+=/apocalypse,cycle_targets=1,if=variable.adds_remain&(death_and_decay.ticking|cooldown.death_and_decay.remains<3|rune<3|set_bonus.tww3_rider_of_the_apocalypse_2pc)
-## [Syrif] - Internal expression to handle SimC only checking 1 spell for CD
-actions.cds_aoe+=/outbreak,if=dot.virulent_plague.ticks_remain<5&dot.virulent_plague.refreshable&(!talent.unholy_blight|talent.unholy_blight&dark_transformation_cooldown)&(!talent.raise_abomination|talent.raise_abomination&cooldown.raise_abomination.remains)
+#self   
+actions.cds_aoe+=/outbreak,if=dot.virulent_plague.ticks_remain<5&dot.virulent_plague.refreshable&(!talent.unholy_blight|talent.unholy_blight&!cooldown.dark_transformation.ready)&(!talent.raise_abomination|talent.raise_abomination&cooldown.raise_abomination.remains)
 
 # Sanlayn CDs AoE
 actions.cds_aoe_san+=/dark_transformation,if=variable.adds_remain&(buff.death_and_decay.up|active_enemies<=3)
@@ -145,8 +151,11 @@ actions.cleave+=/any_dnd,if=!death_and_decay.ticking&variable.adds_remain|talent
 actions.cleave+=/death_coil,if=!variable.pooling_runic_power&talent.improved_death_coil
 actions.cleave+=/wound_spender,if=buff.vampiric_strike.up
 actions.cleave+=/death_coil,if=!variable.pooling_runic_power&!talent.improved_death_coil
-actions.cleave+=/festering_strike,cycle_targets=1,if=buff.vampiric_strike.down&!variable.pop_wounds&debuff.festering_wound.stack<2|buff.festering_scythe.up
-actions.cleave+=/festering_strike,cycle_targets=1,if=buff.vampiric_strike.down&cooldown.apocalypse.remains<variable.apoc_timing&debuff.festering_wound.down
+## [Hekili] Revised to allow Festering Strike with more wounds active; change is neutral/positive in sim and reduces wait time.
+## actions.cleave+=/festering_strike,cycle_targets=1,if=buff.vampiric_strike.down&!variable.pop_wounds&debuff.festering_wound.stack<2|buff.festering_scythe.up
+actions.cleave+=/festering_strike,cycle_targets=1,if=buff.vampiric_strike.down&!variable.pop_wounds&debuff.festering_wound.stack<4|buff.festering_scythe.up
+## [Hekili] Revised to allow Festering Strike with more wounds active; entry is typically not reached in SimC.
+actions.cleave+=/festering_strike,cycle_targets=1,if=buff.vampiric_strike.down&cooldown.apocalypse.remains<variable.apoc_timing&debuff.festering_wound.stack<4
 actions.cleave+=/wound_spender,if=variable.pop_wounds
 
 ## San'layn Fishing

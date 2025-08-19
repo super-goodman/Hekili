@@ -652,7 +652,7 @@ function ns.dumpNameplateInfo()
 end
 
 
-function ns.updateTarget( id, time, mine )
+function ns.updateTarget( id, time, mine, spellID )
     local spec = rawget( Hekili.DB.profile.specs, state.spec.id )
     if not spec or not spec.damage then return end
 

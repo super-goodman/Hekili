@@ -508,7 +508,8 @@ do
 
     
     function Hekili:getHealthPct(unit)
-        if Hekili.State.instance_id == 2662 then
+        local _, zone, _, _, _, _, _, instanceID = GetInstanceInfo()
+        if instanceID == 2662 then
             return UnitHealth(unit) / (UnitHealthMax(unit) + UnitGetTotalHealAbsorbs(unit) ) * 100
         end
         return UnitHealth(unit) / UnitHealthMax(unit) * 100
