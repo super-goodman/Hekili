@@ -8636,7 +8636,7 @@ do
 
                         filterCasts  ={
                             type = "toggle",
-                            name = format( "%s 打断过滤器（地心S2）", NewFeature ),
+                            name = format( "%s 打断过滤器（地心S3）", NewFeature ),
                             desc = format( "如果勾选，当目标使用可以被打断的技能时，将忽略低优先级的技能。\n\n"
                                 .. "举例:  在永茂林地地下城， 塑地者特鲁的 |W%s|w 将被忽略，而 |W%s|w 会被打断。", ( GetSpellInfo( 168040 ) or "自然之怒" ),
                                 ( GetSpellInfo( 427459 ) or "毒性爆发" ) ),

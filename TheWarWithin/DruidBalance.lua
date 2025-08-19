@@ -1891,8 +1891,7 @@ spec:RegisterAbilities( {
         target = "mouseover",
         cooldown = 600,
         gcd = "spell",
-        spend = 30,
-        spendType = "rage",
+
         usable = function ()
             return Hekili:isMouseOverMemberDead() and Hekili.resurrectionCount(20484) >= 1
         end,

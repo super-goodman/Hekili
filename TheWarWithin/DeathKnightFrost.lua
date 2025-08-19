@@ -719,8 +719,7 @@ spec:RegisterAuras( {
         id = 434765,
         duration = 12.0,
         tick_time = 1.0,
-        max_stack = function() if set_bonus.tww3 >= 4 then return 55 else
-            return 40 end end,
+        max_stack = function() return set_bonus.tww3 >= 4 and 55 or 40 end,
         copy = "reapers_mark_debuff",
         onRemove = function()
             if set_bonus.tww3 >= 4 then
@@ -1484,7 +1483,7 @@ spec:RegisterAbilities( {
         cooldown = 30,
         charges = 2,
         recharge = 30,
-
+        toggle = "essences",
         gcd = "off",
         school = "shadowfrost",
 
@@ -1521,7 +1520,7 @@ spec:RegisterAbilities( {
 
         cycle = function ()
             if debuff.mark_of_fyralath.up then return "mark_of_fyralath" end
-            if death_knight.runeforge.razorice and talent.shattering_blade.disabled and debuff.razorice.at_max_stacks then return "razorice" end
+            if talent.shattering_blade.disabled and debuff.razorice.at_max_stacks then return "razorice" end
         end,
 
         handler = function ()

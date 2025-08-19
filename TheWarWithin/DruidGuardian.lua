@@ -2246,7 +2246,7 @@ spec:RegisterAbilities( {
 
         spend = function() return -5 * ( buff.furious_regeneration.up and 1.15 or 1 ) end,
         spendType = "rage",
-        usable = function () return target.distance <= 10, "target must be nearby" end,
+        usable = function () return target.distance <= 8, "target must be nearby" end,
         talent = "thrash",
         form = "bear_form",
         startsCombat = true,

@@ -31,11 +31,16 @@ actions.default+=/spiritwalkers_grace,if=buff.ascendance.remains>10
 actions.default+=/call_action_list,name=cds
 actions.default+=/call_action_list,name=health_aoe,if=find.none_target_lowest_hp.pct<100&(((!raid&find.hurt_num_big.count>1)|(raid&find.hurt_num_big.count>2))|((!raid&find.hurt_num.count>1)|(raid&find.hurt_num.count>2)))
 actions.default+=/call_action_list,name=health_st,if=find.none_target_lowest_hp.pct<100
-actions.default+=/flame_shock,if=target.debuff.flame_shock.down&mana.pct>20&target_is_enemie
-actions.default+=/chain_lightning,if=active_enemies>1&!moving
-actions.default+=/lava_burst,if=target.debuff.flame_shock.up&mana.pct>20&!moving
-actions.default+=/primal_strike,if=target.distance<3&moving&mana.pct>20
-actions.default+=/lightning_bolt
+actions.default+=/call_action_list,name=st,if=find.none_target_lowest_hp.pct>90
+
+
+actions.st+=/flame_shock,if=target.debuff.flame_shock.down&mana.pct>20&target_is_enemie
+actions.st+=/chain_lightning,if=active_enemies>1&!moving
+actions.st+=/lava_burst,if=target.debuff.flame_shock.up&mana.pct>20&!moving
+actions.st+=/primal_strike,if=target.distance<3&moving&mana.pct>20
+actions.st+=/lightning_bolt
+
+
 
 actions.cds+=/chromebustible_bomb_suit,if=health.pct<50
 actions.cds+=/ringing_ritual_mud,if=health.pct<50
@@ -64,6 +69,7 @@ actions.health_aoe+=/chain_heal,if=find.lowest_hp.pct<70&mana.pct>5
 actions.health_st+=/healing_stream_totem,if=find.none_target_lowest_hp.pct>80&talent.ancestral_swiftness.enabled
 actions.health_st+=/riptide,if=find.lowest_hp.pct<85|buff.tidal_waves.down
 actions.health_st+=/primordial_wave,if=find.none_target_lowest_hp.pct<60&find.none_target_lowest_hp.pct<100
+actions.health_st+=/healing_wave,if=find.lowest_hp.pct<100&find.lowest_hp.pct>90
 actions.health_st+=/healing_surge,if=buff.tidal_waves.up&((find.lowest_hp.pct<40&raid&mana.pct>65)|(find.lowest_hp.pct<80&!raid))&(!moving|buff.spiritwalkers_grace.up)
 
 actions.racial+=/blood_fury

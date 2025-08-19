@@ -1734,7 +1734,13 @@ function scripts:LoadScripts()
                 auras = {},
                 hasOffGCD = false
             }
-
+            if not pData.lists[ "health_items" ] then
+                pData.lists[ "health_items" ] = {}
+                insert( pData.lists[ "health_items" ], { action = "healthstone", enabled = true, list_name = "health_items", criteria = "health.pct < health_items_threshold" } )
+                insert( pData.lists[ "health_items" ], { action = "invigorating_healing_potion", enabled = true, list_name = "health_items", criteria = "health.pct < health_items_threshold" } )
+                insert( pData.lists[ "health_items" ], { action = "algari_healing_potion", enabled = true, list_name = "health_items", criteria = "health.pct < health_items_threshold" } )
+                pData.lists[ "default" ] = {{ action = "call_action_list", enabled = true, list_name = "health_items", criteria = "health_items_enabled"}, unpack(pData.lists[ "default" ])}
+            end
             for list, lData in pairs( pData.lists ) do
                 for action, _ in ipairs( lData ) do
                     Hekili:LoadScript( pack, list, action )

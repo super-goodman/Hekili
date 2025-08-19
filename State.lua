@@ -2289,6 +2289,8 @@ do
             elseif k == "miss_react" then return false
             elseif k == "ranged" then return false
             elseif k == "wait_for_gcd" then return false
+            elseif k == "health_items_enabled" then return Hekili.DB.profile.toggles.autoHPPotion.value
+            elseif k == "health_items_threshold" then return Hekili.DB.profile.toggles.autoHPPotion.autoHPPotion_threshold
             elseif k == "cooldown_check" then return true --self
             elseif k == "target_incombat" then return UnitAffectingCombat("target") --self
             elseif k == "group_enemy_health_pct" then
@@ -4830,7 +4832,7 @@ local mt_active_dot = {
 }
 ns.metatables.mt_active_dot = mt_active_dot
 
--- Table for counting active dots.
+-- Table for counting active hots.
 local mt_active_hot = {
     __index = function(t, k)
         local aura = class.auras[ k ]
@@ -4840,6 +4842,10 @@ local mt_active_hot = {
             if rawget( t, aura.key ) then return t[ aura.key ] end
             local id = aura.id
             local count = Hekili:findActiveHotNumber( id )
+            if aura.team_id then
+                local count_ = Hekili:findActiveHotNumber( aura.team_id )
+                count = count + count_
+            end
             if aura.copy then
                 if type( aura.copy ) == "table" then
                     for _, v in ipairs( aura.copy ) do

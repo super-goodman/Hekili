@@ -372,7 +372,7 @@ function Hekili:isTargetSpellingPhysicTargetMeReflectableSpell()
             local name, text, texture, startTimeMS, endTimeMS, isTradeSkill, castID, notInterruptible, spellId = UnitCastingInfo(unit)
             if spellId then
                 local remainingTime = (endTimeMS / 1000) - GetTime()
-                if remainingTime <= 0.5 and not notInterruptible then return true end
+                if remainingTime <= 0.7 and not notInterruptible then return true end
             end
         end
 
@@ -508,7 +508,10 @@ do
 
     
     function Hekili:getHealthPct(unit)
-        return UnitHealth(unit) /UnitHealthMax(unit)*100
+        if Hekili.State.instance_id == 2662 then
+            return UnitHealth(unit) / (UnitHealthMax(unit) + UnitGetTotalHealAbsorbs(unit) ) * 100
+        end
+        return UnitHealth(unit) / UnitHealthMax(unit) * 100
     end
 
     function Hekili:findLowestHpUnit()
@@ -586,7 +589,7 @@ do
         for unit, guid in pairs(friendGuids) do
             local i = 1
             local name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitBuff( unit , i )
-      
+
             while( name ) do
                 if spellId == id then 
                     count_ = count_ + 1

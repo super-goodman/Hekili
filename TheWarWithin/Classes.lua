@@ -532,6 +532,14 @@ local spellFilters = {
     --             spell_reflection = true, -- for testing
     --         },
     --     },
+    --     [ 212697 ] = {
+    --         name = "123",
+    --         [ 440162 ] = {
+    --             name = "123",
+    --             interrupt = true,
+    --             spell_reflection = true, -- for testing
+    --         },
+    --     },
     -- },
 
     -- [ 2601 ] = {
@@ -609,7 +617,16 @@ local spellFilters = {
             name = "Fanatical Conjuror",
             [ 427469 ] = {
                 name = "Fireball",
+                interrupt = true,
                 spell_reflection = true,
+            },
+        },
+        [ 239834 ] = {
+            name = "Fanatical Conjuror",
+            [ 424421 ] = {
+                name = "Fireball",
+                spell_reflection = true,
+                interrupt = true,
             },
         },
         [ 207939 ] = {
@@ -627,6 +644,7 @@ local spellFilters = {
             name = "Prioress Murrpray",
             [ 423536 ] = {
                 name = "Holy Smite",
+                interrupt = true,
                 spell_reflection = true,
             },
 			[ 444608 ] = {
@@ -1008,6 +1026,7 @@ local spellFilters = {
             name = "Ara-Kara, City of Echoes - Nakt",
             [ 434786 ] = {
                 name = "Web Bolt",
+                interrupt = true,
                 spell_reflection = true,
             },
         },
@@ -1087,10 +1106,27 @@ local spellFilters = {
 
     [ 2662 ] = {
         name = "The Dawnbreaker",
+        [ 211087 ] = {
+            name = "Sureki Webmage",
+            [ 428086 ] = {
+                name = "Night Bolt",
+                interrupt = true,
+                spell_reflection = true,
+            },
+        },
         [ 210966 ] = {
             name = "Sureki Webmage",
             [ 451113 ] = {
                 name = "Web Bolt",
+                interrupt = true,
+                spell_reflection = true,
+            },
+        },
+        [ 224616 ] = {
+            name = "活化暗影",
+            [ 452099 ] = {
+                name = "Web Bolt",
+                interrupt = true,
                 spell_reflection = true,
             },
         },
@@ -1098,6 +1134,7 @@ local spellFilters = {
             name = "Nightfall Shadowmage",
             [ 431303 ] = {
                 name = "Night Bolt",
+                interrupt = true,
                 spell_reflection = true,
             },
             [ 431309 ] = {
@@ -1108,6 +1145,11 @@ local spellFilters = {
         [ 213893 ] = {
             name = "Nightfall Darkcaster",
             [ 431333 ] = {
+                name = "Tormenting Beam",
+                interrupt = true,
+                spell_reflection = true,
+            },
+            [ 432520 ] = {
                 name = "Tormenting Beam",
                 interrupt = true,
             },
@@ -1314,6 +1356,39 @@ local spellFilters = {
             name = "Mechadrone Sniper",
             [ 1214468 ] = {
                 name = "Trickshot",
+                interrupt = true,
+                spell_reflection = true,
+            },
+        },
+        [ 231496 ] = {
+            name = "风险管理公司潜水员",
+            [ 468631 ] = {
+                name = "鱼叉",
+                interrupt = true,
+                spell_reflection = true,
+            },
+        },
+        [ 229252 ] = {
+            name = "暗索土狼",
+            [ 463058 ] = {
+                name = "嗜血狞笑",
+                interrupt = true,
+                spell_reflection = true,
+            },
+        },
+        [ 231223 ] = {
+            name = "被惊扰的海藻",
+            [ 471733 ] = {
+                name = "回春水藻",
+                interrupt = true,
+                spell_reflection = true,
+            },
+        },
+        [ 231380 ] = {
+            name = "幽暗爬行者",
+            [ 465813 ] = {
+                name = "昏睡毒液",
+                interrupt = true,
                 spell_reflection = true,
             },
         },
@@ -1321,6 +1396,7 @@ local spellFilters = {
             name = "Venture Co. Surveyor",
             [ 462771 ] = {
                 name = "Surveying Beam",
+                interrupt = true,
                 spell_reflection = true,
             },
         },
@@ -1335,6 +1411,7 @@ local spellFilters = {
             name = "Darkfuse Bloodwarper",
             [ 465871 ] = {
                 name = "Blood Bolt",
+                interrupt = true,
                 spell_reflection = true,
             },
         },
@@ -1353,6 +1430,7 @@ local spellFilters = {
             name = "Venture Co. Electrician",
             [ 465595 ] = {
                 name = "Lightning Bolt",
+                interrupt = true,
                 spell_reflection = true,
             },
         },
@@ -1370,6 +1448,235 @@ local spellFilters = {
 				blessing_of_spellwarding = true,
 			},
 		},
+    },
+
+    --self
+
+    [ 2287 ] = {
+        name = "赎罪大厅",
+        [ 164562 ] = {
+            name = "堕落的驯犬者",
+            [ 326450 ] = {
+                name = "忠心的野兽",
+                interrupt = true,
+                --spell_reflection = true, 
+            },
+        },
+        [ 165414 ] = {
+            name = "堕落的歼灭者",
+            [ 338003 ] = {
+                name = "邪恶箭矢",
+                interrupt = true,
+                spell_reflection = true, -- for testing
+            },
+        },
+        [ 165529 ] = {
+            name = "堕落的搜集者",
+            [ 325701 ] = {
+                name = "生命虹吸",
+                interrupt = true,
+                spell_reflection = true, -- for testing
+            },
+        },
+        [ 164363 ] = {
+            name = "不死石精",
+            [ 328322 ] = {
+                name = "罪邪箭",
+                interrupt = true,
+                spell_reflection = true, -- for testing
+            },
+        },
+        [ 165410 ] = {
+            name = "高阶裁决官阿丽兹",
+            [ 323538 ] = {
+                name = "心能箭矢",
+                interrupt = true,
+                spell_reflection = true, -- for testing
+            },
+        },
+        [ 167876 ] = {
+            name = "审判官西加尔",
+            [ 326829 ] = {
+                name = "邪恶箭矢",
+                interrupt = true,
+                spell_reflection = true, -- for testing
+            },
+        },
+    },
+
+
+    [ 2441 ] = {
+        name = "塔扎维什",
+        [ 178139 ] = {
+            name = "浊盐碎壳者",
+            [ 355057 ] = {
+                name = "鱼人战吼",
+                interrupt = true,
+                --spell_reflection = true, 
+            },
+        },
+        [ 165414 ] = {
+            name = "浊盐鱼术师",
+            [ 355225 ] = {
+                name = "水箭",
+                interrupt = true,
+                spell_reflection = true, -- for testing
+            },
+        },
+        [ 176551 ] = {
+            name = "宝库净化者",
+            [ 352347 ] = {
+                name = "英勇冲击",
+                interrupt = true,
+                --spell_reflection = true, -- for testing
+            },
+        },
+        [ 179388 ] = {
+            name = "时沙号海潮贤者",
+            [ 356843 ] = {
+                name = "盐渍飞弹",
+                interrupt = true,
+                spell_reflection = true, -- for testing
+            },
+        },
+        [ 180431 ] = {
+            name = "专心的祭师",
+            [ 354297 ] = {
+                name = "凌光箭",
+                --interrupt = true,
+                spell_reflection = true, -- for testing
+            },
+            [ 357260 ] = {
+                name = "不稳定的裂隙",
+                interrupt = true,
+                --spell_reflection = true, -- for testing
+            },
+        },
+
+        --天街
+        [ 177817 ] = {
+            name = "支援警官",
+            [ 354297 ] = {
+                name = "凌光箭",
+                interrupt = true,
+                spell_reflection = true, -- for testing
+            },
+            [ 355934 ] = {
+                name = "强光屏障",
+                interrupt = true,
+                --spell_reflection = true, -- for testing
+            },
+        },
+        [ 179841 ] = {
+            name = "老练的火花法师",
+            [ 355641 ] = { --需要修改
+                name = "闪烁",
+                interrupt = true,
+                spell_reflection = true, -- for testing
+            },
+            [ 355642 ] = { --需要修改
+                name = "凌光齐射",
+                interrupt = true,
+                spell_reflection = true, -- for testing
+            },
+        },
+        [ 347775 ] = {
+            name = "过载的邮件元素",
+            [ 356843 ] = {
+                name = "垃圾信息过滤",
+                interrupt = true,
+                --spell_reflection = true, -- for testing
+            },
+        },
+        [ 356407 ] = {
+            name = "上古熔火恶犬",
+            [ 356843 ] = {
+                name = "上古恐慌",
+                interrupt = true,
+                --spell_reflection = true, -- for testing
+            },
+        },
+        [ 179269 ] = {
+            name = "绿洲保安",
+            [ 350922 ] = {
+                name = "威吓怒吼",
+                interrupt = true,
+                --spell_reflection = true, -- for testing
+            },
+        },
+        [ 176565 ] = {
+            name = "捣乱的顾客",
+            [ 353836 ] = {
+                name = "凌光箭",
+                interrupt = true,
+                spell_reflection = true, -- for testing
+            },
+        },
+        [ 176563 ] = {
+            name = "佐·格伦",
+            [ 350922 ] = {
+                name = "威吓怒吼",
+                interrupt = true,
+                --spell_reflection = true, -- for testing
+            },
+            [ 1241032 ] = {
+                name = "最终警告",
+                interrupt = true,
+                --spell_reflection = true, -- for testing
+            },
+        },
+        [ 175806 ] = {
+            name = "索·阿兹密",
+            [ 1245669 ] = {
+                name = "双重秘术",
+                interrupt = true,
+                --spell_reflection = true, -- for testing
+            },
+        },
+        [ 180336 ] = {
+            name = "财团智囊",
+            [ 357196 ] = {
+                name = "凌光箭",
+                interrupt = true,
+                spell_reflection = true, -- for testing
+            },
+        },
+    },
+
+    [ 2738 ] = {
+        name = "奥尔达尼生态圆顶",
+        [ 242209 ] = {
+            name = "吃撑的幼虫",
+            [ 1229474 ] = {
+                name = "啃噬",
+                interrupt = true,
+                spell_reflection = true, 
+            },
+        },
+        [ 234957 ] = {
+            name = "废土遗民祭师",
+            [ 1222815 ] = {
+                name = "奥术箭",
+                interrupt = true,
+                spell_reflection = true, -- for testing
+            },
+        },
+        [ 234962 ] = {
+            name = "废土遗民远遁者",
+            [ 1229510 ] = {
+                name = "弧光震击",
+                interrupt = true,
+                spell_reflection = true, -- for testing
+            },
+        },
+        [ 234955 ] = {
+            name = "废土遗民诉契者",
+            [ 1222815 ] = {
+                name = "奥术箭",
+                interrupt = true,
+                spell_reflection = true, -- for testing
+            },
+        },
     },
 }
 
