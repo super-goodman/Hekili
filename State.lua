@@ -3211,7 +3211,7 @@ do
 
     mt_target = {
         __index = function( t, k )
-            if k == "distance" then t[k] = UnitCanAttack( "player", "target" ) and ( ( t.minR + t.maxR ) / 2 ) or 7.5
+            if k == "distance" then t[k] = UnitCanAttack( "player", "target" ) and ( ( t.minR + t.maxR ) / 2 ) or 10.5
             elseif k == "in_range" then return t.distance <= 8
             elseif k == "minR" or k == "maxR" then
                 local minR, maxR = RC:GetRange( "target" )

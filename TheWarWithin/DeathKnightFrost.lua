@@ -1178,6 +1178,13 @@ local KillingMachineConsumer = setfenv( function ()
     -- Breath of Sindragosa
     if buff.breath_of_sindragosa.up then buff.breath_of_sindragosa.expires = buff.breath_of_sindragosa.expires + 0.8 * stacksConsumed end
 
+    -- Arctic Assault - fires Glacial Advance through target
+    if talent.arctic_assault.enabled then
+        -- This would trigger the glacial advance effect in the game
+        -- For simulation purposes, we can apply Razorice stacks to represent the effect
+        spec.abilities.glacial_advance.handler()
+    end
+
 end, state )
 
 -- Abilities
@@ -1619,7 +1626,7 @@ spec:RegisterAbilities( {
             end
 
             -- Horsemen interactions
-            if talent.trollbanes_icy_fury.enabled and (debuff.chains_of_ice_trollbane_slow.up or debuff.chains_of_ice_trollbane_damage.up) then
+            if talent.trollbanes_icy_fury.enabled and ( debuff.chains_of_ice_trollbane_slow.up or debuff.chains_of_ice_trollbane_damage.up ) then
                 removeDebuff( "target", "chains_of_ice_trollbane_slow" )
                 removeDebuff( "target", "chains_of_ice_trollbane_damage" )
                 -- Apply AoE damage and slow to nearby enemies
@@ -1777,6 +1784,10 @@ spec:RegisterAbilities( {
 
         handler = function ()
             if conduit.spirit_drain.enabled then gain( conduit.spirit_drain.mod * 0.1, "runic_power" ) end
+            if talent.coldthirst.enabled then
+                gain( 10, "runic_power" )
+                reduceCooldown( "mind_freeze", 3 )
+            end
             interrupt()
         end,
     },
@@ -1828,7 +1839,7 @@ spec:RegisterAbilities( {
             end
 
             -- Horsemen interactions
-            if talent.trollbanes_icy_fury.enabled and (debuff.chains_of_ice_trollbane_slow.up or debuff.chains_of_ice_trollbane_damage.up) then
+            if talent.trollbanes_icy_fury.enabled and ( debuff.chains_of_ice_trollbane_slow.up or debuff.chains_of_ice_trollbane_damage.up ) then
                 removeDebuff( "target", "chains_of_ice_trollbane_slow" )
                 removeDebuff( "target", "chains_of_ice_trollbane_damage" )
                 -- Apply AoE damage and slow to nearby enemies (simulated)
