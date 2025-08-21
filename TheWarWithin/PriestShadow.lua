@@ -2205,9 +2205,9 @@ spec:RegisterAbilities( {
             end
         end,
 
-        readyTime = function() 
+        readyTime = function()
             local holdCount = settings.hold_crash
-            if holdCount > 0 and active_enemies < holdCount then return action.shadow_crash.full_recharge_time end 
+            if holdCount > 0 and active_enemies < holdCount then return action.shadow_crash.full_recharge_time end
         end,
 
         copy = { 205385, 457042 }
@@ -2451,7 +2451,7 @@ spec:RegisterAbilities( {
                 spend( spec.abilities.void_bolt.spend, spec.abilities.void_bolt.spendType )
                 applyBuff( "power_infusion", buff.power_infusion.remains + 5 )
             end
-            applyBuff( "voidform" )
+            applyBuff( "voidform", nil, ( 20 + ( buff.sustained_potency.stack ) ) )
             if talent.ancient_madness.enabled then applyBuff( "ancient_madness", nil, 20 ) end
         end,
     },

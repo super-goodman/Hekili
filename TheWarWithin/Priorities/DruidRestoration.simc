@@ -4,7 +4,7 @@ actions.precombat+=/rejuvenation,if=find.lowest_hp.pct<=90
 actions.precombat+=/wild_growth,enable_moving=true,moving=0,if=find.hurt_num.count>2
 
 actions.default+=/call_action_list,name=bear,strict=1,if=buff.bear_form.up
-actions.default+=/skull_bash,if=target.distance<10
+actions.default+=/skull_bash,if=target.distance<=5
 actions.default+=/soothe
 actions.default+=/natures_cure
 actions.default+=/overgrowth,if=find.lowest_hp.pct<35
@@ -14,7 +14,6 @@ actions.default+=/barkskin,if=health.pct<65
 actions.default+=/lifebloom,if=find.health.pct<=100&find.health.pct>40&active_hot.lifebloom<2
 actions.default+=/use_items,enabled=0
 actions.default+=/berserking
-
 actions.default+=/adaptive_swarm,if=talent.adaptive_swarm.enabled
 actions.default+=/lifebloom,if=talent.undergrowth.enabled&buff.cat_form.down&find.lowest_hp.role!=find.tank.token&active_hot.lifebloom<2&find.health.pct>40
 actions.default+=/efflorescence,if=buff.efflorescence.down&buff.cat_form.down&buff.moonkin_form.down&find.health.pct>60
@@ -41,8 +40,6 @@ actions.health_st+=/nourish,enable_moving=true,moving=0,if=buff.wild_synthesis.s
 actions.health_st+=/gallagio_bottle_service,if=find.none_target_lowest_hp.pct<50
 actions.health_st+=/cenarion_ward,if=find.lowest_hp.pct<80
 actions.health_st+=/regrowth,enable_moving=true,moving=0,if=find.lowest_hp.pct<70
-
-
 
 actions.cds+=/chromebustible_bomb_suit,if=health.pct<50
 actions.cds+=/ringing_ritual_mud,if=health.pct<50

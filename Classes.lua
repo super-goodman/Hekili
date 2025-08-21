@@ -3555,7 +3555,15 @@ all:RegisterAbilities( {
 
         readyTime = function ()
             local start, duration = GetItemCooldown( talent.pact_of_gluttony.enabled and 224464 or 5512 )
+            --self
+            if duration == 0 and start == 0 then
+                return 0 
+            elseif duration > 0 and duration < 1 then
+                return 5000
+            end
+
             return max( 0, start + duration - query_time )
+            
         end,
 
         handler = function ()
@@ -4428,6 +4436,7 @@ function Hekili:SpecializationChanged()
 
     wipe( state.buff )
     wipe( state.debuff )
+    wipe( state.cooldown )
 
     wipe( class.auras )
     wipe( class.abilities )
