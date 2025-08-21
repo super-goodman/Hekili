@@ -6,7 +6,7 @@ actions+=/purify,if=!raid
 actions+=/dispel_magic,if=!raid
 actions+=/angelic_feather,if=(!buff.body_and_soul.up|!talent.body_and_soul)&!buff.angelic_feather.up&charges>2&movement.distance>8&!buff.premonition_of_insight.up
 actions+=/call_action_list,name=cooldowns
-actions+=/desperate_prayer,if=health.pct<50
+actions+=/desperate_prayer,if=health.pct<50&buff.spirit_of_redemption.down
 actions+=/call_action_list,name=health_aoe_cd,if=health_party_pct<100&((!raid&(find.hurt_num.count>1|find.hurt_num_big.count>1))|(raid&(find.hurt_num.count>2|find.hurt_num_big.count>2)))
 actions+=/call_action_list,name=health_aoe,if=health_party_pct<100&((!raid&(find.hurt_num.count>1|find.hurt_num_big.count>1))|(raid&(find.hurt_num.count>2|find.hurt_num_big.count>2)))
 actions+=/call_action_list,name=health_st
@@ -84,7 +84,7 @@ actions.health_aoe+=/holy_nova,if=buff.rhapsody.stack>15&health_party_pct<95
 actions.health_aoe+=/divine_star
 
 
-actions.health_st+=/guardian_spirit,if=find.lowest_hp.pct<40 
+actions.health_st+=/guardian_spirit,if=find.lowest_hp.pct<40&buff.spirit_of_redemption.down
 actions.health_st+=/apotheosis,if=cooldown.holy_word_chastise.remains>(gcd.max*3)&cooldown.holy_word_sanctify.full_recharge_time>45
 actions.health_st+=/holy_word_serenity,if=find.lowest_hp.pct<70
 actions.health_st+=/power_word_life,if=find.lowest_hp.pct<35

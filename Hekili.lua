@@ -782,7 +782,7 @@ hekili_autocast:SetScript("OnUpdate", function()
                 end
 
                 Hekili.cycle_state = false
-                if action.indicator == "cycle" and Hekili.State.settings.cycle then
+                if action.indicator == "cycle" and Hekili.State.settings.cycle and isInGCD() then
                     local isMelee = Hekili:isMeleeSpec()
                     TargetNearestEnemy()
 

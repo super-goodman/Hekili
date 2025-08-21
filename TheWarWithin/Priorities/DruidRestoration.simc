@@ -1,14 +1,12 @@
-actions.precombat+=/mark_of_the_wild,if=active_hot.mark_of_the_wild<group_members
+actions.precombat+=/mark_of_the_wild,if=buff.mark_of_the_wild.down
 actions.precombat+=/natures_cure
 actions.precombat+=/rejuvenation,if=find.lowest_hp.pct<=90
 actions.precombat+=/wild_growth,enable_moving=true,moving=0,if=find.hurt_num.count>2
 
 actions.default+=/call_action_list,name=bear,strict=1,if=buff.bear_form.up
-actions.default+=/skull_bash,if=target.distance<5
-actions.default+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check&!raid
-#actions.default+=/cat_form,if=buff.cat_form.up&find.none_target_lowest_hp.pct<70
-#actions.default+=/moonkin_form,if=buff.moonkin_form.up&find.none_target_lowest_hp.pct<70
-actions.default+=/call_action_list,name=cat,if=target_is_enemie&target.distance<=5&find.none_target_lowest_hp.pct>=95&!combat_forbidden&hero_tree.wildstalker
+actions.default+=/skull_bash,if=target.distance<10
+actions.default+=/soothe
+actions.default+=/natures_cure
 actions.default+=/overgrowth,if=find.lowest_hp.pct<35
 actions.default+=/ironbark,if=find.lowest_hp.pct<65
 actions.default+=/renewal,if=health.pct<60
@@ -16,42 +14,47 @@ actions.default+=/barkskin,if=health.pct<65
 actions.default+=/lifebloom,if=find.health.pct<=100&find.health.pct>40&active_hot.lifebloom<2
 actions.default+=/use_items,enabled=0
 actions.default+=/berserking
+
 actions.default+=/adaptive_swarm,if=talent.adaptive_swarm.enabled
 actions.default+=/lifebloom,if=talent.undergrowth.enabled&buff.cat_form.down&find.lowest_hp.role!=find.tank.token&active_hot.lifebloom<2&find.health.pct>40
 actions.default+=/efflorescence,if=buff.efflorescence.down&buff.cat_form.down&buff.moonkin_form.down&find.health.pct>60
 actions.default+=/innervate,if=mana.pct<30&find.health.pct<100
-actions.default+=/wild_growth,enable_moving=true,moving=0,if=find.none_target_lowest_hp.pct<=95
+actions.default+=/moonkin_form,if=buff.moonkin_form.up&find.lowest_hp.pct<100
+actions.default+=/cat_form,if=buff.cat_form.up&find.lowest_hp.pct<100
 actions.default+=/call_action_list,name=cds,if=find.lowest_hp.pct<100&((!raid&find.hurt_num_big.count>1)|(raid&find.hurt_num_big.count>3))
 actions.default+=/call_action_list,name=health_aoe,if=((!raid&find.hurt_num.count>2)|(raid&find.hurt_num.count>3))
 actions.default+=/call_action_list,name=health_st
-actions.default+=/call_action_list,name=st,if=target_is_enemie&health_party_pct>95&!combat_forbidden&!hero_tree.wildstalker
-actions.default+=/wrath,if=target_is_enemie&health_party_pct>95&!combat_forbidden&!hero_tree.wildstalker
+actions.default+=/call_action_list,name=st,if=target_is_enemie&health_party_pct>95
+actions.default+=/wrath
 
-
+actions.health_aoe+=/wild_growth,enable_moving=true,moving=0
 actions.health_aoe+=/swiftmend,if=find.lowest_hp.pct<80
 actions.health_aoe+=/invigorate
 
-
-actions.health_st+=/rejuvenation,if=!rejuvenation_forbidden&find.lowest_hp.pct<=100&(active_hot.rejuvenation<=5&!raid|active_hot.rejuvenation<=settings.raid_rejuvenation_num&raid)&find.lowest_hp.pct>40
+actions.health_st+=/rejuvenation,if=find.lowest_hp.pct<=100&(active_hot.rejuvenation<=5&!raid|active_hot.rejuvenation<=settings.raid_rejuvenation_num&raid)&find.lowest_hp.pct>40
 actions.health_st+=/grove_guardians,if=find.lowest_hp.pct<60&charges=1|charges=2&find.lowest_hp.pct<70|charges=3
+actions.health_st+=/convoke_the_spirits,if=health_party_pct<75|find.none_target_lowest_hp.pct<40
 actions.health_st+=/regrowth,if=(buff.clearcasting.up|buff.blooming_infusion_regrowth.up)&find.lowest_hp.pct<100&(!moving|buff.natures_swiftness.up|buff.blooming_infusion_regrowth.up)
 actions.health_st+=/swiftmend,if=find.lowest_hp.pct<80
+actions.health_st+=/natures_swiftness,if=buff.natures_swiftness.down&find.none_target_lowest_hp.pct<70
 actions.health_st+=/nourish,enable_moving=true,moving=0,if=buff.wild_synthesis.stack>2
 actions.health_st+=/gallagio_bottle_service,if=find.none_target_lowest_hp.pct<50
 actions.health_st+=/cenarion_ward,if=find.lowest_hp.pct<80
 actions.health_st+=/regrowth,enable_moving=true,moving=0,if=find.lowest_hp.pct<70
 
+
+
 actions.cds+=/chromebustible_bomb_suit,if=health.pct<50
 actions.cds+=/ringing_ritual_mud,if=health.pct<50
 actions.cds+=/grove_guardians,if=find.lowest_hp.pct<60&charges=1|charges=2&find.lowest_hp.pct<70|charges=3
 actions.cds+=/heart_of_the_wild,if=health_party_pct<85|find.none_target_lowest_hp.pct<70&buff.moonkin_form.up
-actions.cds+=/natures_swiftness,if=health_party_pct<convoke_the_spirit_health&buff.incarnation_tree_of_life.down&cooldown.convoke_the_spirits.ready
-actions.cds+=/convoke_the_spirits,if=health_party_pct<convoke_the_spirit_health&buff.incarnation_tree_of_life.down
-actions.cds+=/flourish,if=active_hot.rejuvenatio>2&active_hot.wild_growth>2&health_party_pct<flourish_health&buff.incarnation_tree_of_life.down
+actions.cds+=/convoke_the_spirits,if=health_party_pct<85|find.none_target_lowest_hp.pct<60
+actions.cds+=/flourish,if=active_hot.rejuvenatio>0&active_hot.wild_growth>0
 actions.cds+=/gallagio_bottle_service,if=find.none_target_lowest_hp.pct<70
 actions.cds+=/incarnation_tree_of_life,if=buff.incarnation_tree_of_life.down&health_party_pct<80
-actions.cds+=/tranquility,enable_moving=true,moving=0,if=health_party_pct<tranquility_health&((!raid&find.hurt_num_big.count>3)|(raid&find.hurt_num_big.count>8))&buff.incarnation_tree_of_life.down
+actions.cds+=/tranquility,enable_moving=true,moving=0,if=health_party_pct<80&((!raid&find.hurt_num_big.count>3)|(raid&find.hurt_num_big.count>8))
 
+actions.st+=/call_action_list,name=cat,if=target.distance<3&!talent.blooming_infusion.enabled&talent.thriving_growth.enabled
 actions.st+=/cat_form,if=buff.cat_form.up
 actions.st+=/moonkin_form,enabled=0,if=buff.moonkin_form.down&health_party_pct>=100
 actions.st+=/sunfire,cycle_targets=1,max_cycle_targets=5,if=target.debuff.sunfire.down&buff.cat_form.down&mana.pct>20
@@ -62,7 +65,7 @@ actions.st+=/starsurge,if=buff.cat_form.down&mana.pct>20
 actions.st+=/starfire,enable_moving=true,moving=0,if=active_enemies>2&buff.cat_form.down&mana.pct>20
 actions.st+=/wrath,enable_moving=true,moving=0,if=buff.cat_form.down&mana.pct>20
 
-#actions.cat+=/cat_form,if=buff.cat_form.down&!talent.fluid_form.enabled
+actions.cat+=/cat_form,if=buff.cat_form.down&!talent.fluid_form.enabled
 actions.cat+=/rip,if=target.debuff.rip.down&combo_points=5
 actions.cat+=/ferocious_bite,max_energy=0,if=combo_points=5
 actions.cat+=/rake,if=target.debuff.rake.down

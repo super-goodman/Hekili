@@ -1999,7 +1999,8 @@ spec:RegisterAbilities( {
     power_word_shield = {
         id = 17,
         cast = 0,
-        cooldown = function() return buff.rapture.up and 0 or ( 7.5 * haste ) end,
+        --self
+        cooldown = function() return ( 7.5 * haste ) end,
         gcd = "spell",
         school = "holy",
 

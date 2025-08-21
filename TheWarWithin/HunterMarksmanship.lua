@@ -689,7 +689,7 @@ spec:RegisterAuras( {
         streamlineCastMultiplier = function() return 1 - ( buff.streamline.stack * ( 0.2 + 0.1 * talent.improved_streamline.rank ) * ( talent.tensile_bowstring.enabled and buff.trueshot.up and 1.5 or 1 ) ) end
     },
     survival_of_the_fittest = {
-        id = 281195,
+        id = 264735,
         duration = function() return 6 + 2 * talent.lone_survivor.rank end,
         max_stack = 1,
     },
