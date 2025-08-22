@@ -227,6 +227,8 @@ local enemyExclusions = {
     [165737] = true,              -- Sinstone Statue
     [244302] = true,              -- Binding Javelin
     [176551] = true,              -- 宝库净化者
+    [237763] = 1228284,           -- Manaforge Omega: Nexus King Salad Bar - Royal Ward immunity
+    [245705] = true               -- Manaforge Omega: Dimensius - Voidwarden (one should be focussed/cleaved down off miniboss, no reason to full AoE)
 }
 
 local requiredForInclusion = {
