@@ -1980,12 +1980,12 @@ spec:RegisterAbilities( {
 
 local NewFeature = "|TInterface\\OptionsFrame\\UI-OptionsFrame-NewFeatureIcon:0|t"
 
-spec:RegisterSetting( "spell_reflection_filter", true, {
-    name = format( "%s|T132361:0|t 法术反射过滤器(地心S2)", NewFeature ),
-    desc = "如果勾选，插件只会在可反射的法术目标是你时，推荐使用 |T132361:0|t 法术反射。",
-    type = "toggle",
-    width = "full",
-} )
+-- spec:RegisterSetting( "spell_reflection_filter", true, {
+--     name = format( "%s|T132361:0|t 法术反射过滤器(地心S3)", NewFeature ),
+--     desc = "如果勾选，插件只会在可反射的法术目标是你时，推荐使用 |T132361:0|t 法术反射。",
+--     type = "toggle",
+--     width = "full",
+-- } )
 
 spec:RegisterSetting( "check_ww_range", true, {
     name = "监测|T132369:0|t旋风斩攻击范围",

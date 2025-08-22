@@ -20,11 +20,12 @@ local insert, remove, sort, wipe = table.insert, table.remove, table.sort, table
 local abs, ceil, floor, max, sqrt = math.abs, math.ceil, math.floor, math.max, math.sqrt
 
 -- Common WoW APIs, comment out unneeded per-spec
+local After = C_Timer.After
+local FindUnitBuffByID, FindUnitDebuffByID = ns.FindUnitBuffByID, ns.FindUnitDebuffByID
 local GetSpellCastCount = C_Spell.GetSpellCastCount
 -- local GetSpellInfo = C_Spell.GetSpellInfo
 local GetSpellInfo = ns.GetUnpackedSpellInfo
--- local GetPlayerAuraBySpellID = C_UnitAuras.GetPlayerAuraBySpellID
-local FindUnitBuffByID, FindUnitDebuffByID = ns.FindUnitBuffByID, ns.FindUnitDebuffByID
+local GetPlayerAuraBySpellID = C_UnitAuras.GetPlayerAuraBySpellID
 -- local IsSpellOverlayed = C_SpellActivationOverlay.IsSpellOverlayed
 local IsSpellKnownOrOverridesKnown = C_SpellBook.IsSpellInSpellBook
 local IsActiveSpell = ns.IsActiveSpell
@@ -32,6 +33,8 @@ local IsActiveSpell = ns.IsActiveSpell
 -- Specialization-specific local functions (if any)
 local Glyphed = IsSpellKnownOrOverridesKnown
 local FindPlayerAuraByID = ns.FindPlayerAuraByID
+
+local doom_core_consumed = 0
 
 spec:RegisterResource( Enum.PowerType.SoulShards, {
     rampaging_demonic_soul = {
@@ -225,13 +228,16 @@ local guldan_v = {}
 
 local last_summon = {}
 
+local three_for_free = false
 local shards_for_guldan = 0
 
 local function UpdateShardsForGuldan()
-    shards_for_guldan = UnitPower( "player", Enum.PowerType.SoulShards )
+    shards_for_guldan = three_for_free and 3 or UnitPower( "player", Enum.PowerType.SoulShards )
+    three_for_free = false
 end
 
 local dreadstalkers_travel_time = 1
+local last_event = 0
 
 spec:RegisterCombatLogEvent( function( _, subtype, _, source, _, _, _, destGUID, _, _, _, spellID, spellName )
     if source == state.GUID then
@@ -304,8 +310,9 @@ spec:RegisterCombatLogEvent( function( _, subtype, _, source, _, _, _, destGUID,
         elseif spellID == 387458 and imps[ destGUID ] then
             imps[ destGUID ].boss = true
 
-        elseif subtype == "SPELL_CAST_START" and spellID == 105174 then
-            C_Timer.After( 0.25, UpdateShardsForGuldan )
+        elseif subtype == "SPELL_CAST_START" and ( spellID == 105174 or spellID == 434645 ) then
+            if spellID == 434645 then three_for_free = true end
+            After( 0.25, UpdateShardsForGuldan )
 
         elseif subtype == "SPELL_CAST_SUCCESS" then
             -- Implosion.
@@ -340,7 +347,7 @@ spec:RegisterCombatLogEvent( function( _, subtype, _, source, _, _, _, destGUID,
                 if shards_for_guldan >= 1 then table.insert( guldan, now + 0.6 ) end
                 if shards_for_guldan >= 2 then table.insert( guldan, now + 0.8 ) end
                 if shards_for_guldan >= 3 then table.insert( guldan, now + 1 ) end
-
+            
             -- Call Dreadstalkers (use travel time to determine buffer delay for Demonic Cores).
             elseif spellID == 104316 then
                 local info = GetSpellInfo( 104316 )
@@ -348,9 +355,12 @@ spec:RegisterCombatLogEvent( function( _, subtype, _, source, _, _, _, destGUID,
                 dreadstalkers_travel_time = ( info and info.maxRange or 25 ) / 25
 
             end
-        end
 
-    elseif imps[ source ] and subtype == "SPELL_CAST_SUCCESS" then
+        -- Core consumed.
+        elseif spellID == 264173 and state.talent.doom.enabled then doom_core_consumed = GetTime() end
+    end
+
+    if imps[ source ] and subtype == "SPELL_CAST_SUCCESS" then
         local demonic_power = FindPlayerAuraByID( 265273 )
         local now = GetTime()
 
@@ -368,10 +378,6 @@ end )
 local ExpireDreadstalkers = setfenv( function()
     addStack( "demonic_core", nil, 2 )
     if talent.shadows_bite.enabled then applyBuff( "shadows_bite" ) end
-end, state )
-
-local ExpireDoom = setfenv( function()
-    gain( 1, "soul_shards" )
 end, state )
 
 spec:RegisterStateFunction( "SoulStrikeIfNotCapped", function()
@@ -513,10 +519,6 @@ spec:RegisterHook( "reset_precast", function()
 
     class.abilities.summon_pet = class.abilities.summon_felguard
 
-    if debuff.doom.up then
-        state:QueueAuraExpiration( "doom", ExpireDoom, debuff.doom.expires )
-    end
-
     if prev_gcd[1].demonic_strength and now - action.demonic_strength.lastCast < 1 and buff.felstorm.down then
         applyBuff( "felstorm" )
         buff.demonic_strength.expires = buff.felstorm.expires
@@ -610,7 +612,6 @@ spec:RegisterVariable( "imp_despawn", function ()
 end )
 
 
-
 spec:RegisterHook( "spend", function( amt, resource )
     if resource == "soul_shards" then
         if amt > 0 then
@@ -642,8 +643,8 @@ spec:RegisterHook( "spend", function( amt, resource )
                 removeBuff( "art_pit_lord" )
                 if talent.ruination.enabled then
                     applyBuff( "ruination" )
-                    buff.ruination.applied = buff.ruination.applied + 0.25
-                    buff.ruination.expires = buff.ruination.expires + 0.25
+                    buff.ruination.applied = buff.ruination.applied + 0.1
+                    buff.ruination.expires = buff.ruination.expires + 0.1
                 end
                 ArtConsumed = true
             end
@@ -1214,14 +1215,37 @@ spec:RegisterAuras( {
         aliasMode = "first",
         aliasType = "buff"
     },
-        -- Doomed to take $w1 Shadow damage.
-    -- https://wowhead.com/beta/spell=603
     doom = {
         id = 460553,
         duration = 20,
         tick_time = 20,
         type = "Magic",
-        max_stack = 1
+        max_stack = 1,
+        copy = { "impending_doom", 460551 }
+    },
+    used_core = {
+        duration = function() return gcd.max end,
+        max_stack = 1,
+        generate = function( t )
+            local expires = gcd.max + doom_core_consumed
+            
+            -- Expiration is based on actual reset time; virtual used_core will get applied in handlers.
+            if expires > now then
+                t.name = "Demonic Core Consumed"
+                t.caster = "player"
+                t.applied = doom_core_consumed
+                t.expires = expires
+                t.duration = gcd.max
+                t.count = 1
+                return
+            end
+
+            t.count = 0
+            t.applied = 0
+            t.expires = 0
+            t.duration = gcd.max
+            t.caster = "nobody"
+        end,
     },
     dread_calling = {
         id = 387393,
@@ -1698,13 +1722,6 @@ spec:RegisterAuras( {
             end,
         }
     },
-
-    doom = {
-        id = 460551,
-        duration = 20,
-        max_stack = 1,
-        copy = "impending_doom"
-    },
 } )
 
 -- Fel Imp          58959
@@ -1818,6 +1835,45 @@ spec:RegisterStateExpr( "two_cast_igb_imps", function ()
     for i, imp in ipairs( imp_gang_boss_v ) do
         if imp - query_time <= 6 * haste and imp - query_time > 4 * haste then count = count + 1 end
     end
+end )
+
+
+local temp = {}
+
+local function sortOnSecs( a, b )
+    return a.secs < b.secs
+end
+
+spec:RegisterStateFunction( "time_to_n_cast_imps_exceeds_y", function( casts, amount )
+    if #wild_imps_v < amount then return 3600 end
+
+    wipe( temp )
+
+    local start = ( 1 + casts ) * haste
+    for _, imp in ipairs( wild_imps_v ) do
+        local change = max( 0, ( imp - query_time ) - start )
+        temp[ #temp + 1 ] = {
+            add = true,
+            secs = change
+        }
+
+        change = change + ( 2 * haste )
+        if change > 0 then
+            temp[ #temp + 1 ] = { secs = change }
+        end
+    end
+
+    sort( temp, sortOnSecs )
+
+    local count = 0
+    for _, imp in ipairs( temp ) do
+        if imp.add then
+            count = count + 1
+            if count >= amount then return imp.secs end
+        else count = count - 1 end
+    end
+
+    return 3600
 end )
 
 -- Abilities
@@ -1970,22 +2026,35 @@ spec:RegisterAbilities( {
         spendType = "mana",
         startsCombat = true,
 
+        velocity = 35,
+
         cycle = function()
-            if set_bonus.tier31_2pc > 0 then return "doom_brand" end
+            if set_bonus.tier31_2pc > 0 and debuff.doom_brand.up then return "doom_brand" end
             if talent.doom.enabled then return "doom" end
         end,
+        max_cycle_targets = 8,
 
         handler = function ()
             if buff.demonic_core.up then
+                if talent.doom.enabled then applyBuff( "used_core" ) end
                 removeStack( "demonic_core" )
                 if set_bonus.tier30_2pc > 0 then reduceCooldown( "grimoire_felguard", 0.5 ) end
                 if set_bonus.tier31_2pc > 0 then applyDebuff( "target", "doom_brand" ) end -- TODO: Determine behavior on reapplication.
-                if talent.doom.enabled and debuff.doom.down then applyDebuff( "target", "doom" ) end
             end
             removeStack( "power_siphon" )
             removeStack( "decimating_bolt" )
             gain( 2, "soul_shards" )
         end,
+
+        impact = function ()
+            if buff.used_core.up then
+                if debuff.doom.down then
+                    applyDebuff( "target", "doom" )
+                    if Hekili.ActiveDebug then Hekili:Debug( "...demonbolt impact applied doom." ) end
+                end
+                removeBuff( "used_core" )
+            end
+        end
     },
 
     -- Talent: Infuse your Felguard with demonic strength and command it to charge your target and unleash a Felstorm that will deal 400% increased damage.
@@ -2081,9 +2150,7 @@ spec:RegisterAbilities( {
             if extra_shards > 0 then insert( guldan_v, query_time + 0.8 ) end
             if extra_shards > 1 then
                 insert( guldan_v, query_time + 1 )
-                if set_bonus.tww3_diabolist >= 2 then
-                    addStack( "demonic_oculus" )
-                end
+                if set_bonus.tww3_diabolist > 1 then addStack( "demonic_oculus" ) end
             end
 
             if debuff.doom_brand.up then
@@ -2123,6 +2190,8 @@ spec:RegisterAbilities( {
             insert( guldan_v, query_time + 0.6 )
             insert( guldan_v, query_time + 0.8 )
             insert( guldan_v, query_time + 1 )
+
+            if set_bonus.tww3_diabolist > 1 then addStack( "demonic_oculus" ) end
 
             if debuff.doom_brand.up then
                 debuff.doom_brand.expires = debuff.doom_brand.expires - ( 1 + extra_shards )
@@ -2431,4 +2500,4 @@ spec:RegisterStateExpr( "tyrant_padding", function ()
     return gcd.max * ( settings.tyrant_padding or 1 )
 end )
 
-spec:RegisterPack( "恶魔Simc", 20250818.1, [[Hekili:LZXsVTnY5Fl5GtS2frrKX2XPiXhAp19qWIQEwuuKJKimFbYHYRameY2I2Mg0c0cSafOTafPaDXIfzBVvKgKf9htTD9Ek)f63m8HgY5fPSumw0looKFZ373dtgzm6NoAORngn6zMdmpCWXgpUVXJngC4bJgIxgJgnm225u7zWVeAha)8Qp)F(DFZxm0lWH8QL(r2UeuKgLL4aVE0WjzE(4FC4OjcX7bpcGng5ap(OJgnCUNRlkhwukGrcS3FWX3344FWQX)e0cVuK7QXXjErjE4LRgpXM(GOWvJt9cwngJsXEHZ6d8ss0upFkhSaLK6ffwr5J7BmA4z2jHaKPJgE938Lx(7F57F3F8Y)X7U8x83UNhgfKEVlFXF46x9vF3F(5x)LF(fV55x82)01)QV(Yx(vx8V)7x9f)R)ZZ)zR(K)7RFTX1V63aN86V91x9B)R3dN4fEkc33O)C7uRSuK1KSPtV3fV5TvVc34DV)DVW4Qx)Q3)UFTou6L2FAw48iYr9rHPnrl375rTPquBQGBn1XTYqPAUvW75r9dLRisYMS06S5i)yRu4N(c0fCGWtGdKZ7QjGyq4jWHYLG04Lb2PyWZ06m0eb8Fda6eY9cIrjtroyl7uhuORDOZsRuuswGacPayEIEKCvMkjseaDc5TvI0bmprFKe1iK)WPVD4sl340(Uzj2yifst1NyG2YeHe5zTbiFlKWqbQt9MfIWwrtTWZrw0mYlf5glcmEcDSetFluqYaAlteDwbziFlKiubQ1BfKdgpHESeZTtuKVB0zHsDr5byNICaX7aSERWYqBn)OOqOdfmTpgiXff(0vJ9GEAU3c7ep7j(O(fi3YGwio9U7RIA7Tx1JsZccIcTCrWp9CSWltSdXva(0bNFElbDV9urXNoO39GUVI2CwULSrx4yDmC)8(Tgij8sJvweac6MBlIDgFOTjAVLy6U65BY5gjGC7ypFbuuLNF7y5wYgDHJ1XWfE(Ih1aQy4VGVJxYZe4QiDCfoCyifhYgIydC32TyN1zw1WueZEFVqmmwa0gQOrQAarhy72HFvdykgZBuzTDl21RUn0Qoecrhy72H)nrDVnIq6sKQzhY(EhPvXLLK78ZLN(tD(pjNRQz7EF0(g9p8JL4GdVvacsxg60R3j7VV6MoKiLsjTHwsBuqA4GFCnItSk3VHvQ3Egdg0RxvbKpGA9hC7P15j9hyT(dk06fvbLTNjh7uSf2laXLOQ6fcIY(qGng7zckW2JFQsU3VlXnBAAziLyblpOO6vvVBxYO7sCZQeKTyrj(aMQ9b(qGndncSG3VlXTELPHcpkdTEuBngDxIBwLG4L9UbUPcy4TgU1ZWBAAWTl2eVN5nWcTlXnRYu2IX3SmaBxSjEfXBPBeqc23s3GIuS3zJ1Ue3Soc3gk7nirWUe36vhBlVdzB)foCGxssuczF6ttSDWzjixlCuqe80ZeDplQHV102upU4T7DL2MAx(xBnv7sCZ4gykBfuDoutadV1WnldlTJUUQfeWWBnCZYWsR)2vTGagERH7sgE1NC1l(Dx(Y)s(NZXfV9xE4fV5RV6Lp)6F(3M)rDqHA0qFVuCk5BvH(bFa)YZOF8lOqYOLUJ(HJggfpAykcpAie3aZLoAy5GNKFZpd(dg(HDg1vJp)CyM(A5aQDlFuuzL)f0uaw5S(JWJEM5MZiMQye(RBueJyUMrE4MZic)kmel3OpZXpZfri4bBobf(vziw(yi4HBobfuhrKHx(NJGyTrGDyMTpH3oAZ5nbL8f5l0nEZKH3E0MZBn(Kgwn(JxnEFLHlRg)rRgBC4QX9edSO73MEgZbWzKhSvXdej64nxIm1ir8XDkKiP3yVAjYKxIESyjYBQyzIxhr2Q2OHojqgsaS1q3C)KRgF3MwLQ0ZRvk7TAC1tvFbwRg)0vJhK7W26JSNo6NJZEfMplKFkiSd6FyL90GO0mgCZ0AM61AMs0AM3YAnH0VLAnj1o1P1CTdSNHSk1mLFzNSQV7SASs)orVNvdZgy5VWF14tQN(aEwDHZOs0mPIMKQX6eTBImjxGigxDouA9PEGuCWKdRhnFdGlJ(hstsXGZ69yubPaKscgOq0JQ43NJbfgQkIbnApd2SBm5mOrngSaDLPK3NZrz147lWHQhLHngmOep9u7q1SRQsVOcedGN6hHz)7erjce(zoUK2uBBkzXUz5fXlDwayIbHPrccclTavp(HzTAuBzrQM7OgKELesbvkrJnuAeljLvH(sseW6pjCiFLjLKAsbwm2aLnjfvVBxuf8ZlTA8tApjb3Rdz0mccBk6qLxdx)6s46PJNT0RUmuKgT0xPNeeXfuEcGWPEZMJTk4aQhFZ26B4XB2WJ3StE8MAlgSPE8M694faYTGhVXo3JNFG7TQhVHCpEdvE8Iyl9QlZwKDuMhpxDsXE8nNR8MKJxx3cTjnpRsxstxLEsAtP0tu)(nJc06D1UAheOiuI(0Nu54kpjqVw1aCHSaEDXW0VKGStkNTIy9Ao59njFLU(tBtkR2A9mBr4bV1tqoSoB9eNhSTwpJTQ1R5UjY7hV(2q4TyL24MWT2sQov5KO0CdATKbGyd2LJZLBIqYUvMeuCucK(hB7CAEIKhoGPkLYGEgnVKv9OZXJXlragkSeQKkZbIseW5W1kMvzchTmRmX1GDSjL6JCpNM7ak3Zr1wYK5fP6mTYJsNY)HdOCCZD8usFLx7dlluxXQ8yIJDvMas)vq1cKAuAiuluKfN3C5n8LDBFz12M0TvLm5Q3t42MlnHVmt7lJ0wUTvLi4QVr42M7bPYvdoK1C7q3YtX8GMHh52X7eIG2N8jZEBhdqGcbODqjuYiB6yzNPTev65xRJ13ZUQisJQoC15zPWwsvbYgx67fQaTXcN0267LQtL6kznA)9pDLOiXBUUA91kIj)RQFQDMpw0LDwQ3CS99TY)lwKRiLvGNJS9XZTOxyQv5zPxKAXopzbO6ImlXS9NbPKafclzfChJ1s59PlqXlITCMJiDiLh6Ky7rs1acOdUwnxEwNH1c8WEZQUAKMryTOK8A6ehvIgzoF8CI85d2uxiivUznjekj6z7Nk6MdL1LIsnwLvSz)0R5DAdTUjiBxOhw)tH(X6Nft52CK2NeHrQxplZhAbQpzqaRupiqIkafar5I6yHfW7YmdXjK9SwOyi0(mpFxlOxR0QMOxn(r0T0gNGwqKx6NkkltWmbe3gyw45JM6bTRvF5lndbxdg)uvRX5SeVGiVeK1uK)Sm7eziLho2cXvJLik6x09wU2602mh0SrnwAQaBcRRNXG1Cgh)l6Uh7oxrghYmFX(mJw2(PdlKRhUXYvtJTWBhCZKlJ2DnD1LKbnIBRjfcVeUsWPODsKpMp2TGGorjOAZHsJH2VYx2nkkyT7lOqDr5NN8889YLF)j5UrPrzqPZ5GVqXWk5ZWXJlGHw64d1fStMHWPKKtIUYTwLTSiRZcsXAuGhkV8Prd1aCoO0bkCgEUWlJznPuJSjGBrQtugW3wtIcMuAdKxzPK82jyoLevNVg51ZyjCHI6)8eOgOcDeXePt2Q(seksjAdGp1ZbMXIWPPRn)1((dGKV(c3zw3yq2GWJ0WPMTNtf6v8e6YOBlkekSD)ZFrMWESgH9GBiNEtlpuFjBgdKfNLhId6aiAimdQGF2zMwhe7qFSQA15n1XNncYU5GlFnt1CIKfr(p0PQT6iHOI9Ci5HolYIwsHWmmpxkDy7RMQyzxZtoqRxgt5RsY8cZ73SE)Us3rHWS01YKs9gURiLv9u3Djxl3siU50(osipVGkATc16)NNAzXSnIFgkbAtmEEUbGB3bsLfMCTEHtrjHWOEvCK8u4DkLn3OPDwZsdbKP3oI1zdWfekNlcnC3EelC1f2AqIj)NMgYbkLzlCarMvgk8IcS9lRcxA3QAmeulvPTQzaHogTCJckduW8F6R18g2uYuKGdoU6boLMMYqQphE9CxL6mzdBrAraLCQx4SMMiwl0e)OixRPzjlfnNCLIdKxkKna6awGilSa61bS2K(f5S21gwxXgbYHlfhfIgXTmG(XKK0GpCTDdGNNGsNdLx0VDabe0lCH3SiY9RgoZICiYFwm09wLbKTQrB)zq6(DjPX1wiHYOTM0k2AMDmtcd7KtTIboVOn8YNNfcJSq4EGBI8xGw)69jRqjeABnngbJreypZZPyvu0kdwbcELBeM)HSOjE(Yuz4H9DRru5tzgYTsyuNk4)NujnzAQZdPOqgEEuYOHFA2P2(2HE0No6)9d]] )
+spec:RegisterPack( "恶魔Simc", 20250820, [[Hekili:LZ1wlYnYv4FlZdZLEDM2T0CXJdEMhsEkgIzjDEUvRwQ6UfJUHU0JByOXBcjXXKajWcbsceCGSSS4n5TGJXl5htSDM9j)xiNQ0TsQUj1t32SKxg7r6uNZ35sDoN6uYEK2OF6OH2MjOrpsFG(jdotxVV2PNC8r3F0WKLHOrddnTU0Cg8x8n9GF(Up7F(TF9Np0XZc)QLUbM2ywehKgzbVE0WjPoUj)i)rt4X3J00bAdrwWJp90rdN7yBJYOffdCet7Hdo7q9bF)vJ)XbrOvJJD8ombfNGSxnocTWj2jWpU)QhU6HfeRDgq8pb)kmnHrobrojlxnEIj5bb(eMSAmMlo(Z6dapkyQJlbUlqryowcZbJgELzKpqx8OH381FXB)9p79V(p(2)XRF7V4VTVtcYlE)3(0)Wnp)l)2)8tU5l(S38YN8Mx9NU5x9vV9zF5B(3)9395)R)Zt(zRE4)9fVq7MN)BGvEZ38I39B)R7Ne54FjkPVw)5MXgPXiJjPtNU)BE5RkFvsJ39(x)uT39IN)(x)RvXsN4(tt9NhGxQlYpUjBzEplR15YADjOvxfAfXs5OLZ7zz9rInerPtwAC1CKBOrm8txo2cgsyfWXIXUCbWNewbCIynioCPNjeVhfBCfAch83GGoXChVqu0uKvIHzSfY3203APrmkk1JJGKqmRqpvSjtMgXJGoX82QrQiMvO3tGzeYEy130FPHDyCF70iZeibstZhFI2WcbVZZyny(giHHewh7mZhLyem1izoYGKpEjVWyEKXkOZe46BHbserByHOYliI5BGeHsyTAVGyYyf09f4UTccCTdUYxyiklbBvMdmElW1pkqgAQ5hg4d9NqA9jasCrOpE1yhOJM9xyg5yoXf1pN5gAKcXX7DGmPT7ULpko1ZlW3Wgb)0XYizzKPFsjHNp46RBjP7URmjE(GE7d9EfS(qULWOliwfG7N1V1abBVu4L5raNU52GCNkgAtY2psGURr(6mHrCe3woYNJeLf53oi3sy0feRcW5r(8pQbuXWDbBhV4NXjur4Xvy4HMqEi6qeRr422L70bZYomf2T33Xpbowa0gkVJu1GIoa72XFzhWKpNxRYABxUR2CRP0CWLIoa72X)1XCVj2H0LDQ6Di77ocRIlkj31xlo9N88FcwxzZ29(Kd06FYDeeGdVLddIx6B1R3fhCG8MoeOLcfTMsrRLlAyH3PMWXELdB4L6TR2Gb96vwa5dOv)UF8S6SI(dSv)U5w98QGIMZKLzCIrIJhIjrv5l4Sl7db3O8Nripth2tvY8(TjVPttlIPypyXc5vVQ8DBtGUn5nTrq0GffedOlpg4db30uOWCE)2K3QnMAsIO0ugrTXa62K30gb(d7Dnct5a4ngVvd41nn4MLB8NZ8A4H2M8M2ykAW4RxgGnl34pI4n0nciG7BOBqri37SZABYB6aHpgg71irW2K3QnhBQOdrt)fwSNtuuqeEE6tJmTssJq2gjbEbWtVI39SiN(wlBD18I1V3vzRRC4FT1vTn5nvyGUOrq15TACa8gJ30awyhDD1kWbWBmEtdyH1F7QvGdG3y8UaWRE47E6V7Tp7VK95C8Mx9lp5nV8RE3ZEYn)8Vj7J6Gq1OHUoXjX4pRfYh8b8xEe57Kb5JpAP9OFWOHbHJggJsgne23aNlD0WIdEI)BUPWFqHh6ZOUA81xdNPVwoGA3YhHvgzFSn5KvCw)rjJEK(6deDzaH96g5be9kGC06deUFfg81B0JTCtTrybE86lqUFvg81pkbEY6lqo1r454f)5iW3A4z6NA6IX2PRp24uYNxSq3WMof2U36JTgFsdRgFNvJpq62LvJ)KvJ1oz14E8jM39BtwJ(aynI3SvIbSgD26Rr6k0i29Ds0iH3yVCnsNvJUpFnYzkFDI1gHNQ2OHwrqgsGSkQBoFYvJ3RPxPm9CLrz3vJlFQ8lWA14ZxnEqwaBRxYUQKFgp7L7(mqUXGYoO)jL(tnSrtBWTZQPR2QPlWQP)r2QXv(T0QjO2PkRMTPN5mKrHLP476K28TZQXsJ749EAlm9gl3fURgFr90hWZQRCALQMor1eunwLQDB0jXke25QkGszm1DfYdQCy9i5BaEP1)esskkEwVhJsk5Wu8Mbcf9ig(dyai3TQ8aOw7byZUXedqTAamNDfPKpGjqz14d5eq1JayTbdk4tp5bun7QQikkNXa5XUbj0)owvcaLFMLnUn12MsMFywwr8IGfGMqqzAKGadPfO67FOgRgXxMNQzh5K0RqqsKsbBmHsJjcszLBVeSdO6dchYxPtePIuG5hBGatCr196IPG98sRg)G2lsi86ekldNTn5DOYAHRFDjm90Xcl1MlnjPrlIv6jGrmBkVay4uNzZtmYrajIVzB9nI41BeXR3PiEDLfdw3iED1r8Ci5JqeV2wpIN9a3B0iEnXr8AYI45bl1Ml9wKDuueptDs(r8npx5TjhVQUfAtAEAJUGMUkIKuMsPhV(9BUlqz0v7QDGPcljYtFqzGR4Ka9AvdW56ce1fcN(fVj7IIZwH9Enp59TjFLQ(tBtkR2690BX2dwVhNCyD27XppyB9EABuVxZztK1pE9PHW6Xk8XnPRYtkpv5KG4mhATKbGAd(LZY0BSsspvMiuyqeK(pX06YSejhnGQkL0n9uwEbJ6rvGhvuchoK7jKPv6d4LiGjGRvGvAchLGvK6QrFSjP2JSiNMZaklYr2uYeffjBnTkIsLX)Obee3CgpfYx61(qdH6gwPlJ)ExPjGuFfuTGPAfoc5kfEW5nhEdBz32xwTTjDBvjtM69y02COjSLzAFzK2I2wvIGP(ggTnNdszOgSiJ5M(2fRI6bn3EK5h3XhbTp5Ip7TziqbYhO2cfreJOthlAnTvOcxFLnwDp7Y2rQv2HRQilj(sIjq0XL(oHjq5EHlAB99cZPuBLOgT)UNTI3oXBVTQ6AftW)dWFQzQBcVl7SWUzz66AK9lg4RiLwHNJmDtMBqUWuJI1sUi18zEstq5fzwWzZhdPKadcTy5ChJ1s59PlqHlcnSMJWDiLT1jY0bNQbuqRKA1CzHof08CsCMvE1in3H1IsYvYjmOGnIc(yrI4ZhSUHqqQC9AAius0X0nM3nhkQlfPwSsVyZ(PRWoPH2zroEboriJPi3zPMr21MqWXvD(kHWliv5lBbNxKoV7OR9ibVrQ6akTara0ZGtFCwcCphZsDH24OpNZDQXu43a7BFpZh3cnPzFBn0KfoUOPoqFJQ0aoeULroZfK1a62ritB4inUxcTNRc(ciEBRcIs(XepK9)zjroH5PWi0f3ppp6Do)UCLX3Zz658XpgSgXoqLKhKtazlyDZqfr7j2iDrPYV3b4FEH2GRVMq(voU2gW5pIZoy5f37WWi0c8EFYNnnnE6r79ABHgsXRgZyNJwq7m1gW9M06USXNrw)KMo)2pYGC0FuxrFZyQYTDsVqhw(QmEIDj4GP2PCxCUM6)rIMt7dohRvkZFMg22KL4iIQnH19qCVdaHz8OLj)0BsLLmRpVjZUgbHfzNOMkDd4KV5MpJApwBwhVwVNv3FaRNP2DhiW7LbC69bYRFYOZhsPZhwBd5HT1cqnosMRdPY3ZQnvVldkBp4P0h1S7OcYj8CsGBcBfYCPzfeHQn8pcYoO0oyhe4vP7GvYgLTE8ZZ0XSlTolzCCqkCEL5GBlFcrzdoJLxaGwA5cnJBgndLeJ7iK3WVAvlQ7LzkxGpHeYZbX0lxX6G(1r(ZsMZDQvvIsoZMaU9yRGua3gtc8MK7dyg7tf)keVzucJrIyZRyE9sJChqJ6VjmIdk3gHDrQ0TYp)R8qFtG8PowiBdmsJRC)1(OVGQ7UCNjt3aiDo1tvGu92JuUrfpGCdGTLfCv2U)1OkszptHYE8TePIR11UAm1VzdTY5SZbQz7YbZaSHWpfAE8QR0noo0I6MC41vi513JQrC6CsLvgW3buvVJy1la)FKEzjI5jZZlKj)iiC(ORcmi5xXyH65cff9qnWpUwo5s6QMfuXRIsD8ZoVF95nOl6Y94MWUws1ANMvsw8UK2vx8PRxxzVJaXZQOy5loT)o8KwAi9GqUcfbNujCEUdqCE9g6cvAxh)POiFtxJceDK4S5Dk79rnZE3zllTUwZODuTbBbmc2XKH)gZ26iA6QRP1Omb))xLilOKMj3PZvbD(3sRPBr14DA2VhytktFvtJGM8mSd8k2LKW(V7GsfmlxvikPr4rxfTRJpYWccfpMyDKFIaEzS0eg8LunaSc7NOPEHBBafDPJ)SMPgO9wtCdcSnMMgTSPtLMQPGEsOSbrhtteEYXq)pGNh3djJNV2utLmA2m6Itc8rJyMkB)qResWCTH0Mmpcfphk5OEmTCeOJ)cNzb4p0f)zg4fH)Z8PFUrbGOdqB6ods9VnfDsTjdlDNxtzfAmZK6OQ2MrxAeciVQ8j55P(WXuWOhqtG7cQQRhGNLTp0kBCicoAHN5mhR87eGuIWWJZRSdsyFinBcNVmweFOFxfJkEkvD1sLHx4X)FAsAcAsWdU5Z0K5brJg(PPxA6A67qE6O)3d]] )

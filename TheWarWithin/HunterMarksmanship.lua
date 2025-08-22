@@ -1672,7 +1672,7 @@ spec:RegisterAbilities( {
         terrain = true,
         handler = function ()
             applyBuff( "volley" )
-            applyBuff( "trick_shots", 5.5 )
+            applyBuff( "trick_shots", 6 )
             if talent.double_tap.enabled then applyBuff( "double_tap" ) end
 
             -- There are weird situations where it doesn't do the below .. but this is usually what happens

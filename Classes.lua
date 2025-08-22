@@ -3320,6 +3320,7 @@ local bf_classes = {
 }
 
 all:RegisterAbilities( {
+
     blood_fury = {
         id = function () return bf_classes[ class.file ] or 20572 end,
         cast = 0,

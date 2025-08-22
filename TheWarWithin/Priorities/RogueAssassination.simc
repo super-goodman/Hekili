@@ -16,6 +16,8 @@ actions.precombat+=/stealth
 actions+=/stealth
 # Interrupt on cooldown to allow simming interactions with that
 actions+=/kick
+actions+=/combat_mitigation,if=time<combat_delay&moving
+actions+=/combat_mitigation,if=time<combat_delay&time<combat_delay/2&moving
 actions+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check&!raid
 # Conditional to check if there is only one enemy
 actions+=/variable,name=single_target,value=active_enemies=1
@@ -114,7 +116,7 @@ actions.direct+=/mutilate,if=variable.use_filler
 
 # Special Case Trinkets
 actions.items+=/variable,name=base_trinket_condition,value=dot.rupture.ticking&cooldown.deathmark.remains<2&!cooldown.deathmark.ready|dot.deathmark.ticking|boss&fight_remains<=22
-actions.items+=/use_item,name=astral_gladiators_badge_of_ferocity,use_off_gcd=1,if=dot.kingsbane.ticking|dot.deathmkark.ticking|(cooldown.kingsbane.remains>60|cooldown.deathmark.remains>60)
+actions.items+=/use_item,name=astral_gladiators_badge_of_ferocity,use_off_gcd=1,if=dot.kingsbane.ticking|dot.deathmark.ticking|(cooldown.kingsbane.remains>60|cooldown.deathmark.remains>60)
 actions.items+=/use_item,name=treacherous_transmitter,use_off_gcd=1,if=variable.base_trinket_condition
 actions.items+=/use_item,name=mad_queens_mandate,if=cooldown.deathmark.remains>=30&!dot.deathmark.ticking|raid&boss&fight_remains<=3
 actions.items+=/use_item,name=junkmaestros_mega_magnet,if=cooldown.deathmark.remains>=30&!dot.deathmark.ticking&!debuff.shiv.up&(!talent.deathstalkers_mark|buff.lingering_darkness.up&buff.junkmaestros_mega_magnet.stack>5)|raid&boss&fight_remains<=10
