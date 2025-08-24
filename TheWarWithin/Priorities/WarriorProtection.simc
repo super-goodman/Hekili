@@ -25,7 +25,8 @@ actions+=/fireblood
 actions+=/ancestral_call
 actions+=/bag_of_tricks
 actions+=/potion,if=buff.avatar.up|buff.avatar.up&target.health.pct<=20
-actions+=/use_items,if=buff.avatar.up&!trinket.1.is.chromebustible_bomb_suit&!trinket.1.is.ringing_ritual_mud&!trinket.1.is.tome_of_lights_devotion_443535&!trinket.2.is.chromebustible_bomb_suit&!trinket.2.is.ringing_ritual_mud&!trinket.2.is.tome_of_lights_devotion_443535
+actions+=/use_items,if=buff.avatar.remains>10&!trinket.t1.is.chaotic_nethergate&!trinket.1.is.chromebustible_bomb_suit&!trinket.1.is.ringing_ritual_mud&!trinket.1.is.tome_of_lights_devotion_443535&!trinket.2.is.chromebustible_bomb_suit&!trinket.2.is.ringing_ritual_mud&!trinket.2.is.tome_of_lights_devotion_443535&!trinket.t2.is.chaotic_nethergate
+actions+=/chaotic_nethergate,if=active_enemies>=5&fight_remains>20&time>5
 actions+=/thunder_blast,if=spell_targets.thunder_blast>=2&buff.thunder_blast.stack=2
 actions+=/shield_charge,if=cooldown.avatar.remains>10&fight_remains>15
 actions+=/ravager,if=fight_remains>35&(active_enemies>=3|boss)
