@@ -1420,6 +1420,7 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                             slot.interrupt = nil
                                                             slot.castStart = nil
                                                         end
+
                                                         slot.wait = state.delay
                                                         slot.waitSec = nil
                                                         slot.gcd = ability.gcd
@@ -1433,10 +1434,12 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
 
                                                         rAction = state.this_action
                                                         rWait = state.delay
+
                                                         state.selection_time = state.delay
                                                         state.selected_action = rAction
 
                                                         slot.empower_to = ability.empowered and ( state.args.empower_to or ability.empowerment_default or state.max_empower ) or nil
+
                                                         if debug then
                                                             -- scripts:ImplantDebugData( slot )
                                                             self:Debug( "Action chosen:  %s at %.2f!", rAction, state.delay )

@@ -4,6 +4,7 @@ actions.precombat+=/variable,name=trinket_1_stronger,value=!trinket.2.has_cooldo
 actions.precombat+=/variable,name=trinket_2_stronger,value=!variable.trinket_1_stronger
 # [Syrif] - Lets users choose whether to follow guide behaviour or sim behaviour
 actions.precombat+=/multishot,if=buff.beast_cleave.down&(!talent.bloody_frenzy|cooldown.call_of_the_wild.remains)&active_enemies>2
+actions.precombat+=/variable,name=double_stampede,value=buff.lead_from_the_front.duration*(1+(1/(2*gcd)))
 actions.precombat+=/barbed_shot,if=settings.barbed_shot_opener
 
 actions+=/feign_death_wait,if=buff.feign_death.up
@@ -34,12 +35,12 @@ actions.cds+=/potion,if=buff.call_of_the_wild.up|!talent.call_of_the_wild&buff.b
 actions.cleave+=/multishot,if=buff.beast_cleave.down&(!talent.bloody_frenzy|cooldown.call_of_the_wild.remains)&time<3
 actions.cleave+=/barbed_shot,if=time<2&debuff.barbed_shot.down
 actions.cleave+=/multishot,if=buff.beast_cleave.down&active_enemies>3&short_term
-actions.cleave+=/bestial_wrath,if=fight_remains>10&((buff.howl_of_the_pack_leader_cooldown.remains-buff.lead_from_the_front.duration)<(buff.lead_from_the_front.duration%(gcd*0.5))|!set_bonus.tww3_4pc|talent.multishot)
-actions.cleave+=/call_of_the_wild
+actions.cleave+=/bestial_wrath,if=fight_remains>10&(buff.howl_of_the_pack_leader_cooldown.remains<variable.double_stampede|!set_bonus.tww3_4pc|talent.multishot)
+actions.cleave+=/call_of_the_wild,if=fight_remains>40
 actions.cleave+=/barbed_shot,cycle_targets=1,if=full_recharge_time<gcd|charges_fractional>=cooldown.kill_command.charges_fractional|talent.call_of_the_wild&cooldown.call_of_the_wild.ready|howl_summon.ready&full_recharge_time<8
 actions.cleave+=/bloodshed
 actions.cleave+=/multishot,if=pet.main.buff.beast_cleave.down&(!talent.bloody_frenzy|cooldown.call_of_the_wild.remains)
-actions.cleave+=/call_of_the_wild
+actions.cleave+=/call_of_the_wild,if=fight_remains>40
 actions.cleave+=/explosive_shot,if=talent.thundering_hooves
 actions.cleave+=/kill_command
 actions.cleave+=/cobra_shot,if=focus.time_to_max<gcd*2|buff.hogstrider.stack>3|!talent.multishot
@@ -65,7 +66,7 @@ actions.drst+=/kill_command
 actions.drst+=/barbed_shot,cycle_targets=1
 actions.drst+=/cobra_shot
 
-actions.st+=/bestial_wrath,if=((buff.howl_of_the_pack_leader_cooldown.remains)-(buff.lead_from_the_front.duration))<((buff.lead_from_the_front.duration)%gcd*0.5)|!set_bonus.tww3_4pc
+actions.st+=/bestial_wrath,if=fight_remains>10&(buff.howl_of_the_pack_leader_cooldown.remains<variable.double_stampede|!set_bonus.tww3_4pc)
 actions.st+=/barbed_shot,cycle_targets=1,if=full_recharge_time<gcd
 actions.st+=/call_of_the_wild
 actions.st+=/bloodshed

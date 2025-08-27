@@ -1187,9 +1187,9 @@ function quickStopSpelling(action)
         --     SpellStopCasting()
         -- end
 
-    elseif spec == "恶魔" or spec == "恶魔学识" then
-        PetAttack()
-    elseif spec == "射击" or spec == "野兽控制"  or spec == "生存"  then
+    -- elseif spec == "恶魔" or spec == "恶魔学识" then
+    --     PetAttack()
+    -- elseif spec == "射击" or spec == "野兽控制"  or spec == "生存"  then
         -- if Hekili:isPlayerAuraExist(5384) then
         --     Hekili.autoCastEnabled = false
         -- end

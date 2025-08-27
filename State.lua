@@ -237,6 +237,41 @@ state.totem = {}
 
 
 state.trinket = {
+
+    none = {
+        slot = "none",
+        __id = 0,
+        __ability = "null_cooldown",
+        __usable = false,
+        __has_use_buff = false,
+        __has_use_damage = false,
+        __use_buff_duration = 0.01,
+        __proc = false,
+        ilvl = 0,
+
+        --[[ has_cooldown = {
+            slot = "none",
+        }, ]]
+
+        stacking_stat = {
+            slot = "none"
+        },
+        has_stacking_stat = {
+            slot = "none"
+        },
+
+        stat = {
+            slot = "none"
+        },
+        has_stat = {
+            slot = "none",
+        },
+
+        is = {
+            slot = "none",
+        },
+    },
+
     t1 = {
         slot = "t1",
         __id = 0,
@@ -244,7 +279,8 @@ state.trinket = {
         __usable = false,
         __has_use_buff = false,
         __has_use_damage = false,
-        __use_buff_duration = nil,
+        __use_buff_duration = 0.01,
+        __proc = false,
         ilvl = 0,
 
         --[[ has_cooldown = {
@@ -277,7 +313,8 @@ state.trinket = {
         __usable = false,
         __has_use_buff = false,
         __has_use_damage = false,
-        __use_buff_duration = nil,
+        __use_buff_duration = 0.01,
+        __proc = false,
         ilvl = 0,
 
         --[[ has_cooldown = {
@@ -310,7 +347,8 @@ state.trinket = {
         __usable = false,
         __has_use_buff = false,
         __has_use_damage = false,
-        __use_buff_duration = nil,
+        __use_buff_duration = 0.01,
+        __proc = false,
         ilvl = 0,
 
         --[[ has_cooldown = {
@@ -396,17 +434,37 @@ local mt_no_trinket = {
     end
 }
 
+local no_trinket = state.trinket.none
+--[[
 local no_trinket = setmetatable( {
     slot = "none",
-    cooldown = setmetatable( {}, mt_no_trinket_cooldown ),
-    stacking_stat = setmetatable( {}, mt_no_trinket_stacking_stat ),
-    stat = setmetatable( {}, mt_no_trinket_stat ),
-    is = setmetatable( {}, {
-        __index = function( t, k )
-            return false
-        end
-    } )
-}, mt_no_trinket )
+    __id = 0,
+    __ability = "null_cooldown",
+    __usable = false,
+    __has_use_buff = false,
+    __has_use_damage = false,
+    __use_buff_duration = nil,
+    __proc = false,
+    ilvl = 0,
+
+    stacking_stat = {
+        slot = "none"
+    },
+    has_stacking_stat = {
+        slot = "none"
+    },
+
+    stat = {
+        slot = "none"
+    },
+    has_stat = {
+        slot = "none",
+    },
+
+    is = {
+        slot = "none",
+    }
+}, mt_no_trinket ) ]]
 
 setmetatable( state.trinket, {
     __index = function( t, k )
@@ -475,6 +533,10 @@ local mt_trinket = {
             return isEnabled and t.__has_use_buff and t.__use_buff_duration or 0.01
         elseif k == "has_proc" or k == "proc" then
             return isEnabled and t.__proc or false
+        elseif k == "proc_duration" then
+            return t.__proc and t.__use_buff_duration or 0
+        elseif k == "duration" then
+            return t.__use_buff_duration or 0
         end
 
         if k == "up" or k == "ticking" or k == "active" then
@@ -496,7 +558,8 @@ local mt_trinket = {
             end
             return state.cooldown.null_cooldown
         elseif k == "cooldown_remains" then
-            return t.cooldown.remains
+            if t.usable and t.ability and state.cooldown[ t.ability ] then return state.cooldown[ t.ability ].remains end
+            return state.cooldown.null_cooldown.remains
 
         elseif k == "cast_time" or k == "cast_time" then
             return t.usable and t.ability and class.abilities[ t.ability ] and class.abilities[ t.ability ].cast or 0
@@ -507,6 +570,7 @@ local mt_trinket = {
     end
 }
 
+setmetatable( state.trinket.none, mt_trinket )
 setmetatable( state.trinket.t1, mt_trinket )
 setmetatable( state.trinket.t2, mt_trinket )
 setmetatable( state.trinket.main_hand, mt_trinket )
@@ -523,6 +587,7 @@ local mt_trinket_is = {
     end,
 }
 
+setmetatable( state.trinket.none.is, mt_trinket_is )
 setmetatable( state.trinket.t1.is, mt_trinket_is )
 setmetatable( state.trinket.t2.is, mt_trinket_is )
 setmetatable( state.trinket.main_hand.is, mt_trinket_is )
@@ -581,6 +646,7 @@ local mt_trinket_has_stacking_stat = {
     end
 }
 
+setmetatable( state.trinket.none.has_stacking_stat, mt_trinket_has_stacking_stat )
 setmetatable( state.trinket.t1.has_stacking_stat, mt_trinket_has_stacking_stat )
 setmetatable( state.trinket.t2.has_stacking_stat, mt_trinket_has_stacking_stat )
 setmetatable( state.trinket.main_hand.has_stacking_stat, mt_trinket_has_stacking_stat )
@@ -615,6 +681,7 @@ local mt_trinket_has_stat = {
     end
 }
 
+setmetatable( state.trinket.none.has_stat, mt_trinket_has_stat )
 setmetatable( state.trinket.t1.has_stat, mt_trinket_has_stat )
 setmetatable( state.trinket.t2.has_stat, mt_trinket_has_stat )
 setmetatable( state.trinket.main_hand.has_stat, mt_trinket_has_stat )
@@ -627,9 +694,15 @@ local mt_trinket_with_stat = {
     end
 }
 
+setmetatable( state.trinket.none.stat, mt_trinket_with_stat )
 setmetatable( state.trinket.t1.stat, mt_trinket_with_stat )
 setmetatable( state.trinket.t2.stat, mt_trinket_with_stat )
 setmetatable( state.trinket.main_hand.stat, mt_trinket_with_stat )
+
+state.trinket.none.proc = state.trinket.none.stat
+state.trinket.t1.proc = state.trinket.t1.stat
+state.trinket.t2.proc = state.trinket.t2.stat
+state.trinket.main_hand.proc = state.trinket.main_hand.stat
 
 
 local mt_trinkets_has_stat = {
