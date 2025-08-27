@@ -1,0 +1,19 @@
+actions.precombat+=/rite_of_sanctification,line_cd=4
+actions.precombat+=/devotion_aura,line_cd=4,if=buff.devotion_aura.down
+actions.precombat+=/guise_of_the_phase_diver
+
+
+actions+=/rebuke
+actions+=/call_action_list,name=mitigation
+actions+=/wait,sec=0.05
+
+actions.mitigation=/intercession,if=health.pct>70
+actions.mitigation=/blessing_of_freedom,if=find.slowed.exist
+actions.mitigation=/cleanse_toxins
+actions.mitigation+=/lay_on_hands,if=health.pct<loh_health
+actions.mitigation+=/word_of_glory,if=health.pct<wog_health&(holy_power.deficit=0|buff.divine_purpose.up|buff.shining_light_free.up)&time>8&buff.shield_of_the_righteous.up
+actions.mitigation+=/ardent_defender,if=tanking&incoming_damage_5s>ad_damage&!(buff.ardent_defender.up|buff.guardian_of_ancient_kings.up|buff.divine_shield.up|buff.potion.up)
+actions.mitigation+=/guardian_of_ancient_kings,if=tanking&incoming_damage_5s>goak_damage&!(buff.ardent_defender.up|buff.guardian_of_ancient_kings.up|buff.divine_shield.up|buff.potion.up)
+## actions.mitigation+=/sentinel,if=defensive_sentinel&tanking&incoming_damage_5s>goak_damage&!(buff.ardent_defender.up|buff.guardian_of_ancient_kings.up|buff.divine_shield.up|buff.potion.up)
+
+

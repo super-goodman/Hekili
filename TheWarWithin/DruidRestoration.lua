@@ -1376,7 +1376,7 @@ spec:RegisterOptions( {
     damageExpiration = 6,
 
     potion = "tempered_potion",
-    package = "恢复Simc",
+    package = "恢复奶树Simc",
 } )
 
 -- spec:RegisterSetting( "experimental_msg", nil, {

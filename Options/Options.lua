@@ -5008,7 +5008,7 @@ found = true end
 
                                         for key, pkg in pairs( self.DB.profile.packs ) do
                                             local pname = pkg.builtIn and "|cFF00B4FF" .. key .. "|r" or key
-                                            if pkg.spec == id then
+                                            if pkg.spec == id and self.DB.profile.packs.option then
                                                 packs[ key ] = Hekili:ZoomedTextureWithText( texture, pname )
                                             end
                                         end

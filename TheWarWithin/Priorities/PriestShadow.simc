@@ -1,6 +1,6 @@
 ## https://github.com/simulationcraft/simc/blob/thewarwithin/ActionPriorityLists/default/priest_shadow.simc
-## SimulationCraft Commit Sync: bd9a80c
-## Date: 2025-08-05
+## SimulationCraft Commit Sync: df4f2e8
+## Date: 2025-08-23
 
 actions.precombat+=/power_word_fortitude
 actions.precombat+=/shadowform,line_cd=5,if=!buff.shadowform.up
@@ -22,7 +22,6 @@ actions.precombat+=/arcane_torrent
 
 actions+=/shadowform,line_cd=5,if=!buff.shadowform.up
 actions+=/silence
-#actions+=/mind_flay_cancel,if=find.player_casting.id=15407&gcd.remains=0&find.player_casting.remains<70&find.player_casting.remains>10&buff.mind_flay_insanity.down
 actions+=/angelic_feather,if=(!buff.body_and_soul.up|!talent.body_and_soul)&!buff.angelic_feather.up&charges>2&movement.distance>8&!buff.premonition_of_insight.up
 actions+=/variable,name=holding_crash,op=set,value=false
 actions+=/variable,name=pool_for_cds,op=set,value=(cooldown.void_eruption.remains<=gcd.max*3&talent.void_eruption|cooldown.dark_ascension.up&talent.dark_ascension)|talent.void_torrent&talent.psychic_link&cooldown.void_torrent.remains<=4&!variable.holding_crash&!buff.voidform.up
@@ -56,6 +55,8 @@ actions.cds+=/ancestral_call,if=buff.power_infusion.up&(buff.voidform.up|buff.da
 ## actions.cds+=/cancel_buff,name=power_infusion,if=cooldown.power_infusion.up&cooldown.power_infusion.duration>0&set_bonus.tww2_4pc&buff.power_infusion.remains<=2
 ## ## actions.cds+=/invoke_external_buff,name=power_infusion,if=(buff.voidform.up|buff.dark_ascension.up|set_bonus.tww2_4pc)&!buff.power_infusion.up
 ## actions.cds+=/invoke_external_buff,name=bloodlust,if=buff.power_infusion.up&boss&fight_remains<120|boss&fight_remains<=40
+# Use Flash Heal to proc Nexus-King's Command trinket
+actions.cds+=/flash_heal,if=equipped.nexuskings_command&buff.oathbound.up&(!buff.boon_of_the_oathsworn.up|buff.boon_of_the_oathsworn.remains<3)&((talent.void_eruption&(buff.voidform.up|cooldown.void_eruption.up))|(talent.dark_ascension&cooldown.dark_ascension.up)|(talent.power_surge&cooldown.halo.up)|(talent.entropic_rift&cooldown.void_torrent.up))
 # Sync Power Infusion with Voidform or Dark Ascension
 actions.cds+=/power_infusion,if=(fight_remains>40|raid&boss)&(buff.voidform.up|buff.dark_ascension.up&(fight_remains<=80|fight_remains>=140))&(!buff.power_infusion.up|set_bonus.tww2_4pc&buff.power_infusion.remains<=15)
 # Make sure Mindbender is active before popping Dark Ascension unless you have insignificant talent points or too many targets
@@ -69,7 +70,7 @@ actions.cds+=/call_action_list,name=trinkets
 actions.cds+=/desperate_prayer,if=health.pct<=75
 
 # Use Halo to acquire Twist of Fate if an ally can be healed for it and it is not currently up.
-actions.heal_for_tof=halo
+actions.heal_for_tof+=/halo
 # Use Divine Star to acquire Twist of Fate if an ally can be healed for it and it is not currently up.
 actions.heal_for_tof+=/divine_star
 # Use Holy Nova when Rhapsody is fully stacked to acquire Twist of Fate if an ally can be healed for it and it is not currently up.

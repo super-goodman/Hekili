@@ -1737,7 +1737,7 @@ spec:RegisterOptions( {
 
     potion = "tempered_potion",
 
-    package = "Marksmanship",
+    package = "射击Simc",
 } )
 
 local beastMastery = class.specs[ 253 ]

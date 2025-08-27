@@ -2135,7 +2135,7 @@ spec:RegisterOptions( {
 
     potion = "tempered_potion",
 
-    package = "Fire",
+    package = "火焰Simc",
 } )
 
 spec:RegisterSetting( "pyroblast_pull", false, {

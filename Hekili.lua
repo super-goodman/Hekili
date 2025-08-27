@@ -1574,7 +1574,7 @@ function restartAttack()
     or spec ==  "浩劫" or spec ==  "射击" or spec ==  "生存" or spec ==  "野兽控制"
     or spec ==  "复仇" or spec ==  "防御" or spec ==  "酒仙" or spec ==  "守护" or spec ==  "鲜血" or spec ==  "防护" or spec ==  "神圣" or spec ==  "织雾" then
         local isAutoAttacking = C_Spell.IsCurrentSpell(6603) -- 6603 是自动攻击的技能 ID
-        if not isAutoAttacking  then
+        if not isAutoAttacking and UnitAffectingCombat("player") then
             if spec ==  "射击" or spec ==  "生存" or spec ==  "野兽控制" then
                 if Hekili.State.buff.feign_death.down then
                     StartAttack("target")
