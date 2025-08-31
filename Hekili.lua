@@ -1322,7 +1322,12 @@ function errorCast(name)
         CastSpellByName("惩击")
         CastSpellByName("暗影冲击")
         return true
-    elseif name == "黑暗训斥" or name == "苦修" and spec == "戒律" then
+    elseif name == "苦修" and spec == "戒律" then
+        --CastSpellByID(433895)
+        CastSpellByName("苦修")
+        CastSpellByName("黑暗训斥")
+        return true
+    elseif name == "黑暗训斥" and spec == "戒律" then
         --CastSpellByID(433895)
         CastSpellByName("黑暗训斥")
         CastSpellByName("苦修")

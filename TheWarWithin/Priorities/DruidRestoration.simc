@@ -30,7 +30,7 @@ actions.health_aoe+=/wild_growth,enable_moving=true,moving=0
 actions.health_aoe+=/swiftmend,if=find.lowest_hp.pct<80
 actions.health_aoe+=/invigorate
 
-actions.health_st+=/rejuvenation,if=find.lowest_hp.pct<=100&(active_hot.rejuvenation<=5&!raid|active_hot.rejuvenation<=settings.raid_rejuvenation_num&raid)&find.lowest_hp.pct>40
+actions.health_st+=/rejuvenation,if=find.lowest_hp.pct<=95&(active_hot.rejuvenation<=5&!raid|active_hot.rejuvenation<=settings.raid_rejuvenation_num&raid)&find.lowest_hp.pct>40
 actions.health_st+=/grove_guardians,if=find.lowest_hp.pct<60&charges=1|charges=2&find.lowest_hp.pct<70|charges=3
 actions.health_st+=/convoke_the_spirits,if=health_party_pct<75|find.none_target_lowest_hp.pct<40
 actions.health_st+=/regrowth,if=(buff.clearcasting.up|buff.blooming_infusion_regrowth.up)&find.lowest_hp.pct<100&(!moving|buff.natures_swiftness.up|buff.blooming_infusion_regrowth.up)

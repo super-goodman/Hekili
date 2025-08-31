@@ -25,7 +25,7 @@ actions+=/fireblood
 actions+=/ancestral_call
 actions+=/bag_of_tricks
 actions+=/potion,if=buff.avatar.up&fight_remains>40
-actions+=/use_items,if=buff.avatar.remains>10&!trinket.t1.is.chaotic_nethergate&!trinket.1.is.chromebustible_bomb_suit&!trinket.1.is.ringing_ritual_mud&!trinket.1.is.tome_of_lights_devotion_443535&!trinket.2.is.chromebustible_bomb_suit&!trinket.2.is.ringing_ritual_mud&!trinket.2.is.tome_of_lights_devotion_443535&!trinket.t2.is.chaotic_nethergate
+actions+=/use_items,if=buff.avatar.remains>10&fight_remains>30&!trinket.t1.is.chaotic_nethergate&!trinket.1.is.chromebustible_bomb_suit&!trinket.1.is.ringing_ritual_mud&!trinket.1.is.tome_of_lights_devotion_443535&!trinket.2.is.chromebustible_bomb_suit&!trinket.2.is.ringing_ritual_mud&!trinket.2.is.tome_of_lights_devotion_443535&!trinket.t2.is.chaotic_nethergate
 actions+=/chaotic_nethergate,enabled=0,if=active_enemies>=5&fight_remains>20&time>5
 actions+=/thunder_blast,if=spell_targets.thunder_blast>=2&buff.thunder_blast.stack=2
 actions+=/shield_charge,if=cooldown.avatar.remains>10&fight_remains>15&time>5
@@ -43,9 +43,9 @@ actions+=/run_action_list,name=colossus_generic,if=active_enemies<3&!hero_tree.m
 #self
 actions.mountain_aoe+=/thunder_blast,if=buff.thunder_blast.stack=2
 #self
-actions.mountain_aoe+=/shield_slam,if=buff.burst_of_power.stack>=2&rage<100
+actions.mountain_aoe+=/shield_slam,if=buff.burst_of_power.stack>=2
 #self
-actions.mountain_aoe+=/execute,if=spell_targets.execute>=2&(rage>=50|buff.sudden_death.up)&talent.heavy_handed.enabled&(buff.ignore_pain.remains>3&buff.shield_block.remains>2|rage>=75)&time>10
+actions.mountain_aoe+=/execute,if=spell_targets.execute>=2&(rage>=50|buff.sudden_death.up)&talent.heavy_handed.enabled&(buff.ignore_pain.remains>2&buff.shield_block.remains>2|rage>=70)&time>10
 actions.mountain_aoe+=/thunder_blast,if=dot.rend.remains<=1
 actions.mountain_aoe+=/thunder_clap,if=dot.rend.remains<=1
 actions.mountain_aoe+=/thunder_blast,if=buff.violent_outburst.up&spell_targets.thunderclap>=2&buff.avatar.up&talent.unstoppable_force.enabled
@@ -56,6 +56,7 @@ actions.mountain_aoe+=/shield_slam,if=buff.thunder_blast.stack<2&rage<=100
 #self
 actions.mountain_aoe+=/shield_slam,if=rage<=100|cooldown.shield_slam.charges>1|buff.violent_outburst.up&spell_targets.thunderclap<=4&talent.crashing_thunder.enabled
 actions.mountain_aoe+=/revenge,if=buff.revenge.up
+actions.mountain_aoe+=/shield_slam
 actions.mountain_aoe+=/revenge,if=rage>=40&target.health.pct>=25&(buff.ignore_pain.remains>3&buff.shield_block.remains>2|rage>=75)|rage>=40&!talent.heavy_handed
 actions.mountain_aoe+=/thunder_clap,if=buff.violent_outburst.up&spell_targets.thunderclap>=4&buff.avatar.up&talent.unstoppable_force.enabled&talent.crashing_thunder.enabled|buff.violent_outburst.up&spell_targets.thunderclap>6&buff.avatar.up&talent.unstoppable_force.enabled
 actions.mountain_aoe+=/thunder_blast
@@ -66,9 +67,9 @@ actions.mountain_aoe+=/execute,if=spell_targets.execute>=2&(rage>=50|buff.sudden
 #self
 actions.mountain_generic+=/thunder_blast,if=buff.thunder_blast.stack=2
 #self
-actions.mountain_generic+=/shield_slam,if=buff.burst_of_power.stack>=2&rage<100
+actions.mountain_generic+=/shield_slam,if=buff.burst_of_power.stack>=2
 #self
-actions.mountain_generic+=/execute,if=(rage>=50|buff.sudden_death.up)&(buff.ignore_pain.remains>3&buff.shield_block.remains>2|rage>=75)
+actions.mountain_generic+=/execute,if=(rage>=50|buff.sudden_death.up)&(buff.ignore_pain.remains>2&buff.shield_block.remains>2|rage>=70)
 actions.mountain_generic+=/thunder_blast,if=dot.rend.remains<=1
 actions.mountain_generic+=/thunder_clap,if=dot.rend.remains<=1
 actions.mountain_generic+=/thunder_blast,if=buff.violent_outburst.up&spell_targets.thunderclap>=2&buff.avatar.up&talent.unstoppable_force.enabled
@@ -80,6 +81,7 @@ actions.mountain_generic+=/thunder_clap,if=buff.violent_outburst.up&spell_target
 #self
 actions.mountain_generic+=/shield_slam,if=rage<=90|cooldown.shield_slam.charges>1|buff.violent_outburst.up&spell_targets.thunderclap<=4&talent.crashing_thunder.enabled
 actions.mountain_generic+=/revenge,if=buff.revenge.up
+actions.mountain_generic+=/shield_slam
 actions.mountain_generic+=/thunder_blast
 actions.mountain_generic+=/thunder_clap
 actions.mountain_generic+=/revenge,if=rage>=40&target.health.pct>=25&(buff.ignore_pain.remains>3&buff.shield_block.remains>2|rage>=75)

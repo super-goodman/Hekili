@@ -22,8 +22,8 @@ actions+=/call_action_list,name=trinkets
 actions+=/call_action_list,name=aoe,if=active_enemies>1
 actions+=/call_action_list,name=st,if=active_enemies=1
 
-actions.cooldowns+=/sacred_weapon,if=((!prev_gcd.1.holy_bulwark|moving)&time>10&(set_bonus.tww3>=4&buff.masterwork.stack>=5|set_bonus.tww3<4))&cooldown_check
-actions.cooldowns+=/holy_bulwark,if=(!prev_gcd.1.sacred_weapon|moving)&time>10&cooldown_check
+actions.cooldowns+=/sacred_weapon,if=((!prev_gcd.1.holy_bulwark|moving)&time>10&(set_bonus.tww3>=4&buff.masterwork.stack>=5|set_bonus.tww3<4))&cooldown_check&fight_remains>30
+actions.cooldowns+=/holy_bulwark,if=(!prev_gcd.1.sacred_weapon|moving)&time>10&(set_bonus.tww3>=4&buff.masterwork.stack>=3|set_bonus.tww3<4)&cooldown_check&fight_remains>10
 actions.cooldowns+=/lights_judgment,if=spell_targets.lights_judgment>=2|!raid_event.adds.exists|raid_event.adds.in>75|raid_event.adds.up
 actions.cooldowns+=/avenging_wrath,if=fight_remains>35|solo|raid
 actions.cooldowns+=/potion,if=buff.avenging_wrath.up&fight_remains>35|solo
@@ -33,18 +33,17 @@ actions.cooldowns+=/bastion_of_light,if=(buff.avenging_wrath.up|cooldown.avengin
 ## actions.cooldowns+=/invoke_external_buff,name=power_infusion,if=buff.avenging_wrath.up
 actions.cooldowns+=/fireblood,if=buff.avenging_wrath.remains>30
 
-431350
-actions.aoe+=/avengers_shield,if=!target_incombat
-actions.aoe+=/consecration,if=buff.divine_guidance.stack=5&buff.shield_of_the_righteous.up
-actions.aoe+=/blessed_hammer,if=set_bonus.tww3>=2&buff.blessed_assurance.up&buff.shield_of_the_righteous.up
 actions.aoe+=/shield_of_the_righteous,if=buff.shield_of_the_righteous.remains<2|holy_power>3|buff.divine_purpose.up
-actions.aoe+=/avengers_shield,if=time<10&fight_remains>10&buff.shield_of_the_righteous.up&(target.distance<13|solo)
+actions.aoe+=/avengers_shield,if=!target_incombat
+actions.aoe+=/avengers_shield,if=(time<8&fight_remains>10|buff.barricade_of_faith.down)&(target.distance<13|solo)
+actions.aoe+=/consecration,if=buff.divine_guidance.stack=5&buff.shield_of_the_righteous.up
 actions.aoe+=/judgment,if=(charges>=2|full_recharge_time<=gcd.max|talent.hammer_and_anvil)&(target.distance<13|solo)
+actions.aoe+=/blessed_hammer,if=set_bonus.tww3>=2&buff.blessed_assurance.up&buff.shield_of_the_righteous.up
 actions.aoe+=/avengers_shield,if=buff.moment_of_glory.up&buff.shining_light_full.up&buff.shield_of_the_righteous.up&(target.distance<13|solo)
 actions.aoe+=/hammer_of_light,if=time>5&(buff.blessing_of_dawn.up|fight_remains<2)&(debuff.judgment.up|buff.hammer_of_light_ready.remains<2|buff.hammer_of_light_ready.stack>1|buff.hammer_of_light_free.up|(cooldown.eye_of_tyr.remains<3))
 actions.aoe+=/eye_of_tyr,if=time>8&talent.lights_guidance.enabled
 actions.aoe+=/blessed_hammer,if=set_bonus.tww3>=2&talent.hammer_and_anvil.enabled
-actions.aoe+=/avengers_shield,if=!buff.bulwark_of_righteous_fury.up&talent.bulwark_of_righteous_fury.enabled&spell_targets.shield_of_the_righteous>=3&buff.barricade_of_faith.down&(target.distance<13|solo)
+actions.aoe+=/avengers_shield,if=!buff.bulwark_of_righteous_fury.up&talent.bulwark_of_righteous_fury.enabled&(target.distance<13|solo)
 actions.aoe+=/hammer_of_the_righteous,if=buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<3&!buff.avenging_wrath.up
 actions.aoe+=/blessed_hammer,if=buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<3
 actions.aoe+=/crusader_strike,if=buff.blessed_assurance.up&spell_targets.shield_of_the_righteous<2&!buff.avenging_wrath.up
@@ -70,12 +69,13 @@ actions.trinkets+=/use_item,name=unyielding_netherprism,if=buff.avenging_wrath.r
 actions.trinkets+=/use_items,slots=trinket1,if=!trinket.1.is.soulbinders_embrace&(variable.trinket_sync_slot=1&(buff.avenging_wrath.up)|(variable.trinket_sync_slot=2&(!trinket.2.cooldown.ready|!buff.avenging_wrath.up))|!variable.trinket_sync_slot)
 actions.trinkets+=/use_items,slots=trinket2,if=!trinket.1.is.soulbinders_embrace&(variable.trinket_sync_slot=2&(buff.avenging_wrath.up)|(variable.trinket_sync_slot=1&(!trinket.1.cooldown.ready|!buff.avenging_wrath.up))|!variable.trinket_sync_slot)
 
-actions.st+=/avengers_shield,if=!target_incombat
-actions.st+=/consecration,if=buff.divine_guidance.stack=5&buff.shield_of_the_righteous.up
-actions.st+=/blessed_hammer,if=set_bonus.tww3>=2&buff.blessed_assurance.up&buff.shield_of_the_righteous.up
 actions.st+=/shield_of_the_righteous,if=buff.shield_of_the_righteous.remains<2|holy_power>3|buff.divine_purpose.up
-actions.st+=/avengers_shield,if=buff.moment_of_glory.up&buff.shining_light_full.up&buff.shield_of_the_righteous.up&(target.distance<13|solo)
+actions.st+=/avengers_shield,if=!target_incombat
+actions.st+=/avengers_shield,if=buff.barricade_of_faith.down&(target.distance<13|solo)
+actions.st+=/consecration,if=buff.divine_guidance.stack=5&buff.shield_of_the_righteous.up
 actions.st+=/judgment,if=(charges>=2|full_recharge_time<=gcd.max|talent.hammer_and_anvil)&(target.distance<13|solo)
+actions.st+=/blessed_hammer,if=set_bonus.tww3>=2&buff.blessed_assurance.up&buff.shield_of_the_righteous.up
+actions.st+=/avengers_shield,if=buff.moment_of_glory.up&buff.shining_light_full.up&buff.shield_of_the_righteous.up&(target.distance<13|solo)
 actions.st+=/hammer_of_light,if=(buff.blessing_of_dawn.up|fight_remains<2)&(debuff.judgment.up|buff.hammer_of_light_ready.remains<2|buff.hammer_of_light_ready.stack>1|buff.hammer_of_light_free.up|(cooldown.eye_of_tyr.remains<3))
 actions.st+=/eye_of_tyr,if=talent.lights_guidance.enabled
 actions.st+=/judgment,cycle_targets=1,if=spell_targets.shield_of_the_righteous>3&buff.bulwark_of_righteous_fury.stack>=3&holy_power<3&(target.distance<13|solo)
@@ -101,8 +101,8 @@ actions.st+=/consecration
 actions.mitigation=/blessing_of_freedom,if=find.slowed.exist
 actions.mitigation=/cleanse_toxins
 actions.mitigation+=/lay_on_hands,if=health.pct<loh_health
-actions.mitigation+=/word_of_glory,if=health.pct<wog_health&(holy_power.deficit=0|buff.divine_purpose.up|buff.shining_light_free.up)&time>8&buff.shield_of_the_righteous.up
-actions.mitigation+=/word_of_glory,if=health.pct<40&(holy_power>=3|buff.divine_purpose.up|buff.shining_light_free.up)&buff.shield_of_the_righteous.up
+actions.mitigation+=/word_of_glory,line_cd=5,if=health.pct<wog_health&(holy_power.deficit=0|buff.divine_purpose.up|buff.shining_light_free.up)&time>8&buff.shield_of_the_righteous.up
+actions.mitigation+=/word_of_glory,line_cd=5,if=health.pct<40&(holy_power>=3|buff.divine_purpose.up|buff.shining_light_free.up)&buff.shield_of_the_righteous.up
 actions.mitigation=/intercession,if=health.pct>70
 actions.mitigation+=/ardent_defender,if=time<5&time>0&buff.divine_shield.down&buff.ardent_defender.down&buff.guardian_of_ancient_kings.down&active_enemies>=3
 actions.mitigation+=/ardent_defender,if=tanking&incoming_damage_5s>ad_damage&!(buff.ardent_defender.up|buff.guardian_of_ancient_kings.up|buff.divine_shield.up|buff.potion.up)

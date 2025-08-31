@@ -1190,6 +1190,8 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                         ability.target = state.find.tank.unit or ability.target
                                                     elseif scripts:CheckFinding( scriptID, "find.health" ) then
                                                         ability.target = "player"
+                                                    elseif scripts:CheckFinding( scriptID, "find.random_unit" ) then
+                                                        ability.target = state.find.random_unit.unit or ability.target
                                                     elseif not ability.target then
                                                         ability.target = "none"
                                                     end

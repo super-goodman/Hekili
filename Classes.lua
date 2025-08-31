@@ -3551,17 +3551,18 @@ all:RegisterAbilities( {
         startsCombat = false,
         texture = function() return talent.pact_of_gluttony.enabled and 538744 or 538745 end,
 
-        usable = function ()
-            local item = talent.pact_of_gluttony.enabled and 224464 or 5512
+        usable = false,
+        -- usable = function ()
+        --     local item = talent.pact_of_gluttony.enabled and 224464 or 5512
 
-            local _, duration = GetItemCooldown( item )
-            --self
-            if duration > 0 and duration < 1 then return false, "团队战斗中" end
-            if GetItemCount( item ) == 0 then return false, "需要背包中有治疗石"
-            elseif not IsUsableItem( item ) then return false, "治疗石CD中"
-            elseif health.current >= health.max then return false, "必须已受到伤害" end
-            return true
-        end,
+        --     local _, duration = GetItemCooldown( item )
+        --     --self
+        --     if duration > 0 and duration < 1 then return false, "团队战斗中" end
+        --     if GetItemCount( item ) == 0 then return false, "需要背包中有治疗石"
+        --     elseif not IsUsableItem( item ) then return false, "治疗石CD中"
+        --     elseif health.current >= health.max then return false, "必须已受到伤害" end
+        --     return true
+        -- end,
 
         readyTime = function ()
             local start, duration = GetItemCooldown( talent.pact_of_gluttony.enabled and 224464 or 5512 )

@@ -2398,8 +2398,8 @@ do
                     return 100
                 end
                 return tonumber(total_group_health/total_group_health_max*100)
-            elseif k == "Pvepvp_check" then return true
-            elseif k == "pvepvp_check" then return true
+            elseif k == "Pvepvp_check" then return false
+            elseif k == "pvepvp_check" then return false
             elseif k == "range_spell_magic" then return Hekili:isTargetSpellingMagicRangeSpell()
             elseif k == "target_me_spell_magic" then return Hekili:isTargetSpellingMagicTargetMeSpell()
             elseif k == "dot_spell_magic" then return Hekili:isPlayerHasMagicDot()
@@ -4771,6 +4771,11 @@ do
                 elseif k == "unit_name" then return UnitName(unit)
                     
                 elseif k == "role" then return UnitGroupRolesAssigned(unit) end
+            end
+            if t.key == "random_unit" then
+                if k == "unit" then
+                    return Hekili:findRandomHpUnit()
+                end
             end
 
             if t.key == "none_target_lowest_hp" then

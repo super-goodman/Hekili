@@ -16,9 +16,9 @@ local unitIDs = { "target", "targettarget", "focus", "focustarget", "boss1", "bo
 
 local lowHealthRangeSpell_magic_dps = {465827,473070,468813,460156,448791,428169,427894,323393,1241693,1241693,426787,448888,1221532}
 
-local lowHealthRangeSpell_physic_dps = {27609,448492,326409,349934,346742,438877,438476}
+local lowHealthRangeSpell_physic_dps = {448492,326409,346742,438476}
 
-local dot_magic_dps = {473713,468815,446368,446403,1236512,1236513,1236514,335338,344874,1236615,1240097,1253638,433740,461507,438618,448248,431365,426735,451119,434441,1217439,1236126,1239487,1219704,1226444}
+local dot_magic_dps = {473713,468815,446368,446403,1236512,1236513,1236514,335338,344874,1236615,347481,1240097,1253638,350804,433740,461507,438618,448248,431365,426735,451119,434441,431350,431349,431352,1217439,1236126,1239487,1219704,1226444}
 
 local dot_physic_dps = {453461,427621,427635,350101}
 
@@ -556,6 +556,27 @@ do
         return lowestUnit or "none"
     end
 
+    function Hekili:findRandomHpUnit()
+        local group = Hekili:getGroupFriendUnits()
+        if not group then return "none" end
+        local units = {}
+        for unit, _ in pairs(friendGuids) do
+            if UnitExists(unit)  then
+                table.insert(units, unit)
+            end
+        end
+    
+        friendGuids = {}
+    
+        -- 随机返回一个
+        if  #units > 0 then
+            local i = math.random(1, #units)
+            return units[i]
+        end
+    
+        return "none"
+    end
+
     function Hekili.findDeaduUnit() 
         local _, dead = Hekili:getGroupFriendUnits()
         local dead_list = {}
@@ -573,8 +594,12 @@ do
     function Hekili:findInjuredGroupNumber(gap)
         if not Hekili:getGroupFriendUnits() then return 0 end
         local count = 0
-        
-        for unit, guid in pairs(friendGuids) do
+        local tank_gap = Hekili.DB.profile.toggles.autoHealing.tank_gap
+        for unit, _ in pairs(friendGuids) do
+            local health_gap = gap
+            if UnitGroupRolesAssigned(unit) == "TANK"  then
+                health_gap = tank_gap
+            end
             if not UnitIsDead(unit) and Hekili:getHealthPct(unit) <= gap then
                 count = count + 1
             end

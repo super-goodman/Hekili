@@ -3269,17 +3269,15 @@ spec:RegisterAbilities( {
     wind_rush_totem = {
         id = 192077,
         cast = 0,
-        cooldown = function () return 120 - 3 * talent.totemic_surge.rank end,
-        gcd = "totem",
+        cooldown = function () return 120 - 6 * talent.totemic_surge.rank end,
+        gcd = "spell",
         school = "nature",
-
+        toggle_terrain = "player",
         spend = 0.01,
         spendType = "mana",
 
         talent = "wind_rush_totem",
-        startsCombat = true,
-
-        toggle = "cooldowns",
+        startsCombat = false,
 
         handler = function ()
             summonTotem( "wind_rush_totem" )

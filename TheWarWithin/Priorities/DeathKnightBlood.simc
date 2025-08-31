@@ -28,7 +28,7 @@ actions+=/blood_tap,if=(rune<=1&rune.time_to_3>gcd)
 actions+=/deaths_caress,if=buff.bone_shield.remains<gcd.max*2
 actions+=/death_strike,if=cooldown_check&(health.pct<death_strike_damage|(runic_power>120|health.pct<95&runic_power>100)&(buff.dancing_rune_weapon.down&!buff.death_and_decay.up|buff.dancing_rune_weapon.down))
 actions+=/death_strike,if=buff.coagulopathy.up&buff.coagulopathy.remains<=gcd
-actions+=/any_dnd,if=!buff.death_and_decay.up
+actions+=/any_dnd,line_cd=4,if=!buff.death_and_decay.up
 actions+=/blood_boil,line_cd=2,if=dot.blood_plague.remains<gcd.max*2|(active_dot.blood_plague<active_enemies|time<20&!boss&runic_power>40)&buff.dancing_rune_weapon.down&!buff.death_and_decay.up
 actions+=/dancing_rune_weapon
 actions+=/call_action_list,name=deathbringer,strict=1,if=hero_tree.deathbringer

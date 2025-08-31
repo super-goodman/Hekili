@@ -200,6 +200,15 @@ spec:RegisterPvpTalents( {
 
 -- Auras
 spec:RegisterAuras( {
+    --self
+    -- Increases movement speed by $?s382215[${$382216s1+$w2}][$w2]%.$?$w3!=0[  Less hindered by effects that reduce movement speed.][]
+    -- https://wowhead.com/ptr-2/spell=2645
+    ghost_wolf = {
+        id = 2645,
+        duration = 3600,
+        type = "Magic",
+        max_stack = 1
+    },
     ascendance = {
         id = 114052,
         duration = function() return talent.preeminence.enabled and 18 or 15 end,
@@ -377,6 +386,10 @@ local recallTotem1
 local recallTotem2
 
 spec:RegisterTotems( {
+    --self
+    healing_tide_totem = {
+        id = 538569
+    },
     tremor_totem = {
         id = 136108
     },
@@ -455,6 +468,44 @@ end )
 
 -- Abilities
 spec:RegisterAbilities( {
+
+    --self
+    -- Turn into a Ghost Wolf, increasing movement speed by $?s382215[${$s2+$382216s1}][$s2]% and preventing movement speed from being reduced below $s3%.
+    ghost_wolf = {
+        id = 2645,
+        cast = 0,
+        cooldown = 0,
+        gcd = "spell",
+        school = "nature",
+
+        startsCombat = false,
+
+        handler = function ()
+            applyBuff( "ghost_wolf" )
+            if talent.spirit_wolf.enabled then applyBuff( "spirit_wolf" ) end
+        end,
+    },
+
+    --self
+    -- Talent: Summons a totem at the target location for $d, continually granting all allies who pass within $192078s1 yards $192082s% increased movement speed for $192082d.
+    wind_rush_totem = {
+        id = 192077,
+        cast = 0,
+        cooldown = function () return 120 - 6 * talent.totemic_surge.rank end,
+        gcd = "spell",
+        toggle_terrain = "player",
+        spend = 0.010,
+        spendType = 'mana',
+
+        talent = "wind_rush_totem",
+        startsCombat = false,
+        texture = 538576,
+
+        handler = function ()
+            summonTotem( "wind_rush_totem" )
+            applyBuff( "wind_rush" )
+        end,
+    },
 
     totemic_projection = {
         id = 108287,
@@ -1024,12 +1075,14 @@ spec:RegisterAbilities( {
     poison_cleansing_totem = {
         id = 383013,
         cast = 0,
-        cooldown = function () return 45 - 3 * talent.totemic_surge.rank end,
+        cooldown = function () return 120 - 6 * talent.totemic_surge.rank end,
         gcd = "totem",
 
         spend = 0.02,
         spendType = "mana",
-
+        usable = function ()
+            return debuff.dispellable_poison.up, "requires poison"
+        end,
         startsCombat = false,
         texture = 136070,
 
@@ -1062,6 +1115,7 @@ spec:RegisterAbilities( {
     -- Restorative waters wash over a friendly target, healing them for 13,520 and an additional 10,502 over 18 sec.
     riptide = {
         id = 61295,
+        hot_id = 61295,
         cast = 0,
         charges = function () return 2 + ( talent.elemental_reverb.enabled and 1 or 0 ) end,
         cooldown = 6,
@@ -1151,7 +1205,8 @@ spec:RegisterAbilities( {
         cooldown = function() return talent.call_of_the_elements.enabled and 120 or 180 end,
         gcd = "spell",
         school = "nature",
-        toggle = function() if settings.healing_mode then return "cooldowns" end end,
+        --self
+        toggle = "cooldowns",
         talent = "totemic_recall",
         startsCombat = false,
 
@@ -1240,35 +1295,107 @@ spec:RegisterAbilities( {
     width = "full",
 } )--]]
 
-spec:RegisterSetting( "experimental_msg", nil, {
-    type = "description",
-    name = strformat( "%s：%s支持使用图腾和 %s 来构建治疗体系。它将推荐使用 %s 和 %s，保持 %s / %s 的重新充能，并使用 %s 来强化特定技能。你的 %s 也将得到监控。",
-        select( 7, GetSpecializationInfoByID( spec.id ) ), ( UnitClass( "player" ) ), Hekili:GetSpellLinkWithTexture( spec.abilities.chain_heal.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.healing_rain.id ),
-        Hekili:GetSpellLinkWithTexture( spec.abilities.surging_totem.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.riptide.id ), Hekili:GetSpellLinkWithTexture( spec.abilities.healing_stream_totem.id ),
-        Hekili:GetSpellLinkWithTexture( spec.abilities.unleash_life.id ), Hekili:GetSpellLinkWithTexture( spec.talents.earth_shield[2] ) ),
-    width = "full",
-} )
 
-spec:RegisterSetting( "healing_mode", false, {
-    name = "治疗辅助模式",
-    desc = "如果勾选，可能会根据默认优先级推荐使用治疗技能。",
+
+-- spec:RegisterSetting( "healing_mode", false, {
+--     name = "治疗辅助模式",
+--     desc = "如果勾选，可能会根据默认优先级推荐使用治疗技能。",
+--     type = "toggle",
+--     width = "full",
+-- } )
+
+-- spec:RegisterSetting( "second_shield", "earth_shield", {
+--     name = strformat( "|T236224:0|t 选择 %s 技能", _G.SHIELDSLOT ),
+--     desc = strformat( "当拥有 %s 天赋时，使用 %s 后使用哪个 %s 技能。", _G.SHIELDSLOT, Hekili:GetSpellLinkWithTexture( spec.talents.elemental_orbit[2] ),
+--     	Hekili:GetSpellLinkWithTexture( spec.abilities.water_shield.id ) ),
+--     type = "select",
+--     values = function()
+--         return {
+--             earth_shield = class.abilityList.earth_shield,
+--             lightning_shield = class.abilityList.lightning_shield,
+--         }
+--     end,
+--     width = "full"
+-- } )
+
+spec:RegisterSetting( "allow_mitigation", true, {
+    name = strformat( "允许DBM介入" ),
+    desc = strformat( "如果勾选，插件将在团队警报技能来临时推荐升腾等团刷技能"),
     type = "toggle",
     width = "full",
 } )
 
-spec:RegisterSetting( "second_shield", "earth_shield", {
-    name = strformat( "|T236224:0|t 选择 %s 技能", _G.SHIELDSLOT ),
-    desc = strformat( "当拥有 %s 天赋时，使用 %s 后使用哪个 %s 技能。", _G.SHIELDSLOT, Hekili:GetSpellLinkWithTexture( spec.talents.elemental_orbit[2] ),
-    	Hekili:GetSpellLinkWithTexture( spec.abilities.water_shield.id ) ),
-    type = "select",
-    values = function()
-        return {
-            earth_shield = class.abilityList.earth_shield,
-            lightning_shield = class.abilityList.lightning_shield,
-        }
-    end,
+spec:RegisterStateExpr( "allow_mitigation", function ()
+    return settings.allow_mitigation or false
+end )
+
+spec:RegisterSetting( "self_riptide", true, {
+    name = strformat( "保持自身 %s", Hekili:GetSpellLinkWithTexture( spec.abilities.riptide.id ) ),
+    desc = strformat( "如果勾选，插件将保证玩家自身保持激流buff"),
+    type = "toggle",
+    width = "full",
+} )
+
+spec:RegisterStateExpr( "self_riptide", function ()
+    return settings.self_riptide or false
+end )
+
+spec:RegisterSetting( "ascendance_health", 65, {
+    name = strformat( "%s团队血量设置", Hekili:GetSpellLinkWithTexture( spec.abilities.ascendance.id ) ),
+    desc = strformat( "当团队血量低于该设定值时，插件会推荐使用%s",Hekili:GetSpellLinkWithTexture( spec.abilities.ascendance.id ) ),
+    type = "range",
+    min = 0,
+    max = 100,
+    step = 1,
     width = "full"
 } )
+
+spec:RegisterStateExpr( "ascendance_health", function ()
+    return settings.ascendance_health or 65
+end )
+
+
+spec:RegisterSetting( "healing_tide_totem_health", 60, {
+    name = strformat( "%s团队血量设置", Hekili:GetSpellLinkWithTexture( spec.abilities.healing_tide_totem.id ) ),
+    desc = strformat( "当团队血量低于该设定值时，插件会推荐使用%s",Hekili:GetSpellLinkWithTexture( spec.abilities.healing_tide_totem.id ) ),
+    type = "range",
+    min = 0,
+    max = 100,
+    step = 1,
+    width = "full"
+} )
+
+spec:RegisterStateExpr( "healing_tide_totem_health", function ()
+    return settings.healing_tide_totem_health or 60
+end )
+
+spec:RegisterSetting( "chain_heal_health", 90, {
+    name = strformat( "%s团刷血量设置", Hekili:GetSpellLinkWithTexture( spec.abilities.chain_heal.id ) ),
+    desc = strformat( "当团队中有多目标掉血至设置值以下时，插件会推荐使用%s",Hekili:GetSpellLinkWithTexture( spec.abilities.chain_heal.id ) ),
+    type = "range",
+    min = 0,
+    max = 100,
+    step = 1,
+    width = "full"
+} )
+
+spec:RegisterStateExpr( "chain_heal_health", function ()
+    return settings.chain_heal_health or 90
+end )
+
+spec:RegisterSetting( "healing_surge_health", 70, {
+    name = strformat( "%s单抬血量设置", Hekili:GetSpellLinkWithTexture( spec.abilities.healing_surge.id ) ),
+    desc = strformat( "当团队中有单目标掉血至设置值以下时，插件会推荐使用%s",Hekili:GetSpellLinkWithTexture( spec.abilities.healing_surge.id ) ),
+    type = "range",
+    min = 0,
+    max = 100,
+    step = 1,
+    width = "full"
+} )
+
+spec:RegisterStateExpr( "healing_surge_health", function ()
+    return settings.healing_surge_health or 70
+end )
 
 spec:RegisterRanges( "lightning_bolt", "flame_shock", "wind_shear", "primal_strike" )
 
@@ -1278,7 +1405,7 @@ spec:RegisterOptions( {
     aoe = 3,
     cycle = false,
 
-    nameplates = true,
+    nameplates = false,
     nameplateRange = 20,
     rangeFilter = false,
 
@@ -1292,4 +1419,4 @@ spec:RegisterOptions( {
 } )
 
 
-spec:RegisterPack( "奶萨Simc", 20250818, [[Hekili:TRrBlUXX5Fl5lM7WfvjDs3PdSnC9mK2dRJuubJVpO9gT7Ovt0(wNz2t5mgHDcPj1Pn4s)qcLcLwSBClKgOLusBVM)m16YDFY)f6ZmZUAND0UR2ZPKqHyeNL0(mpV)(OHTg(tgoWbXXdpSDZ2DB2RvVgT2DRT7U7Wb8tJWdheHSNICH3eG8H)U4z)9lEYZhq8Tfp6uVqKJafSWyQn84zHZ8IrdhmkM4X)rbdhvi270dore2g(6T7mCWeIJdwblMb4TvRgTNFW8d(Qh95x(PV9L)6V88p8zx(V(4l(lpDX7(3U8J(0xE2V4YF7dV4p(OZ)5FWIh)8fN9Wfp5ZE5zpsCMfp9t(Qp5Jx8hENfp9pDXN)bN)Hp)IF5t24fFX7D579Ro)V(p28LN9BMFW(U)49UZ1j3(o)W34Gb3z)RV94FA)d6XJhT)El)398pY)Or(C4Vy3JUp7W72)23T)93VV7b37U3B)JyZ6)MhENx)(9V9rTHVV)H9V)9C9oQ)T99ERtz9F992R)EGkIgoM4bkMHdobtzKWGevXoB1e0wiAajWLnCW5V)tw84F3Ip7SfV7ZEX)8N17fFXF(8h)WlEN)9I3)JU43)8)ZdF75hmCGhHXzc19emYJpXIXHpCO0gIdqJ8Wod)bdhGS5c6ibcWoaffJ8T4HCSVsftjrkquGYASeFx)MF)0JndDc(7rgFZXKaNgEHZWmU1KOgr28BSBZRT63ERDAEnFuak99JIhpUbN4G8KOI1io6AB8A(HNai)bpq(uweHs4ZqEtbDJLlfzJbO2C4aGd5ykbCKK0jimaBXruxm3khnNF8TMFCVMZp(AZpMJ8Wb8gOaB45uGQSzKX8amJ1iv5WbLVHYYGsgy)ga27o)4h8G5hVI44eolitzlvPoybj2QAsuHWaKBBLWudiB1Szg5JOe)qQdjH7eSrNRQKcimJ2RQM3T5QUwP0QBP0QaVajr2q(QeoPJIrOiIJ8nPUvs(yBWGSPYMuogs8jETuKSP8LIUWxQ8c1mSf7jchQGWPyWGacnhm6iBqJVmgmfYrEHHowJJPNQRusD(wcfY1kCSfNsSNYmaClDaZ8OTrEEgq2jhkbMhtNcCzEO4IW(XOyp(k86mq)zXazJweVwOjf0FVXj4OtISSNGTNQROH06c5HliYssi4Al1hSezWu5XSu1t8jCIlscyLHoGDtGItWw4aSpbZK(cDsmHHmwQbEP1nJbaHJpbhaoGaJOsdwq8roObvcb75SsudhfmTb(Ta(VwHPalUttH8cqydyRBrblRJWshu9hkt9ONZd7H9H)h8qcPJi808DzSOk)Es0Xnnc1xx2vt(F7s4)kTZjHkWX3r)4JYoU0WqSTGsMVjofLlvcYN2qe7jIbvFII9rKaLNqBdJpqOE6(5XmSfGlFMoTbG29k6X1EvpUCzNANRyuE(v3SKwTYM4ybrob5Eyb(W5WKGXB1Suo3om0t4I0OOoaYP1A1Cv9pfltZiiHzNfAMdf7xebSA3GcrjZpw4Njfh7jcNlM1yQIwipG43uZMPsDuzFlc2P8us5ZQxxh70cc1lXsoZ8Ug1xuV)RHvFtTIrf1ctC0QkibgKkMYtBU(MIkTKFsEcTqOapmInbIThll636k3Hr3MgAQQAwRC6wE3gxf0waqsSBMEZirSh6eKQhG0wzs8WiSepO66a2vt3kX6OykJl5HDQqclGyAo(QN3Wblz2XEqYxOQrO90SIgRJ10QpuuQTs7xkFdXAKwks9(FLirdbE9BhrkJ0srQ8AhQWyMnoWr4MvAo3cOPS3lZC71QeRTJ0bUD5zTxNAsBiGnsFPNIt1lrmfOySV1iIBd7W4aLQSLEx516eTtBlp5qvrSRgHkIiBwtTyYOWOqLLynZlUwL5vJQQW)2V6tqAmNwL0usmUy2rSDO)iuHltOO2q9iNih(dJIcdmIrwfGQhMqf6n9uX0sjXZctBsjzNqE6dLkuxAyCKLp2xmPJwyKcKQNGqsPzi4t6TrRnjK2JkA(G6PjYYNSwvLmdjpmWngRPQUQthymwsDBw)BHHnYz8uHYMC7o6TSl2NIWbwMAmgrDgMFc1C93Bd9iea94RYOAaz5jQlDPpzyoBZo8CJRAojDLCGzaq6HIKltWu)7qyryppb0w(ixITS9VLQkgMZfRnSH80weBNA45xmot5dxOvBH7FuYYnQW7pN5D(XtISCrrzU9OKEQMa9uzerW4IexJI9MHOtlkAXAPVv2tLj5dCf6vG9vSUkhrsgq)cEeK3y1VuhnrtoLvgE0FwgIs)2nnJHwYZff9(DQTvvB5KNSX7kVV7Vt1TCMfnrvLqs00xLLTnuE6dDypHg6dDvZ4erwHrqtaWKneE1vSRaHuiRKCWucpgyt)41KyADDZCdX6Z07p8)t7hTmcPzzDHcDGJtiyf4CWyWW0ti2jvDk(EEmNGQYH(kEjv5h8Q0H3k3ziPpn9vNO25tbRWYEcmde0gQ7eEqYk6QAXfLjsjtDxKavarZpyD5v1sPh0cLyInPV3wkcLnjQbn1kJtj(I4soLmn7crwYdPImyC9m6mGNBIJQTYY1jz7fg7ifOK9lz2F2kaO2gNyHB6lL3aQQnZjOEgKwIfjIYZ11N0ePVLMCTwKDOV2jd6vZLRMFxG1zBQRzvwvZwDsUIqJmJD6QN4oDxav3LqopSTmxxw5sS0eiN2tCLstWwQTBfsREZHLxZTAl(g1pzxh90J1n5DBTBSRggGDkn8pVZx5RvRgezBT49aepMIz53Cy5B4sADw5mYmzRzPVzAG1TDbzYvH9T6bEm3mvSwJufCnTLt6unEj7UpDoIkUMIsyL6iTA32EfxsrnmQ9EL2i9R2nuu3iMUFdeX0D17VW0CKFzfPISqTRjWRzOZjqLp5rm9ZWJeXKy6Am6IF8fFdNUjxg4wLgHvXLFCvLXMLkJRUCV2vkERcFR55(PpSHH8vWptIeCNdSC)Emm2LAETsnRS1rtVk8ZIcJPYZxEbP15uFRLo1RdszbJERAS3PRrUGcl3wEX0kU1Msm97uWvs0TeDRSvrumFsiD5pZoX3n8)o]] )
+spec:RegisterPack( "奶萨Simc", 20250828, [[Hekili:TRv3UXTXv4NfFJGuDXwUR0kVgWYaw2iTrWkifBacSUyPMLCwUJfjhwYH7AzySWobPj1PnWf9IeuuGIwy34wG0a0IuK2Q2xM4vr6k)k0Zmd5YHd)z5Ah7EtSnmK4mZ5CMZpFNFih0EW7mOVnIHh8wDm601O3MTBzS9MDBFPb9zhhGh0pazDeYb(bFKh8)ZFY)4Sh90(epl(sh7sr2CserJdTGLNsN6gJg0FymXL9M(dgwk1n6cNiaBbpE7Tg0FmX2gl3locOB72T6mBVz79Tp4Ro)lEVZ)n)3t)KNC()(Zo7V(45FWF)8p9lE(j)YZ)D3)S)0do9x8XZF4tNFY9N)OV85N8a(zM)4p)B)8pB(F89N)4)8zF1hF6N80Z(vpA9N91F45F4V(0)2)CJNFYVD2Ex35NETBErYnU5p5T3R)nV(f3E0pB)96XIhE9RT4p3Y7aVdg6XUZ(39g7V)WB)g39w3X7G31z3939Ux)DEZB)gEheDWbESd8UZrhme2LXT(X7V)7UV3U3Em88DV21UbOHcPJiUGEzq)j4Wic1pvt0PhOSqH(eFNOb9p9JE08h(7N)LNm)dEYZ(x)8l)SV(VC6dV)zV))z(h9PN9hE63C)3B2Ed67sIyrCT9ymYLn2mIb)YBjmHyF0qxS9GDh0hzX48rSjG6MrXHCZhx1gscKRj3tuRfe6I78Js3)u0e8pKmANreF7wU0P4iM54GwbwSRCzJ1k(0REjJ18q(O0FEy8OrTyeBKRGurTIdwB9l4rNae)E3tSAuajKWMICpcukMoHilmSRng0hKqgoKaoqc(ifpoHND4vMD4MgdyG(t7(QDMCYM4yTnmMD49U3Sdliz20P(zkmH2XgZ5XM1ZdFQp2KHa9kZuJFxD2H9a2T2SdzixSpRfY3cwpe4z0uYiMpokQvkLlARyHyKNjJYWEC5yRxy5aU3BlLJgStqdLjlbHepAOnjrlXfJUQIr)2fLBXgxUL4sDfsuiIyZj72nZZDjKDNzhM7aMsVgE4cCNTecmd(BFWndUulczs52qxk12CuC4XQctQJ2IDHCmPJmzHeRJI024MQBmZEBHCD125w5ij48Jdpce887ITiahU3ErllgNnoIbwxv9KwCJk1mzJdXrJPU2s8etjSEogwsqwkdj(tio0qeJRUtv7bu5IFxka6rGluVUoOqYRswdQFpcJ4Geuw3BXYfJ8JWMsiS68ycOKiQVP8aCzvgvxIRtjxZaDxFb2LnbYA66Y3TPhYHybOMk(5ryg3Ue1sCAtILD9yi1qZu5WbWJGDBkLhDOGDRtXhy6GceX7c(GsabhdGGcG3SLe(VMdJDHeIhPTggfc2gSl2datrUzRUohhX3HBjaXxk6sy(eyoVswYMYk(qvYem(4OQOJ6Azek9PBKP00K5YG6(E1wr1wU7twoWl99QULQ6uVQsiSYRnmt3jzvlBS4opYfXz6yQLI2iTOorrnDslQriHKitSp2JGZebfsuFvA8dmbNC(ibXBlO9fawkQsubTDmI4B6sCgZ4vkxFPzvFLIdQIbUOjiWpimIvaQCy(sI4Qxi7)r4YyjKmHN3xwLQu5jyuz6XfOOlKH0RN5qQlRqTaoJPqQQPu3r1Br1VAtHILmdJJgNfkPBuIGwW6B0YqPIUPisIhKnEek2T2wm4v4yk)ftEc1IbNjjExu74Yk5iNWhbBjCjjm1YMLPSYLgROGQiikk4AtxcUpV9eCWKatRXyRJsDPevZ2N7ByX4QQMXuLsmQnRka6usaZwjn0qJGFFJQCUfizyFO6Cqqw4euvv3sCpacbZRpsROBW9(Ow47aYFJ6PaeXlzOuzs3YaYxgJvqJLlMbnL0B1cqAtA4qclTVQmrmxgIDsAfSzYFVcYFVghfOyNtA6ao(LRaCryyiwMbH0BJT0lNvSAlEJnlkHSvi2dGfLEcD0m(Cxqd1iPyOyvzmMcZ57QAKKY956u0NR8mecttEjw1WK2xSfbGNG7rUflXlohLesE15wSOqX9GtsRYAOoNERDYmbwCclxASTitqYUHCpGRrKSbz5MVGY(lV8EGhi7JlACdXIUb5sFDjWeAMYKDZoTGIgamNDsZwMiEMJcL8c5c3RDuCiK4sPcsvtyOD14DRlk55c5YL1OaN0QLAgWvoNOlBOk(P)8lHp1gkJ(PSrXWlnydn(icO5n7pgBkpdnSMH2WzOqvwnk(YNfuM2TK5BKbBbvkyQ6g3vjq3hCfHS9UKrIo1AxDphvmEMUgAkILlVRI8uDH8VWSRTc)k50c2QdBRLGbfzH9T5hwdFqbbQ44kfu(Y1RGZYzMrkLzm2XO(JxvURiS7iZu6ukHRPQFjYMouNEE1cBqI9C1DkuQU43sQKlasvFSPmsENfJFKr8WjdzujLPgdeIDvZCQ28Rw2YIhFXNy7vYuTRN(pv8hPXioe4ySN5qItllASplTXLeaM1B4j6ior2HQJzRgJkJjB0qTyIferLoqVuJDo3WKBcxL9E1rh9SrKi5Svd1jIXfD5jgoCARG69X20KBDnQQ3Xo1bVvcZuIFAqV4lt0uWhkROSkFRl5Fdi69Wxn05kELc5Dy9)NRugRLT1gaLIr9gIQTXwrxhUKjI3TbgfKVM8SgtYTLeoNVPHQa1Io6y5RCqJSjpprnXd4tQIYMYsxueM5esJdm9WE8xJGoxRASYtfdZTIwTuxS07IoSqo3gg13jgVIARmlzdvNvbs0WMx1j3Q2l8RWwsZzpLy(L2a9IolGS9COrHJFmk0w9IK2TAw(2AERflPmMIi896wADhTRUGMIZMrbWqX9S4iRQPnvisEIPJLDR2T0p4ckMB2oSCj6QF8OLxOuICxSGhULSNcWuHtoPTWMMy99q3z2H)GzhA0svvkSNMLwB0QkOVkROR(YWlt8xAlVtXUUrbHa7ZfWiuLQ9rKBOEzhQmWPvQMLEnC2fnz8el7nKP72K1asYBUwc7RJt0rPYJSJugiwD9ri(ikYSvIXRZ3Wc4LMJdSJwPEkibvx3GGsGVNn1Zm2hWh5)xP0OAuPCvdSPEpR1A8EjBWVAaU69JxV59hSLAH(nTnKf173GYQ4Fgggv5mNpKQgS3gWLTv8n8rS4qCKwN5R4xYZoIHEL4WUiwzTMzvtVXs9jx)wvYnJvJM5hZw(iQAM1NaARGArKGzPZRATQNuubfuLI23f4LnAsrfJNkmdYAF9hnnYP7lBKt5WZPcnhxkzwSkUEQ8rFCs5BePiDex9L056yixR4iPgEXt5pyipkfhUYoeV2bKYbx3UYSp1mEWxD35In43P2RBX93w5Mk5qU7BpT5zNr7CBBlJfyjfMBtETu1Pw1iygf4(Hb04qX5xsX(lB6hnpftVIg)Kp)Vxl5Qx20vBSBtUBq3kSl838TDPFPEnx)YfHCJxIs9iSXiO)UK(IJiUl5BRqRwVU5I2cPE4HXrmcCoZHuVHMrXIx2Fn1Nxdb5XIcnoHfdQmV4L81MT07VSWKS5IUc4nny8OV2MdBvmsjM2b8ProekyfymWyeHdNqefZlCLqXSX0WfFm98Nn4)9]] )
