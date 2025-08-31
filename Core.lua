@@ -1062,7 +1062,7 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                 if not channelPass then
                                                     if debug then self:Debug( " - this entry cannot break the channeled spell." ) end
                                                     if action == state.channel then
-                                                        --stop = scripts:CheckScript( scriptID ) self
+                                                        stop = scripts:CheckScript( scriptID )
                                                     end
 
                                                 elseif not aScriptPass then

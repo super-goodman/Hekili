@@ -1331,7 +1331,7 @@ end )
 
 spec:RegisterSetting( "self_riptide", true, {
     name = strformat( "保持自身 %s", Hekili:GetSpellLinkWithTexture( spec.abilities.riptide.id ) ),
-    desc = strformat( "如果勾选，插件将保证玩家自身保持激流buff"),
+    desc = strformat( "如果勾选，插件将保证玩家在非满血状态时自身保持激流buff"),
     type = "toggle",
     width = "full",
 } )
