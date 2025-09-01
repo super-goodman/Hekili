@@ -32,16 +32,14 @@ actions.precombat+=/variable,name=can_extend_dr,default=0,op=reset
 actions.precombat+=/variable,name=can_use_empower,value=1,default=1,if=!talent.animosity|!talent.dragonrage|buff.empowering.up
 actions.precombat+=/variable,name=acceptable_engulf_loss,default=3,op=reset
 # Get Some Scarlet Adaptation Prepull
-actions.precombat+=/verdant_embrace,enabled=0,if=talent.scarlet_adaptation
+actions.precombat+=/verdant_embrace,if=talent.scarlet_adaptation
 ## [Syrif] - This charge gets refunded pretty early by deep breath when talented into slipstream, but added some extra conditions to stop it from griefing in dungeons
-
-actions.precombat+=/blessing_of_the_bronze
 actions.precombat+=/hover,if=talent.slipstream&buff.hover.down&cooldown.deep_breath.up
-actions.precombat+=/firestorm,enabled=1,if=talent.firestorm&(!talent.engulf|!talent.ruby_embers)
-actions.precombat+=/living_flame,enabled=0,if=!talent.firestorm|talent.engulf&talent.ruby_embers
+actions.precombat+=/firestorm,if=talent.firestorm&(!talent.engulf|!talent.ruby_embers)
+actions.precombat+=/living_flame,if=!talent.firestorm|talent.engulf&talent.ruby_embers
 
 # Delay pot in ST if you are about to SS - mostly relevant for opener where you want DR->FB->SS->rotation
-actions+=/potion,if=(!talent.dragonrage|buff.dragonrage.up)&(!cooldown.shattering_star.up|debuff.shattering_star_debuff.up|active_enemies>=2)|raid&boss&fight_remains<35
+actions+=/potion,if=(!talent.dragonrage|buff.dragonrage.up)&(!cooldown.shattering_star.up|debuff.shattering_star_debuff.up|active_enemies>=2)|boss&fight_remains<35
 # Variable that evaluates when next dragonrage is by working out the maximum between the dragonrage cd and your empowers, ignoring CDR effect estimates.
 actions+=/variable,name=next_dragonrage,value=cooldown.dragonrage.remains<?((cooldown.eternity_surge.remains-8)>?(cooldown.fire_breath.remains-8))
 ## Invoke External Power Infusions if they're available during dragonrage
@@ -51,9 +49,10 @@ actions+=/variable,name=pool_for_id,if=talent.imminent_destruction,default=0,op=
 actions+=/variable,name=can_extend_dr,if=talent.animosity,op=set,value=buff.dragonrage.up&(animosity_extension<4)
 actions+=/variable,name=can_use_empower,op=set,value=cooldown.dragonrage.remains>=gcd.max*variable.dr_prep_time,if=!buff.empowering.up&talent.animosity&talent.dragonrage
 # Rupt to make the raidleader happy
-actions+=/quell
-actions+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check&!raid
+actions+=/quell,use_off_gcd=1
 actions+=/unravel
+actions+=/expunge,enabled=0,if=debuff.dispellable_poison.up
+# [Hekili] No API available for detecting bleeds
 actions+=/cauterizing_flame,enabled=0,if=debuff.dispellable_poison.up|debuff.dispellable_curse.up|debuff.dispellable_disease.up
 # [Hekili] Recommended to link to toggle.interrupts with Show Separately enabled
 actions+=/hover,enabled=0,if=moving&buff.hover.down
@@ -62,20 +61,20 @@ actions+=/run_action_list,name=aoe,strict=1,if=active_enemies>2
 actions+=/run_action_list,name=st,strict=1,if=active_enemies<3
 
 # AOE action list. Use Hover for Mass Disintegrates.
-actions.aoe+=/hover,use_off_gcd=1,if=!prev_gcd.1.engulf&!prev_gcd.1.fire_breath&talent.maneuverability&talent.melt_armor&!cooldown.fire_breath.up&!cooldown.eternity_surge.up|talent.feed_the_flames&talent.engulf&talent.imminent_destruction&!buff.hover.up&cooldown.deep_breath.remains<3
+actions.aoe=hover,use_off_gcd=1,if=raid_event.movement.in<6&!buff.hover.up&gcd.remains>=0.5&(buff.mass_disintegrate_stacks.up&talent.mass_disintegrate|active_enemies<=4)
 # Spend firestorm procs ASAP
 actions.aoe+=/firestorm,if=buff.snapfire.up
 actions.aoe+=/shattering_star,cycle_targets=1,if=(!buff.essence_burst.at_max_stacks&talent.arcane_vigor|talent.eternitys_span&active_enemies<=4)
 # BaumChange 1: Send DB before DR if FS FS FTF - +30k in 5T
 actions.aoe+=/deep_breath,if=talent.maneuverability&talent.melt_armor&!cooldown.fire_breath.up&!cooldown.eternity_surge.up|talent.feed_the_flames&talent.engulf&talent.imminent_destruction
-# self
-actions.aoe+=/tip_the_scales,use_off_gcd=1,if=(fight_remains>=45|boss)&(!talent.dragonrage|buff.dragonrage.up)&(cooldown.fire_breath.remains<cooldown.eternity_surge.remains|cooldown.fire_breath.ready)
+# Tip FB
+actions.aoe+=/tip_the_scales,use_off_gcd=1,if=(!talent.dragonrage|buff.dragonrage.up)&cooldown.fire_breath.remains<cooldown.eternity_surge.remains
 # Engulf at R4 with Scorch.
 actions.aoe+=/fire_breath,cycle_targets=1,empower_to=4,if=talent.scorching_embers&(variable.can_use_empower&fight_remains>=duration|empowering.fire_breath)
 # R2 funny breath good default.
 actions.aoe+=/fire_breath,cycle_targets=1,empower_to=2,if=variable.can_use_empower&(fight_remains>=duration|empowering.fire_breath)
 # DR if mobs will live 15s or there are no add events or pull events.
-actions.aoe+=/dragonrage,if=fight_remains>=15|boss
+actions.aoe+=/dragonrage
 ## Engulf if Firebreath is up and Enkindle is up. Ruby embers is ignored here. Probably can improve this with a target_if=max:dot.fire_breath_damage.remains> etc. Make FB up = 3, others no special interaction so 1 is fine. In if recheck for >=4 value.
 ## actions.aoe+=/engulf,cycle_targets=1,if=(dot.fire_breath_damage.remains>travel_time)&(dot.enkindle.remains>travel_time|!talent.enkindle)&(!talent.scorching_embers|dot.fire_breath_damage.duration<=6|fight_remains<=30)&(cooldown.dragonrage.remains>=cooldown.engulf.duration+full_recharge_time|!talent.dragonrage|buff.tip_the_scales.up&cooldown.fire_breath.up|buff.dragonrage.up|full_recharge_time<=cooldown.fire_breath.duration_expected)
 # [Hekili] Re-revised Fire Breath debuff remaining so that you get back-to-back Engulfs easier.
@@ -115,13 +114,13 @@ actions.green+=/verdant_embrace
 
 actions.st+=/deep_breath,if=talent.maneuverability&set_bonus.tww3_4pc,cancel_if=gcd.remains=0&ticks>=8&active_enemies=1
 # CD on CD
-actions.st+=/dragonrage,if=fight_remains>=30|boss
+actions.st+=/dragonrage
 actions.st+=/eternity_surge,empower_to=1,if=set_bonus.tww3_4pc&buff.dragonrage.up&cooldown.engulf.full_recharge_time<gcd.max*3&cooldown.fire_breath.remains<gcd.max*3
 actions.st+=/living_flame,if=set_bonus.tww3_4pc&cooldown.engulf.remains<=execute_time*2&buff.essence_burst.stack<(2-talent.arcane_vigor.enabled)&buff.dragonrage.up&cooldown.fire_breath.remains<=execute_time*2
 # Flap wings
-actions.st+=/hover,use_off_gcd=1,if=!prev_gcd.1.engulf&!prev_gcd.1.fire_breath&raid_event.movement.in<6&!buff.hover.up&gcd.remains>=0.5|talent.slipstream&gcd.remains>=0.5
-# self
-actions.st+=/tip_the_scales,use_off_gcd=1,if=(fight_remains>=45|boss)&(!talent.dragonrage|buff.dragonrage.up)&(cooldown.fire_breath.remains<cooldown.eternity_surge.remains|cooldown.fire_breath.ready)
+actions.st+=/hover,use_off_gcd=1,if=raid_event.movement.in<6&!buff.hover.up&gcd.remains>=0.5|talent.slipstream&gcd.remains>=0.5
+# Become a faster dragon (for one empower)
+actions.st+=/tip_the_scales,use_off_gcd=1,if=buff.dragonrage.up&cooldown.fire_breath.remains<=cooldown.eternity_surge.remains
 # Dont overcap with Vigor.
 actions.st+=/shattering_star,if=(!buff.essence_burst.at_max_stacks|!talent.arcane_vigor|talent.engulf)&(set_bonus.tww2_2pc|!talent.scorching_embers|!talent.engulf|dot.fire_breath_damage.ticking&dot.fire_breath_damage.rank=max_empower|(action.engulf.usable_in<?cooldown.fire_breath.remains_expected+4)>=15)
 # Engulf at R4 with Scorch.
@@ -132,10 +131,10 @@ actions.st+=/fire_breath,empower_to=1,if=variable.can_use_empower|empowering.fir
 ## [Hekili] Original, fully insane Engulfs.
 ## Gulf :garf:
 ## actions.st+=/engulf,if=(dot.fire_breath_damage.remains>travel_time)&(dot.living_flame_damage.remains>travel_time|!talent.ruby_embers)&(dot.enkindle.remains>travel_time|!talent.enkindle)&(!talent.iridescence|buff.iridescence_red.up)&(!talent.scorching_embers|dot.fire_breath_damage.duration<=6|fight_remains<=30)&(debuff.shattering_star_debuff.remains>travel_time|full_recharge_time<action.shattering_star.usable_in|talent.scorching_embers)&(cooldown.dragonrage.remains>=cooldown.engulf.duration+full_recharge_time|!talent.dragonrage|buff.tip_the_scales.up&cooldown.fire_breath.up|buff.dragonrage.up|full_recharge_time<=cooldown.fire_breath.duration_expected)
-# self
-actions.st+=/engulf,if=(dot.fire_breath_damage.remains>travel_time)&(dot.living_flame_damage.remains>travel_time|dot.fire_breath_damage.remains<action.living_flame.cast_time+travel_time+0.5|!talent.ruby_embers)&(dot.enkindle.remains>travel_time|!talent.enkindle)&(!talent.iridescence|buff.iridescence_red.up)&(!talent.scorching_embers|dot.fire_breath_damage.duration<=6|boss&fight_remains<=30)&(debuff.shattering_star_debuff.remains>travel_time|full_recharge_time<action.shattering_star.usable_in|talent.scorching_embers)
-# self
-actions.st+=/engulf,if=settings.simplify_engulf&active_enemies<3&(dot.fire_breath_damage.remains>travel_time)&(!talent.scorching_embers|dot.fire_breath_damage.duration<=6|fight_remains<=30)&(variable.next_dragonrage>=cooldown*1.2|!talent.dragonrage)
+# [Hekili] Modified to ignore Ruby Embers if applying it is going to waste the Fire Breath dot.
+actions.st+=/engulf,if=(dot.fire_breath_damage.remains>travel_time)&(dot.living_flame_damage.remains>travel_time|dot.fire_breath_damage.remains<action.living_flame.cast_time+travel_time+0.5|!talent.ruby_embers)&(dot.enkindle.remains>travel_time|!talent.enkindle)&(!talent.iridescence|buff.iridescence_red.up)&(!talent.scorching_embers|dot.fire_breath_damage.rank=max_empower|boss&fight_remains<=30)&(debuff.shattering_star_debuff.remains>travel_time|full_recharge_time<action.shattering_star.usable_in|talent.scorching_embers)
+# [Hekili] Simplified Engulf such that you don't waste charges waiting for perfect multipliers.
+actions.st+=/engulf,if=settings.simplify_engulf&active_enemies<3&(dot.fire_breath_damage.remains>travel_time)&(!talent.scorching_embers|dot.fire_breath_damage.rank=max_empower|fight_remains<=30)&(variable.next_dragonrage>=cooldown*1.2|!talent.dragonrage)
 # Burnout LF for EB if DR expire soon
 actions.st+=/living_flame,if=buff.dragonrage.up&buff.dragonrage.remains<(buff.essence_burst.max_stack-buff.essence_burst.stack)*gcd.max&buff.burnout.up
 # AS for EB if DR expire soon
@@ -178,10 +177,3 @@ actions.trinkets+=/use_item,use_off_gcd=1,slot=trinket1,if=!variable.trinket_1_b
 actions.trinkets+=/use_item,use_off_gcd=1,slot=trinket2,if=!variable.trinket_2_buffs&!variable.trinket_2_manual&(variable.damage_trinket_priority=2|trinket.1.cooldown.remains|trinket.1.is.spymasters_web|trinket.1.cooldown.duration=0)&(gcd.remains>0.1&!prev_gcd.1.deep_breath)&(variable.next_dragonrage>20|!talent.dragonrage|!variable.trinket_1_buffs|trinket.1.is.spymasters_web&(buff.spymasters_report.stack<5|fight_remains>=130+variable.next_dragonrage))
 actions.trinkets+=/use_item,slot=trinket1,if=!variable.trinket_1_buffs&!variable.trinket_1_manual&(variable.damage_trinket_priority=1|trinket.2.cooldown.remains|trinket.2.is.spymasters_web|trinket.2.cooldown.duration=0)&(!variable.trinket_1_ogcd_cast)&(variable.next_dragonrage>20|!talent.dragonrage|!variable.trinket_2_buffs|trinket.2.is.spymasters_web&(buff.spymasters_report.stack<5|fight_remains>=130+variable.next_dragonrage))
 actions.trinkets+=/use_item,slot=trinket2,if=!variable.trinket_2_buffs&!variable.trinket_2_manual&(variable.damage_trinket_priority=2|trinket.1.cooldown.remains|trinket.1.is.spymasters_web|trinket.1.cooldown.duration=0)&(!variable.trinket_2_ogcd_cast)&(variable.next_dragonrage>20|!talent.dragonrage|!variable.trinket_1_buffs|trinket.1.is.spymasters_web&(buff.spymasters_report.stack<5|fight_remains>=130+variable.next_dragonrage))
-
-
-
-actions.mitigation=/expunge
-actions.mitigation+=/renewing_blaze,if=health.pct<=hp_gap&buff.renewing_blaze.down&buff.obsidian_scales.down&buff.zephyr.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)
-actions.mitigation+=/obsidian_scales,if=health.pct<=hp_gap&buff.renewing_blaze.down&buff.obsidian_scales.down&buff.zephyr.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)
-actions.mitigation+=/zephyr,if=health.pct<=hp_gap&buff.obsidian_scales.down&buff.zephyr.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)

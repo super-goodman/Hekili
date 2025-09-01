@@ -26,6 +26,8 @@ local targetMeSpell_magic_dps = {446649,448787,319941}
 
 local targetMeSpell_physic_dps = {427629,446776,353312,352345}
 
+local healerRangeSpells = {465827,473070,468813,460156,448791,428169,427894,424431,323393,1241693,1241693,426787,426793,448888,426734,1221532,448492,326409,346742,438476}
+
 local lowHealthRangeSpell_magic = lowHealthRangeSpell_magic_dps
 
 local lowHealthRangeSpell_physic = lowHealthRangeSpell_physic_dps
@@ -258,6 +260,42 @@ function Hekili:isTargetSpellingPhysicRangeSpell()
             end
 
         end
+
+    end
+    return false
+
+end
+
+function Hekili:isHealerRangeSpells()
+    for unit, guid in pairs(Hekili.npGUIDs) do
+        if UnitExists( unit ) and not UnitIsDead( unit ) and UnitCanAttack( "player", unit ) and UnitHealth( unit ) > 1 and not UnitIsPlayer( unit ) and UnitAffectingCombat(unit)  then
+            local _, _, _, _, endTimeMS, _, _, _, spellId = UnitCastingInfo(unit)
+            if spellId then
+                for _, v in ipairs(healerRangeSpells) do
+                    local remainingTime = (endTimeMS / 1000) - GetTime()
+                    if v == spellId and remainingTime <= 1 then
+                        return true
+                    end
+                end
+
+            end
+
+            local _, _, _, startTimeMS, endTimeMS, _, _, spellID, _, _ = UnitChannelInfo(unit)
+            if spellID then
+                local now = GetTime() * 1000  
+                local duration = endTimeMS - startTimeMS
+                local elapsed = now - startTimeMS
+                local remaining = duration - elapsed
+                local percentRemaining = remaining / duration
+                for _, v in ipairs(healerRangeSpells) do
+                    if v == spellID and percentRemaining > 0.3 then
+                        return true
+                    end
+                end
+
+            end
+        end
+
 
     end
     return false
