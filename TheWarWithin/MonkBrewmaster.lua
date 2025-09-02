@@ -306,6 +306,11 @@ spec:RegisterAuras( {
     brewmasters_balance = {
         id = 245013,
     },
+    call_to_arms_invoke_niuzao = {
+        id = 358520,
+        duration = 12,
+        max_stack = 1
+    },
     celestial_brew = {
         id = 322507,
         duration = 8,
@@ -2160,8 +2165,12 @@ spec:RegisterAbilities( {
         handler = function ()
             applyBuff( "weapons_of_order" )
             setCooldown( "keg_smash", 0 )
-            if talent.call_to_arms.enabled or legendary.call_to_arms.enabled then summonPet( "niuzao", 12 ) end
             if talent.chi_surge.enabled then reduceCooldown( "weapons_of_order", min( active_enemies, 5 ) * 4 ) end
+            if talent.call_to_arms.enabled then
+                applyBuff( "call_to_arms_invoke_niuzao" )
+                summonPet( "niuzao_the_black_ox", 12 )
+                if talent.improved_niuzao_the_black_ox.enabled then applyBuff( "improved_invoke_niuzao_the_black_ox" ) end
+            end
         end,
 
         copy = { 387184, 310454 }

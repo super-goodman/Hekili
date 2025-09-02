@@ -2799,14 +2799,6 @@ all:RegisterAuras( {
                     t.expires = expirationTime > 0 and expirationTime or query_time + 5
                     t.applied = expirationTime > 0 and ( expirationTime - duration ) or query_time
                     t.caster = "player"
-                    if spellId == 440313 then 
-                        if UnitName("boss1") == "狂犬K.U.-J.0." then 
-                            t.count = 0
-                            t.expires = 0
-                            t.applied = 0
-                            t.caster = "nobody"
-                        end
-                    end
                     return
                 end
 
@@ -3326,7 +3318,6 @@ local bf_classes = {
 }
 
 all:RegisterAbilities( {
-
     blood_fury = {
         id = function () return bf_classes[ class.file ] or 20572 end,
         cast = 0,

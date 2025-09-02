@@ -1195,7 +1195,7 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                     elseif not ability.target then
                                                         ability.target = "none"
                                                     end
-
+                                                    --print(ability.target )
                                                     if ability.hot_id then
                                                         if ability.target == "none" then
                                                             aScriptPass = false
@@ -1413,6 +1413,7 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                         slot.texture = ability.texture
                                                         slot.indicator = ability.indicator 
                                                         slot.target = ability.target
+                                                        ability.target = nil
                                                         slot.toy = ability.toy
                                                         slot.startsCombat = ability.startsCombat
                                                         if ability.interrupt and state.buff.casting.up then

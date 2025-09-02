@@ -49,7 +49,7 @@ actions.default+=/prayer_of_mending,if=find.lowest_hp.pct<=100&!buff.premonition
 actions.default+=/shadow_word_pain,cycle_targets=1,if=!buff.premonition_of_insight.up&target.time_to_die>0.3*dot.shadow_word_pain.duration&health_party_pct>80&time>0&target.debuff.shadow_word_pain.remains<=2&!raid
 actions.default+=/penance,if=((!find.hurt_num_big.count>2|!find.hurt_num.count>2)&health_party_pct>=70|(find.hurt_num_big.count>2|find.hurt_num.count>2)&health_party_pct>=85)&time>0&!raid&target_is_enemie
 actions.default+=/shadow_word_death,if=health.pct>50&!buff.premonition_of_insight.up&!raid
-actions.default+=/void_blast,if=!buff.weal_and_woe.up&!buff.premonition_of_insight.up&!moving
+actions.default+=/void_blast,if=(!buff.weal_and_woe.up|cooldown.power_word_shield.remains>4)&!buff.premonition_of_insight.up&!moving
 
 actions.raid+=/renew,if=find.lowest_hp.pct<=100&(!buff.shadow_covenant.up|!buff.premonition_of_piety.up)&(!cooldown.shadowfiend.full_recharge_time<=10&!talent.mindbender|!cooldown.mindbender.full_recharge_time<=10&talent.mindbender)&active_hot.atonement<=10&boss
 actions.raid+=/power_word_radiance,,line_cd=2,if=active_hot.atonement<=7&!buff.premonition_of_insight.up

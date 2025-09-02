@@ -6,7 +6,7 @@ Hekili.UnitDebuff = UnitDebuff
 -- Hekili.UnitBuff = UnitBuff
 Hekili.FindUnitBuffByID = ns.FindUnitBuffByID
 local format = string.format
-local insert, remove, wipe = table.insert, table.remove, table.wipe
+local insert, remove, wipe, min = table.insert, table.remove, table.wipe, math.min
 Hekili.pingcheckstr = "|cff00ff00随机Hekili网络防盗版系统启动\n\n请在2分钟内于队伍/团队中说出：QQ群的开头名称中的任意一个字!\n\n并在副本结束后联系群内管理员并提供卡密为证明!\n\n否则，5分钟后我们会强制停止你的自动输出\n\n2H后强制冻结你的订阅卡密/战网!\n\n会有网络存档！请重视!\n\n非订阅者请无视!\n"
 Hekili.pingcheckstr2 = "Hekili网络防盗版系统已启动,请按照聊天频道指示行动"
 Hekili.excludeDispelWarning = false
@@ -16,7 +16,7 @@ local unitIDs = { "target", "targettarget", "focus", "focustarget", "boss1", "bo
 
 local lowHealthRangeSpell_magic_dps = {465827,473070,468813,460156,448791,428169,427894,323393,1241693,1241693,426787,448888,431364,1221532}
 
-local lowHealthRangeSpell_physic_dps = {448492,326409,346742,438476}
+local lowHealthRangeSpell_physic_dps = {448492,326409,346742,357508,438476}
 
 local dot_magic_dps = {473713,468815,446368,446403,1236512,1236513,1236514,335338,344874,1236615,347481,1240097,1253638,350804,433740,461507,438618,448248,431365,426735,451119,434441,431350,431349,431352,1217439,1236126,1239487,1219704,1226444}
 
@@ -26,7 +26,7 @@ local targetMeSpell_magic_dps = {446649,448787,319941}
 
 local targetMeSpell_physic_dps = {427629,446776,353312,352345}
 
-local healerRangeSpells = {465827,473070,468813,460156,448791,428169,427894,424431,323393,1241693,1241693,426787,426793,448888,426734,1221532,448492,326409,346742,438476}
+local healerRangeSpells = {465827,473070,468813,460156,448791,428169,427894,424431,323393,1241693,1241693,426787,426793,448888,426734,1221532,448492,326409,346742,357508,438476}
 
 local lowHealthRangeSpell_magic = lowHealthRangeSpell_magic_dps
 
@@ -55,7 +55,7 @@ function Hekili.GetFullName(target)
 end
 
 function Hekili.isEasyTankingBoss()
-    local easyBossList = {"艾谢朗", "高阶裁决官阿丽兹", "P.O.S.T.总管", "隐修院长穆普雷", "索·阿兹密", "索·莉亚", "收割者吉卡塔尔", "拉夏南", "布朗派克男爵", "阿兹希卡", "撰魂师"}
+    local easyBossList = {"艾谢朗", "佐·菲克斯", "高阶裁决官阿丽兹", "P.O.S.T.总管", "隐修院长穆普雷", "索·阿兹密", "索·莉亚", "收割者吉卡塔尔", "拉夏南", "布朗派克男爵", "阿兹希卡", "撰魂师"}
 
     local boss = UnitName("boss1")
     if boss then
@@ -546,11 +546,13 @@ do
 
     
     function Hekili:getHealthPct(unit)
-        local _, zone, _, _, _, _, _, instanceID = GetInstanceInfo()
+        local _, _, _, _, _, _, _, instanceID = GetInstanceInfo()
+        local incoming_heal = UnitGetIncomingHeals(unit, UnitGUID("player")) or 0
         if instanceID == 2662 then
-            return UnitHealth(unit) / (UnitHealthMax(unit) + UnitGetTotalHealAbsorbs(unit) ) * 100
+            return min(100, (UnitHealth(unit) + incoming_heal) / (UnitHealthMax(unit) + UnitGetTotalHealAbsorbs(unit) ) * 100)
+            
         end
-        return UnitHealth(unit) / UnitHealthMax(unit) * 100
+        return  min(100, (UnitHealth(unit) + incoming_heal)  / UnitHealthMax(unit) * 100)
     end
 
     function Hekili:findLowestHpUnit()
@@ -638,7 +640,7 @@ do
             if UnitGroupRolesAssigned(unit) == "TANK"  then
                 health_gap = tank_gap
             end
-            if not UnitIsDead(unit) and Hekili:getHealthPct(unit) <= gap then
+            if not UnitIsDead(unit) and Hekili:getHealthPct(unit) <= health_gap then
                 count = count + 1
             end
         end

@@ -84,7 +84,7 @@ actions.mountain_generic+=/revenge,if=buff.revenge.up
 actions.mountain_generic+=/shield_slam
 actions.mountain_generic+=/thunder_blast
 actions.mountain_generic+=/thunder_clap
-actions.mountain_generic+=/revenge,if=rage>=40&target.health.pct>=25&(buff.ignore_pain.remains>3&buff.shield_block.remains>2|rage>=75)
+actions.mountain_generic+=/revenge,if=rage>=40&target.health.pct>=25&(buff.ignore_pain.remains>3&buff.shield_block.remains>2|rage>=75)|rage>=40&!talent.heavy_handed
 actions.mountain_generic+=/devastate
 
 

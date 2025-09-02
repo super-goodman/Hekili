@@ -1588,8 +1588,9 @@ local function ConvertScript( node, hasModifiers, header )
                     if type( node[ m ] ) == 'string' then modSimC[ m ] = SimcWithResources( node[ m ]:trim() ) end
                 else
                     modifiers[ m ] = nil
-                    modifiers[ "error:" .. m ] = e .. "\n - " .. emulated
-                    Hekili:Error( format( "Error in %s modifier %s: %s\n\n - %s", header, m, e, emulated ) )
+                    --SELF
+                    modifiers[ "error:" .. m ] = tostring(e) .. "\n - " .. tostring(emulated)
+                    Hekili:Error( format( "Error in %s modifier %s: %s\n\n - %s", header, m, tostring(e), tostring(emulated) ) )
                 end
             end
         end

@@ -767,7 +767,7 @@ hekili_autocast:SetScript("OnUpdate", function()
           
             if action.actionName ~= nil and isInBattle(action) and not IsMounted() and not IsInTravelForm() and not isInVehicle() and not UnitIsDead( "player" ) then
 
-                local cast_ID, type = GetSpellIDByName(action.actionName)
+                local cast_ID, type = GetSpellIDByName(action)
                 local _, _, _, _, _, _, _, ChannellingID = UnitChannelInfo("player")
 
                 quickStopSpelling(action)
@@ -803,8 +803,8 @@ hekili_autocast:SetScript("OnUpdate", function()
                         UseToyByName(name)
                         return
                     end
-                    --print(name)
-                    --print(action.target)
+                    -- print(name)
+                    -- print(action.target)
                     if Hekili.forceStealth == true  then
                         Hekili.forceStealth = false
                     end
@@ -863,7 +863,6 @@ hekili_autocast:SetScript("OnUpdate", function()
                                     CastSpellByName(name, action.toggle_terrain)
                                 end
                             else
-                   
                                 if terrain == "none" then
                                     CastSpellByName(name,"cursor")
                                 elseif terrain == "mouseover"  then
@@ -934,7 +933,7 @@ hekili_autocast:SetScript("OnUpdate", function()
       
         if action.actionName ~= nil and IsMounted() == false and IsInTravelForm() == false  and not isInVehicle() then
   
-            local cast_ID, type = GetSpellIDByName(action.actionName)
+            local cast_ID, type = GetSpellIDByName(action)
             local _, _, _, _, _, _, _, ChannellingID = UnitChannelInfo("player")
             quickStopSpelling(action)
             restartAttack()
@@ -1322,16 +1321,16 @@ function errorCast(name)
         CastSpellByName("惩击")
         CastSpellByName("暗影冲击")
         return true
-    elseif name == "苦修" and spec == "戒律" then
-        --CastSpellByID(433895)
-        CastSpellByName("苦修")
-        CastSpellByName("黑暗训斥")
-        return true
-    elseif name == "黑暗训斥" and spec == "戒律" then
-        --CastSpellByID(433895)
-        CastSpellByName("黑暗训斥")
-        CastSpellByName("苦修")
-        return true
+    -- elseif name == "苦修" and spec == "戒律" then
+    --     --CastSpellByID(433895)
+    --     CastSpellByName("苦修")
+    --     CastSpellByName("黑暗训斥")
+    --     return true
+    -- elseif name == "黑暗训斥" and spec == "戒律" then
+    --     --CastSpellByID(433895)
+    --     CastSpellByName("黑暗训斥")
+    --     CastSpellByName("苦修")
+    --     return true
     elseif name == "心灵震爆" or name == "暗影冲击" and spec == "暗影" then
         --CastSpellByID(433895)
         CastSpellByName("心灵震爆")
@@ -1687,15 +1686,17 @@ function GetLocalizedItemName(itemID)
 end
 
 --1法术 2物品 3打断
-function GetSpellIDByName(skillName)
+function GetSpellIDByName(ability)
 
-    local ability = Hekili.Class.abilities[skillName]
-    if ability.id and ability.id > 10 and not ability.item then
 
-        return ability.id, 1
+    if ability.actionID and ability.actionID > 10 and not ability.item then
+        return ability.actionID, 1
+    end
+    
+    local item = Hekili.Class.abilities[ability.actionName]
 
-    elseif ability.item then
-        return ability.item, 2  
+    if item.item then
+        return item.item, 2  
     end
 
     return nil  

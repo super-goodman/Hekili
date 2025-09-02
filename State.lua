@@ -8049,7 +8049,6 @@ do
                 end
             end
         end
-
         if ability.item then
             if not ability.bagItem and not self.equipped[ ability.item ] then
                 return false, "item not equipped"
