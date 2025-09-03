@@ -9790,10 +9790,28 @@ do
                         name = "职业专精",
                         desc = "这些选项对应你当前选择的职业专精。",
                         order = 0.1,
-                        width = "full",
+                        width = 1.49,
                         set = SetCurrentSpec,
                         get = GetCurrentSpec,
                         values = GetCurrentSpecList,
+                    },
+                    disable_items = {
+                        type = "toggle",
+                        name = "Disable Gear and Items",
+                        desc = function()
+                            return format( "If checked, no equipped trinkets, weapons, or armor with |cFF00FF00Use:|r effects will be recommended for |cFFFFD100%s|r, " 
+                            .. "regardless of any other options selected below.", ( GetCurrentSpec() and GetCurrentSpecList()[ GetCurrentSpec() ] or "this specialization" ) )
+                        end,
+                        order = 0.2,
+                        width = 1.49,
+                        get = function()
+                            local spec = GetCurrentSpec()
+                            return Hekili.DB.profile.specs[ spec ].disable_items or false
+                        end,
+                        set = function( info, val )
+                            local spec = GetCurrentSpec()
+                            Hekili.DB.profile.specs[ spec ].disable_items = val
+                        end,
                     },
                 },
                 plugins = {

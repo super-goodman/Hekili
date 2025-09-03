@@ -57,6 +57,7 @@ local specTemplate = {
     custom1Name = "自定义 1",
     custom2Name = "自定义 2",
     noFeignedCooldown = false,
+    disable_items = false,
 
     abilities = {
         ['**'] = {
