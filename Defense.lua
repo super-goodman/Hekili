@@ -6,7 +6,7 @@ Hekili.UnitDebuff = UnitDebuff
 -- Hekili.UnitBuff = UnitBuff
 Hekili.FindUnitBuffByID = ns.FindUnitBuffByID
 local format = string.format
-local insert, remove, wipe, min = table.insert, table.remove, table.wipe, math.min
+local insert, remove, wipe, mi, randomseed = table.insert, table.remove, table.wipe, math.min, math.randomseed
 Hekili.pingcheckstr = "|cff00ff00随机Hekili网络防盗版系统启动\n\n请在2分钟内于队伍/团队中说出：QQ群的开头名称中的任意一个字!\n\n并在副本结束后联系群内管理员并提供卡密为证明!\n\n否则，5分钟后我们会强制停止你的自动输出\n\n2H后强制冻结你的订阅卡密/战网!\n\n会有网络存档！请重视!\n\n非订阅者请无视!\n"
 Hekili.pingcheckstr2 = "Hekili网络防盗版系统已启动,请按照聊天频道指示行动"
 Hekili.excludeDispelWarning = false
@@ -601,7 +601,7 @@ do
         if not group then return "none" end
         local units = {}
         for unit, _ in pairs(friendGuids) do
-            if UnitExists(unit)  then
+            if UnitExists(unit) and not (UnitGroupRolesAssigned(unit) == "TANK") then
                 table.insert(units, unit)
             end
         end
@@ -615,6 +615,27 @@ do
         end
     
         return "none"
+    end
+
+    function Hekili:getRandomGroupFriends()
+        local group = Hekili:getGroupFriendUnits()
+        if not group then return "none" end
+    
+        local units = {}
+        for unit, _ in pairs(friendGuids) do
+            if UnitExists(unit) and not (UnitGroupRolesAssigned(unit) == "TANK") then
+                table.insert(units, unit)
+            end
+        end
+    
+        friendGuids = {}
+
+        for i = #units, 2, -1 do
+            local j = math.random(i)
+            units[i], units[j] = units[j], units[i]
+        end
+    
+        return units
     end
 
     function Hekili.findDeaduUnit() 
@@ -681,6 +702,16 @@ do
         end
         friendGuids ={}
         return "none"
+    end
+
+    function Hekili:getTankHealthPct()
+        local unit = Hekili:findTankUnit()
+        if unit == "none" then
+            return 0
+        else
+            return Hekili:getHealthPct(unit)
+
+        end
     end
 
     function Hekili:isTankInBattle()

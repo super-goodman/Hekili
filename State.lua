@@ -4829,7 +4829,8 @@ do
             if t.key == "tank"  then
                 if k == "unit" then return Hekili:findTankUnit() 
                 elseif k == "exist" then return Hekili:findTankUnit() ~= "none" 
-                elseif k == "token" then return "tank" end
+                elseif k == "token" then return "tank"
+                elseif k == "health" then return Hekili:getTankHealthPct() end
                 
             end
 
@@ -4856,6 +4857,12 @@ do
                     local next_id_ = C_AssistedCombat.GetNextCastSpell()
                     local next_id = FindBaseSpellByID(next_id_)
                     return next_id
+                end
+            end
+
+            if t.key == "ignore_hot" then
+                if k == "up" then         
+                    return true
                 end
             end
             return

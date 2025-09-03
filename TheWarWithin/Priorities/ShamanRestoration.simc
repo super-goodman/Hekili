@@ -2,7 +2,7 @@ actions.precombat+=/earthliving_weapon,line_cd=5,if=buff.earthliving_weapon.down
 actions.precombat+=/skyfury,line_cd=5,if=buff.skyfury.down|active_dot.skyfury<group_members
 actions.precombat+=/water_shield,line_cd=5,if=buff.water_shield.down
 actions.precombat+=/flametongue_weapon,line_cd=5,if=buff.earthliving_weapon.down&buff.earthliving_weapon.down
-actions.precombat+=/earth_shield,line_cd=5,if=find.tank.exist
+actions.precombat+=/earth_shield,line_cd=5,if=find.tank.exist&!raid
 actions.precombat+=/earth_shield,line_cd=5,if=buff.earth_shield.down&talent.elemental_orbit.enabled&find.health.pct<=100&group_members>1
 actions.precombat+=/tidecallers_guard
 actions.precombat=/cleanse_spirit
@@ -14,6 +14,7 @@ actions.precombat+=/guise_of_the_phase_diver,if=!raid
 
 actions.default+=/wind_shear
 actions.default+=/call_action_list,name=ghost_wolf,if=buff.ghost_wolf.up
+#actions.default+=/damage_cancel,if=(find.player_casting.id=188443|find.player_casting.id=188196|find.player_casting.id=51505)&gcd.remains<0.1&(find.lowest_hp.pct<=70|healer_spell_magic)
 actions.default+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check&!raid
 actions.default+=/earthen_wall_totem,if=(active_enemies>4|boss)&!moving
 actions.default+=/earth_shield,line_cd=5,if=find.tank.exist&find.none_target_lowest_hp.pct>70&!raid
@@ -24,22 +25,29 @@ actions.default+=/use_items,enabled=0
 actions.default+=/surging_totem,if=(active_enemies>2|boss)&mana.pct>20&talent.surging_totem.enabled&talent.acid_rain.enabled&!moving
 actions.default+=/totemic_recall,if=cooldown.healing_stream_totem.remains>10|cooldown.cloudburst_totem.charges<1|!cooldown.poison_cleansing_totem.ready
 actions.default+=/healing_stream_totem,if=talent.healing_stream_totem_2.rank=1&charges_fractional>=2&!raid
-actions.default+=/healing_rain,if=((!moving&find.none_target_lowest_hp.pct>80&(active_enemies>4|boss)&mana.pct>90&!raid&!talent.surging_totem.enabled&talent.acid_rain.enabled)|buff.ancestral_swiftness.up)&(!talent.call_of_the_ancestors|raid)
+actions.default+=/healing_rain,if=((!moving&find.none_target_lowest_hp.pct>80&(active_enemies>4|boss)&mana.pct>90&!raid&!talent.surging_totem.enabled&talent.acid_rain.enabled)|buff.ancestral_swiftness.up)&!talent.call_of_the_ancestors
 actions.default+=/unleash_life,if=talent.ancestral_swiftness.enabled&find.lowest_hp.pct<=100&fight_remains>5
 actions.default+=/unleash_life,if=find.lowest_hp.pct<50&!talent.ancestral_swiftness.enabled&fight_remains>5
 actions.default+=/ancestral_swiftness,if=talent.ancestral_swiftness.enabled&fight_remains>15
 actions.default+=/spiritwalkers_grace,if=buff.ascendance.remains>10
-actions.default+=/riptide,if=find.tank.exist&find.none_target_lowest_hp.pct>70&!raid
-actions.default+=/riptide,if=find.health.pct<100&find.none_target_lowest_hp.pct>70&self_riptide
-
 actions.default+=/call_action_list,name=cds
-actions.default+=/call_action_list,name=health_aoe,if=find.none_target_lowest_hp.pct<100&(((!raid&find.hurt_num_big.count>1)|(raid&find.hurt_num_big.count>2))|((!raid&find.hurt_num.count>1)|(raid&find.hurt_num.count>2)))
-actions.default+=/call_action_list,name=health_st,if=find.none_target_lowest_hp.pct<100
-actions.default+=/call_action_list,name=st
+actions.default+=/call_action_list,name=raid,if=raid&talent.call_of_the_ancestors
+actions.default+=/riptide,if=find.tank.exist&find.none_target_lowest_hp.pct>70&!raid&find.tank.health<=70
+actions.default+=/riptide,if=find.health.pct<100&find.none_target_lowest_hp.pct>70&self_riptide
+actions.default+=/riptide,if=find.random_unit.unit&talent.call_of_the_ancestors
+actions.default+=/call_action_list,name=health_aoe,if=(!raid|!talent.call_of_the_ancestors)&find.none_target_lowest_hp.pct<100&(((!raid&find.hurt_num_big.count>1)|(raid&find.hurt_num_big.count>2))|((!raid&find.hurt_num.count>1)|(raid&find.hurt_num.count>2)))
+actions.default+=/call_action_list,name=health_st,if=(!raid|!talent.call_of_the_ancestors)&find.none_target_lowest_hp.pct<100
+actions.default+=/call_action_list,name=st,if=!raid
 actions.default+=/lava_burst,if=buff.lava_surge.up&target_is_enemie&find.none_target_lowest_hp.pct>50
 actions.default+=/flame_shock,if=target_is_enemie&moving&target.debuff.flame_shock.down&find.none_target_lowest_hp.pct=100&mana.pct>20&buff.spiritwalkers_grace.down
 actions.default+=/frost_shock,if=target_is_enemie&moving&target.debuff.frost_shock.down&find.none_target_lowest_hp.pct=100&mana.pct>20&buff.spiritwalkers_grace.down
 
+actions.raid+=/recall_cloudburst_totem,if=totem.cloudburst_totem.up&health_party_pct<=80&buff.cloudburst_totem.v1>health.max*0.5
+actions.raid+=/riptide,if=find.lowest_hp.pct<=100&(cooldown.riptide.charges>=2|moving)
+actions.raid+=/healing_wave,if=(find.lowest_hp.pct<100)&buff.tidal_waves.stack>=2&!moving
+actions.raid+=/riptide,if=find.random_unit.unit
+actions.raid+=/healing_wave,if=find.lowest_hp.pct<100&!moving
+actions.raid+=/call_action_list,name=st
 
 actions.st+=/flame_shock,if=target.debuff.flame_shock.down&mana.pct>20&target_is_enemie
 actions.st+=/chain_lightning,if=active_enemies>1&!moving
@@ -47,11 +55,11 @@ actions.st+=/lava_burst,if=target.debuff.flame_shock.up&!moving
 actions.st+=/primal_strike,enabled=0,if=target.distance<3&moving&mana.pct>20
 actions.st+=/lightning_bolt,if=target.debuff.flame_shock.up&!moving
 
-actions.cds+=/cloudburst_totem,if=totem.cloudburst_totem.down&cooldown.cloudburst_totem.charges>1&!moving&health_party_pct>=70&find.none_target_lowest_hp.pct>=60
+actions.cds+=/cloudburst_totem,if=totem.cloudburst_totem.down&cooldown.cloudburst_totem.charges>1&!moving&health_party_pct>=70&find.none_target_lowest_hp.pct>=60&fight_remains>20
 actions.cds+=/signet_of_the_priory,if=buff.ascendance.up&buff.ascendance.remains>=13
-actions.cds+=/ascendance,if=allow_mitigation&range_spell_magic&totem.healing_tide_totem.down&buff.loomithars_living_silk.down
-actions.cds+=/healing_tide_totem,if=allow_mitigation&range_spell_magic&buff.ascendance.down&buff.loomithars_living_silk.down
-actions.cds+=/loomithars_living_silk,if=allow_mitigation&range_spell_magic&totem.healing_tide_totem.down&buff.ascendance.down
+actions.cds+=/ascendance,if=allow_mitigation&healer_spell_magic&totem.healing_tide_totem.down&buff.loomithars_living_silk.down
+actions.cds+=/healing_tide_totem,if=allow_mitigation&healer_spell_magic&buff.ascendance.down&buff.loomithars_living_silk.down
+actions.cds+=/loomithars_living_silk,if=allow_mitigation&healer_spell_magic&totem.healing_tide_totem.down&buff.ascendance.down
 actions.cds+=/loomithars_living_silk,if=find.none_target_lowest_hp.pct<=50
 actions.cds+=/chromebustible_bomb_suit,if=health.pct<50
 actions.cds+=/ringing_ritual_mud,if=health.pct<50
@@ -62,13 +70,12 @@ actions.health_aoe+=/recall_cloudburst_totem,if=totem.cloudburst_totem.up&health
 actions.health_aoe+=/wellspring,if=talent.wellspring.enabled&buff.unleash_life.up
 actions.health_aoe+=/surging_totem,if=find.none_target_lowest_hp.pct<80&talent.surging_totem.enabled&!moving
 actions.health_aoe+=/ascendance,if=health_party_pct<=ascendance_health|health.pct<=20
-actions.health_aoe+=/riptide,if=find.lowest_hp.pct<=100&!raid|raid&find.lowest_hp.pct<100
-actions.health_aoe+=/riptide,if=find.random_unit.unit&!raid
+actions.health_aoe+=/riptide,if=find.lowest_hp.pct<=30&find.ignore_hot&cooldown.riptide.charges>=2
 actions.health_aoe+=/chain_heal,if=find.health.pct<30
 actions.health_aoe+=/healing_rain,if=mana.pct>30&!talent.surging_totem.enabled&!talent.call_of_the_ancestors
 actions.health_aoe+=/wellspring,if=talent.wellspring.enabled&((raid&find.hurt_num_big.count>4)|(!raid&find.hurt_num_big.count>2))&find.none_target_lowest_hp.pct<70&!moving
 actions.health_aoe+=/natures_swiftness,if=find.none_target_lowest_hp.pct<60
-actions.health_aoe+=/chain_heal,if=find.lowest_hp.pct<=chain_heal_health&talent.call_of_the_ancestors&!raid|find.lowest_hp.pct<80&talent.call_of_the_ancestors&raid
+actions.health_aoe+=/chain_heal,if=find.lowest_hp.pct<=chain_heal_health&talent.call_of_the_ancestors&!raid|find.lowest_hp.pct<40&talent.call_of_the_ancestors&raid
 actions.health_aoe+=/chain_heal,if=buff.natures_swiftness.up|buff.ancestral_swiftness.up&find.lowest_hp.pct<=chain_heal_health
 #actions.health_aoe+=/healing_wave,if=active_hot.riptide>2&buff.tidal_waves.up&buff.primordial_wave.up&find.lowest_hp.pct<100
 actions.health_aoe+=/healing_stream_totem,if=find.none_target_lowest_hp.pct<80&!talent.ancestral_swiftness.enabled
@@ -86,7 +93,7 @@ actions.health_st+=/riptide,if=find.lowest_hp.pct<100|buff.tidal_waves.down
 actions.health_st+=/healing_stream_totem,if=find.none_target_lowest_hp.pct>80&talent.ancestral_swiftness.enabled
 actions.health_st+=/primordial_wave,if=find.none_target_lowest_hp.pct<60&find.none_target_lowest_hp.pct<100
 actions.health_st+=/healing_wave,enabled=1,if=find.lowest_hp.pct<75&raid
-actions.health_st+=/healing_surge,line_cd=1,if=find.lowest_hp.pct<=healing_surge_health
+actions.health_st+=/healing_surge,line_cd=1,if=find.lowest_hp.pct<=healing_surge_health&!raid|raid&find.lowest_hp.pct<=(healing_surge_health-10)
 
 actions.racial+=/blood_fury
 actions.racial+=/bag_of_tricks
@@ -100,6 +107,8 @@ actions.mitigation=/cleanse_spirit
 actions.mitigation+=/poison_cleansing_totem,if=!moving
 actions.mitigation+=/purge,line_cd=settings.purge_icd,if=buff.dispellable_magic.up
 actions.mitigation+=/greater_purge,if=buff.dispellable_magic.up
+actions.mitigation+=/riptide,if=find.health.pct<=40&find.ignore_hot.up
+actions.mitigation+=/healing_surge,line_cd=1,if=find.health.pct<=40
 actions.mitigation+=/astral_shift,if=health.pct<hp_gap&buff.astral_shift.down&buff.stone_bulwark.down&buff.earth_elemental.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)
 actions.mitigation+=/stone_bulwark_totem,if=health.pct<hp_gap&buff.astral_shift.down&buff.stone_bulwark.down&buff.earth_elemental.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)
 actions.mitigation+=/earth_elemental,if=health.pct<hp_gap&buff.astral_shift.down&buff.stone_bulwark.down&buff.earth_elemental.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)

@@ -753,6 +753,59 @@ spec:RegisterStateExpr( "remaining_winters_chill", function ()
     local projectiles = 0
     local fof_consumed = buff.fof_consumed.remains
 
+    -- Add incoming Winter's Chill stacks from Flurry projectiles
+    local incoming_wc_stacks = 0
+    if action.flurry.in_flight and action.flurry.lastCast > 0 then
+        local distance = target.maxR or 30
+        local gcdMax = gcd.max
+        local flurryCastTime = action.flurry.lastCast
+        local timeSinceCast = query_time - flurryCastTime
+
+        -- Calculate when each projectile would impact (absolute times)
+        local impact1Time = distance / 48
+        local impact2Time = impact1Time + (0.31 * gcdMax)
+        local impact3Time = impact1Time + (0.56 * gcdMax)
+
+        -- Count projectiles that have NOT YET landed by query_time
+        local projectiles_still_incoming = 0
+
+        if timeSinceCast < impact1Time then
+            projectiles_still_incoming = projectiles_still_incoming + 1
+            if Hekili.ActiveDebug then
+                Hekili:Debug( "Remaining Winters Chill(%s): Flurry projectile 1 still incoming (%.3fs remaining)", this_action, impact1Time - timeSinceCast )
+            end
+        end
+
+        if timeSinceCast < impact2Time then
+            projectiles_still_incoming = projectiles_still_incoming + 1
+            if Hekili.ActiveDebug then
+                Hekili:Debug( "Remaining Winters Chill(%s): Flurry projectile 2 still incoming (%.3fs remaining)", this_action, impact2Time - timeSinceCast )
+            end
+        end
+
+        if timeSinceCast < impact3Time then
+            projectiles_still_incoming = projectiles_still_incoming + 1
+            if Hekili.ActiveDebug then
+                Hekili:Debug( "Remaining Winters Chill(%s): Flurry projectile 3 still incoming (%.3fs remaining)", this_action, impact3Time - timeSinceCast )
+            end
+        end
+
+        -- Only count incoming stacks that will land before Winter's Chill expires
+        local remaining_flight_time = max(0, max(impact1Time, impact2Time, impact3Time) - timeSinceCast)
+        if remaining_flight_time < remains then
+            incoming_wc_stacks = projectiles_still_incoming -- Let final calculation handle max stacks
+            if Hekili.ActiveDebug then
+                Hekili:Debug( "Remaining Winters Chill(%s): +%d stacks from %d incoming Flurry projectiles", this_action, incoming_wc_stacks, projectiles_still_incoming )
+            end
+        else
+            if Hekili.ActiveDebug then
+                Hekili:Debug( "Remaining Winters Chill(%s): Flurry projectiles won't land before Winter's Chill expires", this_action )
+            end
+        end
+    end
+
+    -- Count consumer projectiles that will remove Winter's Chill stacks
+
     for spender in pairs( wc_spenders ) do
         local a = action[ spender ]
         local in_flight_remains = a.in_flight_remains
@@ -760,20 +813,18 @@ spec:RegisterStateExpr( "remaining_winters_chill", function ()
             if spender == "ice_lance" and fof_consumed > in_flight_remains then
                 if Hekili.ActiveDebug then Hekili:Debug( "Remaining Winters Chill(%s): Ice Lance in flight, but FoF consumed before it hits.", this_action ) end
             else
-                if Hekili.ActiveDebug then Hekili:Debug( "Remaining Winters Chill(%s): Added %s projectile.", this_action, spender ) end
+                if Hekili.ActiveDebug then Hekili:Debug( "Remaining Winters Chill(%s): -%s projectile will consume stack.", this_action, spender ) end
                 projectiles = projectiles + 1
             end
         end
     end
 
-    local result = max( 0, stacks - projectiles )
+    -- Calculate final result: current stacks + incoming stacks - consumed stacks
+    local result = max( 0, min( 2, stacks + incoming_wc_stacks ) - projectiles )
 
     if Hekili.ActiveDebug then
-        Hekili:Debug( "Remaining Winters Chill(%s): FoF Consumed[%s], Winter's Chill[%d => %d, %.2f vs. %.2f], Projectiles[%d]; Value[%d]",
-            this_action, buff.fof_consumed.up and "true" or "false",
-            wc.stack, stacks, remains, cast,
-            projectiles,
-            result )
+        Hekili:Debug( "Remaining Winter's Chill(%s): Current=%d stacks/%.2fs, Incoming=+%d, Consumers=-%d, Available=%d",
+            this_action, wc.stack, remains, incoming_wc_stacks, projectiles, result )
     end
     return result
 end )
@@ -852,8 +903,9 @@ spec:RegisterHook( "COMBAT_LOG_EVENT_UNFILTERED", function( _, subtype, _, sourc
 
         local now = GetTime()
 
-        if subtype == "SPELL_DAMAGE" and spellID == 30455 and now - lanceRemoved > lanceICD then
+        if subtype == "SPELL_DAMAGE" and spellID == 228598 and now - lanceRemoved > lanceICD then
             numLances = max( 0, numLances - 1 )
+            lanceRemoved = now
             if numLances == 0 then latestFingersLance = 0 end
         end
 
@@ -880,6 +932,86 @@ spec:RegisterHook( "COMBAT_LOG_EVENT_UNFILTERED", function( _, subtype, _, sourc
         end
     end
 end, false )
+
+-- Track basic Flurry cast data for distance calculation
+local flurryCastData = {}
+
+-- Track Flurry cast and damage events
+spec:RegisterCombatLogEvent( function( _, subtype, _, sourceGUID, _, _, _, targetGUID, _, _, _, spellID, _, _, _, amount )
+    if sourceGUID ~= state.GUID then return end
+    local now = GetTime()
+
+    -- Flurry cast
+    if spellID == 44614 and subtype == "SPELL_CAST_SUCCESS" then
+        -- Get current distance to target
+        local distance = state.target.maxR
+        -- Get current GCD max
+        local gcdMax = 1.5  -- Default fallback
+        if state and state.gcd and state.gcd.max then
+            gcdMax = state.gcd.max
+        end
+
+        -- Store cast data for impact tracking
+        flurryCastData[targetGUID] = {
+            castTime = now,
+            distance = distance,
+            gcdMax = gcdMax,
+            impactsReceived = 0
+        }
+
+        -- Calculate impact timings using the provided formulas
+        local impact1Time = distance / 48
+        local impact2Time = impact1Time + ( 0.31 * gcdMax )
+        local impact3Time = impact1Time + ( 0.56 * gcdMax )
+
+        -- Queue all 3 impacts with proper timing for the addon's prediction system
+        state:QueueEvent( "flurry", now, impact1Time, "PROJECTILE_IMPACT", targetGUID, true )
+        state:QueueEvent( "flurry", now, impact2Time, "PROJECTILE_IMPACT", targetGUID, true )
+        state:QueueEvent( "flurry", now, impact3Time, "PROJECTILE_IMPACT", targetGUID, true )
+
+        if Hekili.ActiveDebug then
+            Hekili:Debug("Flurry cast: Distance=%.1f, GCD=%.3f, Impacts at %.3f/%.3f/%.3f",
+                distance, gcdMax, impact1Time, impact2Time, impact3Time)
+        end
+
+    -- Flurry damage events (projectile impacts)
+    elseif spellID == 228354 and ( subtype == "SPELL_DAMAGE" or subtype == "SPELL_MISSED" ) then
+        local castData = flurryCastData[ targetGUID ]
+        if castData then
+            castData.impactsReceived = castData.impactsReceived + 1
+            local delay = now - castData.castTime
+
+            if Hekili.ActiveDebug then
+                Hekili:Debug( "Flurry impact %d: %.3fs after cast ( predicted: %.3f )",
+                    castData.impactsReceived, delay,
+                    castData.impactsReceived == 1 and castData.distance / 48 or
+                    castData.impactsReceived == 2 and ( castData.distance / 48 + 0.31 * castData.gcdMax ) or
+                    ( castData.distance / 48 + 0.56 * castData.gcdMax ) )
+            end
+
+            -- Clean up after all 3 impacts received
+            if castData.impactsReceived >= 3 then
+                flurryCastData[ targetGUID ] = nil
+            end
+        end
+    end
+end)
+
+--[[ Optional: Clean up old cast data periodically
+local function cleanupOldCastData()
+    local now = GetTime()
+    for targetGUID, data in pairs( flurryCastData ) do
+        -- Remove data older than 10 seconds
+        if now - data.castTime > 10 then
+            flurryCastData[ targetGUID ] = nil
+        end
+    end
+end
+
+-- Clean up every 30 seconds
+C_Timer.NewTicker( 30, cleanupOldCastData )
+
+--]]
 
 spec:RegisterStateExpr( "brain_freeze_active", function ()
     return buff.brain_freeze.up -- frost_info.virtual_brain_freeze
@@ -1252,13 +1384,24 @@ spec:RegisterAbilities( {
 
         talent = "flurry",
         startsCombat = true,
-        flightTime = function () return 0.5 + target.maxR * 0.0175 end,
+        -- Remove flightTime to prevent generic projectile handling, flurry gets its own queued event handler
+        -- flightTime = function () return 0.5 + target.maxR * 0.0175 end,
 
         handler = function ()
             removeBuff( "brain_freeze" )
-            applyDebuff( "target", "winters_chill", nil, 2 )
-            if Hekili.ActiveDebug then Hekili:Debug( "Winter's Chill applied by Flurry." ) end
+            -- Don't apply Winter's Chill directly - let the impacts handle it
+            if Hekili.ActiveDebug then Hekili:Debug( "Flurry handler - queueing virtual projectiles." ) end
             applyDebuff( "target", "flurry" )
+
+            -- Queue 3 separate projectile impacts for virtual predictions
+            local distance = target.maxR or 30  -- Fallback distance if not available
+            local gcdMax = gcd.max
+            local impact1Time = distance / 48
+
+            -- Queue all 3 impacts with proper timing (virtual queue)
+            state:QueueEvent( "flurry", query_time, impact1Time, "PROJECTILE_IMPACT", target.unit, false )
+            state:QueueEvent( "flurry", query_time, impact1Time + ( 0.31 * gcdMax ), "PROJECTILE_IMPACT", target.unit, false )
+            state:QueueEvent( "flurry", query_time, impact1Time + ( 0.56 * gcdMax ), "PROJECTILE_IMPACT", target.unit, false )
 
             if buff.expanded_potential.up then removeBuff( "expanded_potential" )
             elseif legendary.sinful_delight.enabled then gainChargeTime( "mirrors_of_torment", 4 )
@@ -1288,15 +1431,22 @@ spec:RegisterAbilities( {
         end,
 
         impact = function()
-            -- This wipes out the effect of a prior projectile impacting and wiping out a stack when Flurry will re-max it.
-            if Hekili.ActiveDebug then Hekili:Debug( "Winter's Chill reapplied by Flurry impact." ) end
-            applyDebuff( "target", "winters_chill", nil, 2 )
+            -- Handle individual projectile impact - each adds 1 Winter's Chill stack
+            if Hekili.ActiveDebug then Hekili:Debug( "Flurry projectile impact - adding Winter's Chill stack." ) end
+
+            -- Add 1 Winter's Chill stack (max 2)
+            local currentStacks = debuff.winters_chill.stack or 0
+            if currentStacks < 2 then
+                applyDebuff( "target", "winters_chill", nil, currentStacks + 1 )
+            end
             applyDebuff( "target", "flurry" )
-            applyBuff( "bone_chilling", nil, 3 )
+            -- Add incremental effects per projectile
+            if talent.bone_chilling.enabled then addStack( "bone_chilling" ) end
             if talent.frostfire_mastery.enabled then
-                if buff.frost_mastery.up then applyBuff( "frost_mastery", buff.frost_mastery.expires, min( buff.frost_mastery.stacks + 3, 6) )
-                else applyBuff( "frost_mastery", nil, 3 ) end
-                if buff.excess_frost.up then
+                if buff.frost_mastery.up then applyBuff( "frost_mastery", buff.frost_mastery.expires, min( buff.frost_mastery.stacks + 1, 6) )
+                else applyBuff( "frost_mastery", nil, 1 ) end
+                -- Only handle Excess Frost consumption on final stack (when we reach 2 stacks)
+                if currentStacks == 1 and buff.excess_frost.up then
                     removeStack( "excess_frost" )
                     spec.abilities.ice_nova.handler()
                     reduceCooldown( "comet_storm", 3 )
@@ -1402,7 +1552,8 @@ spec:RegisterAbilities( {
 
         impact = function ()
             applyDebuff( "target", "chilled" )
-            if not action.flurry.in_flight then removeDebuffStack( "target", "winters_chill" ) end
+            -- Always consume Winter's Chill if available (Flurry projectiles apply stacks progressively)
+            removeDebuffStack( "target", "winters_chill" )
         end,
 
         bind = "frostfire_bolt",
@@ -1485,7 +1636,8 @@ spec:RegisterAbilities( {
 
         impact = function ()
             applyDebuff( "target", "chilled" )
-            if not action.flurry.in_flight then removeDebuffStack( "target", "winters_chill" ) end
+            -- Always consume Winter's Chill if available (Flurry projectiles apply stacks progressively)
+            removeDebuffStack( "target", "winters_chill" )
             applyDebuff( "target", "frostfire_bolt" )
         end,
 
@@ -1557,7 +1709,8 @@ spec:RegisterAbilities( {
 
         impact = function()
             applyDebuff( "target", "glacial_spike" )
-            if not action.flurry.in_flight then removeDebuffStack( "target", "winters_chill" ) end
+            -- Always consume Winter's Chill if available (Flurry projectiles apply stacks progressively)
+            removeDebuffStack( "target", "winters_chill" )
         end,
 
         copy = 228600
@@ -1661,12 +1814,9 @@ spec:RegisterAbilities( {
                 if Hekili.ActiveDebug then Hekili:Debug( "Fingers of Frost consumed by Ice Lance." ) end
                 removeStack( "fof_consumed" )
             else
-                if action.flurry.in_flight then
-                    if Hekili.ActiveDebug then Hekili:Debug( "Winter's Chill not consumed by Ice Lance because Flurry is in-flight." ) end
-                else
-                    if Hekili.ActiveDebug then Hekili:Debug( "Winter's Chill consumed by Ice Lance." ) end
-                    removeDebuffStack( "target", "winters_chill" )
-                end
+                if Hekili.ActiveDebug then Hekili:Debug( "Winter's Chill consumed by Ice Lance." ) end
+                -- Always consume Winter's Chill if available (Flurry projectiles apply stacks progressively)
+                removeDebuffStack( "target", "winters_chill" )
             end
         end,
 
@@ -1981,9 +2131,4 @@ spec:RegisterSetting( "check_cone_range", true, {
     width = "full"
 } )
 
-
---spec:RegisterPack( "冰霜官方一键宏Simc", 20250612, [[Hekili:TZZ2UTXXz)SqeaArBhwUuIkwaKSa9UgGMBuVMlxUCO4cThy3dsMbeeQjiNmsQtqnslAdqqk(tqqGJZ)LogoTpmvsw(Q8k0VzM9WmZoZWLuYjQX9gFyNz(onFNNHZaJb)(b7p2kgn4nA3QDNw7ASxtJD2E3wBpy)45Zqd2FML9Hwha)dFlp4pp7D))F(N9zN9O)65F63F6Jp55p4rN9O7VVJNnEMZDdSgJHyuqsOnm7Jdo2nXAW(JsCCJ)T(dgvgzBV9o70zW(wjXtdclwXuNXJr0fGIaGFX39LyS8Sh81p)KhC6JFYZp5TE(78rc0Xp(0p887)XN(p)7x8EFZz37RF27)UND)pb(4zV39p9P)FN(4)05FWF(8p9BF23(bNDVp)I3(hgSVRtuCeMITDrwhHmNmb(pVbrQG8Tg5Igp43adg6eJcDaYAsic9M4VVCy9LdNfIoY8a7XnnAEGRLTJLRz0mNdbg3Yo2jWpD(ObXahFjHjzWqKNLJVJ)bMh74dlpY0EQJR7YH9woSfzgJrJsMmPj3WnhhCSpz0APWpyYecosjVCY1Xgz6hCKfMG3wnb7CW0ytkTeTCy)LdnaKVybqFwoJlGMDGhk2mkoi0ddWDWaSqWe8MiFZGWrSibMvhLO1oiWfZjnDSNBEecWDtrAayX8zvGbztBlIWi2Yf5h3KHqBMIAk)Kdm2zicTgLbyO1CqgBcKquSciYnLsGSqqfn1zsmEhFwWXOqqcfdJfGmJI0RPMZAUGbeq6(wZkOeQQGmrvYSmUHrrKH7PCbZyfRLx8RsI1rQaBmYkEAM6kNaJOolzhV7YH7XmdoaefdoTaSbwfgD4KM2b(iSyhlwwhRYT0zyIjIcwHBWcEPHmNcASX4qVC72xO(lK7uyNvPVL4JcdjQRHbtCSDq(2Z507ID8aA7vxoKc(MS7inDTav1Ki8u7MBQw1vakxVMCQUtL88Sl7Sy9DXnnW8ZZj25alY8YmbZTwNHCDJIrwUcaVn7SGTLaiyJDsyesyEQ1iyC)HO8oRz1UTyPD3XedE97yPwwiZrwWwgkSimXuG(JN2CMDmSpaQktNzEaanozB6I07YwoGi4qn25y0SrL7cp0Y)aWviwOB6zDGJn1ym2k8ay3ZtYqJdIl)rwWmB68ivWHDScaL9vglCpROiwj0UBSeYZjmmi00bOwuHiIm0bHGppemM)roroJCCDINBognb5hjo1CvM8pFDw4XWYyH3RTjcVu)AtNpliEkk0ZXsqK8sOGnJyXc17Sjcv9UGmA3InyfeqkBAVul1LXx04iqKRvwVXMLQTM0AQiazIsw1OsVmNu(QcZobMmo)QCGJZZMi1LNHgVrRRLVnkn3dCId48)xPMJQQk5YSzZRtTAPKYv5W6Ll3DQqzPJ4uyHvtM1MqZIdLHYm1OxuPzxQEkojwd9QwBMXS6012IZ4IzNrOaobRqUjAnEEM1xvjpENxzk5)VoYC9OJmW(H9yPnBiBLXWUUnKKvqsKzme)mckqcimoNGbrrY0jGQ82U9YH3A5qCYd3C5q0FiXz2m04MrZMdzrtezhJgXyMuyHMgWHog1v)rwa6a6R5Oa34OzwP9RqjuZdtOlogUu02cA9YNw728H74JtWdrAefAxvvjbLOLwuPjlNurzDAgAyLck)OP7kg7LjB0aqJwDKbrgIlenlimMTLm4n8C5UkcOpT1nCYCfsjEVtSIvbzKetOCZmVzOWji7ytRiBK)yiG7CZiuyINKkM1rSvt4NrGAqReh)ze7OKqiuh4Y9q)GJHXWDN)firkbDsIIK3BdR4jqk0MXb31XNRbrKq)extzqMFUARtwdxTxbYHI9W)T2Ig1OYJDR4zDxIJO2zAOL9TUnJVvHcSsHQSkSY9Z6MegoNEUgHoZOF83z5NybrnSNIl)aqAyGhnBPETU9YHhp1XEk8)Ncdf54bKbKMe24jo9JwJhhabuST89dIll1bERvtkhHjdiSkYh55GIOL41gtV7PGE9rjH4qEZ9TMfHx4uC2OCE3Lct9z2S(QHQOdG0bnQ1D3ovpmJjbXPjSepYoNbxl9g5gem2CscEpJRvDgQtGqN2kHX053D1gPgDyKo50j4MdfEieTHqCBZfB3jer4drwGldaS8mkglKTTCDlLfqvQ6yvN6WkoxHAkRUJjTsP2Kg82Kz5wjVWtcWQx5YsRqbNSPyTzNWq1Rq7Q9qdU6RqBNx6QqtDfvvnXC(k0uhg8ArfAAcUETTDqdu37MyCS4jwjUXdepoh7GeI6aU3EcUo5oqhUwwZpprRv9j8VYAQKKwyAQKqEd(o4P7z5BzoYcp95mwOYhxR2l2K7i0SJMbMdiC67uZqQUbePWXghdHrCbHnmP)ht8nRGE)kmPeiZPMPvfpB)KIZkcCCfQAvmt1Ii(GWrdnXfiYfAsmjgsPkzSSxWr4aRYy6WeFLKvAitjzdE1qzBizX2erjz(XPaSHK3AttP3Pb9zZT(etVSm538nXIgrLNB4vnXTHuMqFY0Nt6gTxskoyDjRukkD3uD6kRMC28nn6zRKNI7gI)ne5K9LckqRdwTeXAJzCo3r0yAqglqerWpFPOAwHqDIq9oqOnxxeaDjr2yi3GzaCrXfRpRjB4)LBc8xGwh(JMAJTzMtqq5frXuISqv5N5M8QjXZlvUJvICRwtEvsh1lvpjg3kZEtTbXk6dktRpeWh(0SAOkB2l7n6JRmosZtyULAczWElAXX91ZiRiBqQrKwfYRQ9c1QNVy2lu1)t9zUbUZ8aNudkoCMn6ORRsPf)0DY1x9NllrgPvMKF7fM4gGevnY)EUCOK)bnLwmIvKY0ccPrBu2FgX4)9Z6oOANg4YjO3wKuDsLGrmae6UZCdICOfeWFh9ibcXDBqGL3vuSq3c4Mez)4iyldpPSBAoG9JTcXBOrd2)IV9Ro7tU3p(0)2zF3tp7D(YBavpCJZE))YfFXx)8p7Kl(Q)4Pp(KtFs6Li)0)1Jo)bF))(K3A5R)Sh(W2x8fFiSUl(HhE(h9pUbeB2)quSYdMO4Efq1AVXPp(j3OQhNXno)HFbbTlF9ZF)p(S795uI90N8Ug7C6J)MZV3jx82)aLQjtdhXpyIJBECLOM5rCVvVFLyq)LVUSzLfA)2yl)Evls(Tjzb0ZOnMutbkak2ANz)oBTYSFpRfSArT6fiV(wocsWhhDDfLLEBAUw9mUTZKE1yl8TEnsBfxjSa9i8A5RGLDzcPUrxfTqmoSlnPW68wv97TD9A0euxjkyk4BJWtfrdTgoE5yfrXkHDEzoRnd0R96jNUuyQIikpV31xy1R9kHoj6CfO(1sSuvGwryssYQcCpJtLMunyIVLIiCmucByT6BjVLTlwut9rm0O(wCPz03O1IfyB)g1RP8OeQRPDMaaQRRbLW4sypAXhyglViL6kAaD5fNLSa)YRjP6gfWSo(iaEvkCv0()(3rkvN1F)BNgoUxRkqe1K2vFUTpUYMQRi1SETQRSoSflKZQnKZgPBIeIxQ6GuvYCOIx3wABtF)olwOP98nQxz0Yx)cB0NYvnWPmkxxDRALB3ohPktdUb2gTG2yc2SH6Y8q4NAfAr6))M1QlXlRHQn)A)Pr)MxtIMprf93l1bDIM4amFVyf69w3PrHfc7V4SflKFG(D3lDKY)8063ZOtdjSQm7fLAnqWmz)QZKb3nZk6sRJUckrZVASky12f8yT6z1)1KkMZ)zlktDJXPuX4q69vTofmVHVah8k6D3U9TA36MkUnIPAKLUFJlwSvTs3RXfluafqdvDeGUgTzmmlpC72f6)YV7IDjU7FLxj7(bKjvghyQQAXyROdl5VPRXDa(IO0yhoFwSJnuAkKnyskuZM2VMmfaYUohq088r3fGpStdv4dv8b6sJDY(NcRc0PS8Jj1dojaMHjK)CeURazZRr3Ts1Ceyw0Dr2jXitSY1TmUPKFabn0RwWVNOqBODR6yVEkDEySx9TKSmJwDyxNI7AjutvBqxqoO7BaoOx3Ux0VtRvW1QVoJejGAsrTWrpclF1eFbHiUBQiXXfOzWL8oDv0lGOgIypXvKpf1lQl2DGN1DVzBXYt2oR8eWKC5WR0lrOiDs78EgR3TvZ2c1L2LPWuPYqfxGpmilbjvP2Sj7GAKSKDWYoZC8pk4qC)jbZaFGKXlMYde3dGNQjjrS7Z8FonW36axW1o4zcuWaD5OepV0iiyyxEiHaRuyxCnflns(fduNEzDvoHKB1y0rQmp)Igkoa)DlKpnV8gUS6Yf4VzxsHG8eDUkZPrAwtYjgHSMxvk38sIYzOWo(1Ik)kwgBWrM1j7xuNIsgV8QbLaZp76cLOO1uHqIGPqRqInKYsiwTWJfcRrXcBImB9igbrMcek6)sWhjN4HTkynzltcVw60vBihQRR5yTYNPTq09Bz0PVAy0q0(bF6JPBDKtrKXzp75nQCrK7sRSb5k(MRhi1KvhoFS8(SzfWauXJaedUStseK7vekfNtOs2ICaHSYksFSRULy5fUEDrjBvRR(X1n31I8tUSnxptYzPdcd5wRLC(xPDf5Uh3S9fULE5zgob0vMBRmyD15YkN6KFyOP2ocrNZpIuSEC(lCJIjeY842Oyk5pqncMb8pQe93TLI1JNz6RRcNxo2NsM6fVJfD7L(gwihASpwlyWvEH1LJbokx4HQHyJw6jPak6w2ZrXIfcpffyLvXNHIYRn77Ip)enuXOmN8UogT0J0b9ZR8b6OqmL)4CCTtgKrDk4FfpBm)YxUiJjuiJuBWAavItssSzXB)YVGeDKN3l7bVXU7qUJrd(pd]] )
-spec:RegisterPack( "冰霜Simc", 20250811, [[Hekili:TZ1EpoYXX9pl3)CpI0YJK7X7wzCYbNoPlrhcKumvI)JGWHnh2KSXoV08y3JhegifhlFwrcXjwkgX5YdfeBiiizl4aeFrpI)WKDPo9x(RGRQ75r3n7E4qQDJTHceGoUt3t3vxD1v9RE0ZOEJE5rdNssPJEH(D7pO7b963P3n2Fq3BmAy6Yi6OHre3djZHFeq8H))PVXh)Lp8Hdz(Uytl9cjtXHijml2fAErAAuY34QxDolDr2KoUH(xnH5N5rszHbUXKzP4F7E1rdNKX8sF(Grtmn)73V3OHKS0fHXJgct2THrMnDkv0DAcm5y33R7b71R33iF8Fweog53n)ULpU7nm84RVx3bgE812RVPb5AWly4X7V3(M69(Mh7(71hPKE960Rt38XiJlFCgVtJg6Xsstq23SzoKqk8RxGVHqdit8Oth9matWf5CJg6ggqDcN54g6nvWcIzrIMEU7LsJdiEjqVIzWVzeyZJ4rds7GDNMK6KeqI6umS5JVy(4lNpokMEKZC3PaLb7tuOtPHX(5JF1xnF8fYh7gcVB4XbYn2jMsMUmF8vkhJzS5lsDIP(ewqs(4VjSs7kgHycBAzhLhTzXH3Ng4egpPCWUOTwvh0lALKK73OuqsYcpCwmLEFQg37wZX3ofwkyR47KpoLepNMMGSiwiWsz3hE4lrHoDh(qKpMealUN3f(1leEebEJW8XjliPa3pF8FKhXLr8GD7i2HLD(2ijdpItZY7usZlSef0Ah5T7oPmFQtclaNoyrEGHnW5IP0jrmJq7c2clyUZXSayQsCCxW8aI6PZhl4MtPtYMnRJsZDq2Ryd0M4Xvqw8(AS46LZfkEZqqMgF7zfCSlQWH)9KvALOdZL6ea704A)AYR9jYIxHWjnEVSU92a3rVPYP8328ayfpyx2T)krsx0(6vIH7LfhVejWRJeO0(qHoezIg61nSUmk0wISCxINhnUwxjYCkAMV4WfeOBlOSh1Z7ep29VpjEkovhyvfeiJmJftDMe6LQPk6zZIHrh1RaAf)ZPCLAjPG938XplLKU4sWFFBbpe130RF(4JH)ey3hsPr8x9zkOHcLo3HZkYh)IXtYhhgiPb1WQFkohLBdY2k47sm3LohH0uNSOsrsEdkVwb5EZ8XpLG1zTlpnVlc5(cvbQmNoSaNzEO9LcPWNYcpf318ibU6A2F2WGlbVRFwG7I8Xp39CPjad8oW4dKfDwi(VGqwscNZLUa(Z(6AQZhZckA72GIkGjod)Lh0Te6RKrHzTdWEd8wIc8E0JibOPKW4ITS6DmeVZ0KTNVt50TdYwKyD9BYEiyvf5xGXqByjQ6Tgl7pMVYuza8fdUNxkZLqbD2ttkArLTOS(KipjD8k2R7lKsS1ZYvIoQO14HjrECTiItNlvyJnPiQFnxbEnCM5cH8jvhgr9KwCGG56rtK2ugupyQASWrt3IPMsm19HBtqej3H3ub4IikkBwjfJuzN1OPsHfERzr8j(AwM4KfSzPixjk8yASgb8Tb875JVvm5(OsNVflndXZCNqaxu(yqWNffHC3qUGVlNAhwmEasjCaHgZstytleoK1PHRhxyZfWjp2NFmm8iAShbKXoMpVjzteNUsLFrZYw16LAcWyZ4kVmxlufK56ZskwbAb6Zcnv9SBWKVnvROJ6Z5((4exOx9cgo4dBL2mHGt313W0b7kOyFP0TYWvR9ehj7MiTCkY2aDGMfzfREkwL7ztVoAj2r8hoONsc)LCe(H6dImixBe(Fd9bm6Z5(yw5dvLyEe1ZljLs80M3(Y9cwDWa64MfNq16NDOUsYG011TD9UYAC9MY9bBn8JM0RaSjsCmdqHubgAbq)Pl6e5cNiUjOQzrKZCI2UyXl1mGnZdKSzEdZUYcTSvZNJIjGSMdNP74tMZClrqHEu54BOPPHPR)q5HjAXYeBJJCB1du5tLaW7tGZssCi7hz2ehYNfhhg7WaQLwZI4nnNRudAl4iwcBcZJLU0zkDgnirVRvImvp(3LzEsl5Mbs3aZRaT)ILrHaEQyFgrJL81qgBjXAYLHwXuBwfuV(DLDTe8KQSBFTMRBADjSJalosgyHs3iIByg3MhoInzgr5GsBnJG7ohrJokcSOsrOKIDmmaAG5R0yMlALST2fRTeAWutRgc3PjnBdPYDyf31KHCJdnyoLgq9zuuweKA334IjolWkHuev0g1wFbjVZpNjhWasb5SXajSf0IWjKTKuaod47b5iAZko2jMZorqaVPMG0b0TnSNlxrYkUqP0NsF(8yUh6aAEm1ihXfmpbPMA1Ql3vTtJCkINBD7xPD8cyZb(nUYsIi(g9eFB4i67p3Cx2F400gCLENKw2jQbKwskqURXSAidigDu(LXiZ8mfVnOZmKR6lFmdiTSeKMpEbqRhH(JsqF(rFrvdM2twgqN7GslWFneLRkIUppkAeWUliCJo5Yd2ruid9mvmu0i013Ii)JtRGhsvdfY5wWqtBiDhMyy)Pz0mADOfQ5oOt8CV3Vt5MVGXw6tE)NazjIqEiVYKOmvXgzWbkrkrO9TrtIB0zt5qy1gxQ2Mq1SbN3Rd4W6(hzlYahOdwZumloWASzA0cyldVLI752nGzlGbRVBIReldF7D()mW3FHYedkoQxunF2AZNn3MurypQHFvPIlB(4eObEqvsBB225v0xn89gX2Y6RK912fnNuLnE0BTtlwxPsM2lL)bBWXttwpxlAN)3(JSnXULTIPfu4gbIwgx0oKyY9tCI5rn1zMiOPYN)f84oUlqpykmI2knekPJAJmP11IOFU3SoqtXIwpN2mW43YWm0UrGuQVzPygtWa8(T5SvPuwHjlqykHGPoWZl8yuTIWs06HY2Go7YtbcQUKlwufbCpfTTPELMXjBtiPiyTYz9RqtO1egwZtLthODeXBBaATJKCJ2mvhi7Al3Ky8gTcUZI3nj62R)AgvmfmzBPzzlmOiWk3ObLnRSEhHZ1cdkncVtnXrI0Zio0TFn(nrgyMNb7Va1rRo(wNhu9t7W7(slJdN4XhEJhW7Kp(LxG4FjEjqR(ucUR(kiCtbSsjeNBfAZcq4ykICjrI0CJNj9wEMIW2I1voy12AE9)Ra12siF6gV2OvYTbL8UvYfwoF)7zjFuKVWg1twv7d6kkVsR0ewks2gpluLnnM(Y2y)R9gHSBnBJI4gmM1k)ewZC1UPxVigvTikdUlH(6uuiG8aBy0LxTkXsRsQ0Di2EHwPDc45NveQHqbmR486AsCAinbLnxaRedWSYIEYYoVxYXOynx95Ri87NuRiMmlvXVFvD(pPbvZIY9qUmgt1I)TYkszd0UAXDq3Z1ALUNnQURD49mJOt3rG)FfB)2tX22hndlkKSv1Esvywt6fA0SmFHFb5aCFMh)6RyemipoM)jeEn1kqU13GAd(bVe4uFwGhVcJ4o3j0X0QaNwONro4P1rcTHi9OR2xT4S9oMSmP8SWAkKWaZYXRk2pkf05pcCVKIVuqM)e(5Mzwx1DmSTAYxRDWMdOThKBNqwpLIeanBa1bPiW)rxDdE7AAfdbz7eQu8CoIaYMqR4V8YG)bCKcFyb5McAmCxqJdZsCsb)bs8zORaoveUdY7flMQLMU9ZjQhvM5bMOmOVTOfrKdn4zJYwVyat6uoPpXtFvsWshqhCWHpjB2tx(8otbEpkD)nhyY7PVQbXsR(cvu)yf5(a5jTQ0XvNYRR3NcfmYDc45yYyBbCffw3qEjp5Xv7XtdsIQLIcl)8JjG(QuUv)sybv176Wx(Q3Mdxco7erd4VHQBJteE2X41vmkRuusO3kBEgou3AsywGEnVY8P8ic0TJqLiUsusOuLYYgz96hrQm3SHZhL9pku8VkmUxQ4HwrkOuCfdklpbwr5ueI6nV4AxkgyXU)atszL0ILZGY0HHHSp3TCScp(dKmzNeT0hoWIgFoMorcYz91kOyXiA7YnBY(MgQrxZDRVwiEubcPoI86KCyJkGmbGZO(b4acOAyAOJnnzPKeUcdfw4n7DWR(QxMV76gVegsxqtCsACwXOw2T)qExGr2JnNBzpGEpy8DddaSvZXY)2zkR8NAVfngpO44tciCStoGeEscm8L97k38YIvHoZIEpQBwkypcoS8efhdKDMh(JGdR4GQB5nl10VRreCk7opvjgT1F9EDhi9(stCmnkmovjOj9LUMyT4yuLGJL9rLxAqxLSXRXb0HNpPKtToEwtWhl4QWgoOthy5G2qh(fbBP0mAQ1gqqMKfmXlmCQdm2PlwIygANsMUTxjt)Uv0(AZwdaW8yEllxi0u(nje4IOBYNNKO9zTjKxZYcwaYfGXsAGjegND0N6m1uei8PXuVPeq2lned1Xzor1BqjrPnvPJw)skusvcIhVjfyUHohOQAwL2uLAik8f8upsmnyAyIteZlm1HF5EKXYyQzC40nCwiLhMbiNt56nJZMiF6uVfCq0TMu2zWYP7HhJUIbaYNco)agdo8CLHzEgrA0wufy(r04zGxcoKexGhbqfx6KqJZ8pxj0gMwKATfC3jzaynuG4WGWJH2MF(QkXW0HuNnvXXK0zeqWin8ESG1HMkUfXfdTAFXr1Mw0aAwmgIQLbKOeeo7ceoVcgoliDThuqrBnT0TnRi6yLGRINqb6WxhEC)TYXIxSWpabk)WNR(wgw6xELtdBpMFo5yV6j24GuuuNg81dhyDnskRRVfp(IjssWCRNZYkYaxRRXbtcZMvOxntaOfA8HGMk(mP45iYs5uI(MMIVJ4ooGCfedW4sSMdKfvTAJPZukMtT4JfqnNvd52mZxYQ9vbRP8LmWquaQ9OR0VzBb1sC17jLxG)bpH5lXppWOaO(muaI7A7AXbsKAqySIaNnXf9KLRFHpR8mgW7dnlYfQFOpTSyaz8WZdNi5y61IRQeLjvdhzW5j(LwmkoCgZLbUrSuVEDmjOpOQLMUc93SmGRBQJWU0nAYBzJF5ee7ekFweQlNWIAdXuPJqA6lUGYhsbo3wCDt1hMg(ek04DLVvjYTDCSdkc)8ULN22Kt6TPmbSNTJZqQOX6fZg4L2KsnHN4vX82Hxup8a13q5netNdiofHR2y4DLU4SfxHBPWvZNY8XVim0(GIZL1rrwK2m8LRoZHbwomlD9QEOYbsd2Du1ABp9RwlMifvfBXxFGnwa(LstKKe8(UOoFgYUJS2BLiDU5kBVPBMTT8WzrIvgdN2D1EJ222HILZQVv2(Gd8cHPfFUbeL2IiVtcztogjrbIlsohGTomoL)5ciDbwdD1VOPYS2CMS0)Ga0KAnJoMvUK(ArbaA9QWlPwBR(GCOQP5PYR(SsKj(MsakOYaNALZb3o8fGO(as7(YBCDPJXw(YBCD(4O9L3W4hDJnEv2BDYvT7CRu2v3Krldwrm5jQva6RxSI7sPiUE9TFoDV2RVwvTihq7sjROjWx9fNybh57S9knjwKYiDLaOyVpHRoivsjaEdCMeYtfRGA6ycOFn19vTY4BlcLT6BWHOynQR)IHCdh1z1UkR0Lf2iV)Lk54GfWKOY7ZMbICwYoA2KxTIft4TmGN939m7H6bBTnVbTcD2g(eA0EqkTyhWkAk7QX2uv5CXZIYVwbU5gP911lAlIBFTaCXMkX)ZGBrqdGT3wBXwTLybj0ZhOIcsuIA13Cq1YmsSrysrqwqkZtT4IsRUCLyeZ0WvvxGoNVyMoyZyMoO9yMAHJd7ksh71r5M0pSrKq7SEJgXkPxRMMXkzl5mThRe0einIPxV8tjB3bDamqhtIrMBYOHp(J(PN(39M)6p7hF6p)Zo97(tUK70KlD6d(rp(9E)V8HV2J)PV(jp61o5t(NE837do9nF)t(v)SvVZ)9)7R9xLF3V4d)Wbp(9El49E8N)HRE7)9lLcofCin1AIQRyxfmPlDYJ(Kl120BFPvF47voTxxmTN8O3E178Zx9wV(x8J)Rp5Z)vFX78(F5R)dp97(lx9wFVt(0)J)cqGCTn8)Yvp4Fy1V49w9WV)Q)5VZx(p(d4J4jF6p5Kh93S6DFWQ)LhE6V8xC6dF)vV5R94VZNl4bN8Opsm4)6p7To5ZFJv)O)Tv)NVl2N)2)(t(0)RvV7hV6T)zN(j)qOBR(()pN(GpgiS87MpEpSOtxVakkAYAjqu0EllSc8ZP7Qh8do9n)xfBDN8jVrV(N8OpqM(5lreOB4mgwTB8V8tUGH9RXfog9B(]] )
-
-
---该Simc用途为适配官方一键宏，提供自动爆发，减伤与打断等功能
+spec:RegisterPack( "冰霜Simc", 20250830, [[Hekili:TZ1EpYXXX9pl8FipgPBVD3Jh5DcKkGIskHecYe(eI(VB2zNT3DhCZJ1DpZDCjewWKGOOOyJ8YcgiHijka2qWq2rigWHrwk(dJV7m9F5VcPQUNEMU7P7zM9EK4azaYBF090D1vxp(vvx9EWGdEVd2FIFg5G3Dy)H70FV(B3R)29hERbhSF2YfKd2FHFWH(ZG3K4hd)90p8l(np)57hghGnTmk1FcoeS0CAa088SSfSxBRTMfMnpFCVG04TyHX5r(zHPjbu)Pz4Nd2ACu64TYMto2NEm01WKTUFa2LhtdtPHzlFNqwgBRjKP(5rzBfdeG3uAklRhJpZJZdJYEyYbJRt8d3zVHaX7NNnpLEW(aL(aGScNmHi6oHbp)MBUA07nNSA077tH)WPGvJ2N4ZsHx3E1JWXBZ(7U529FTvJE7WNa)bN(PHu4H(wlijeAvNgU3RHdssgHYwn6bZdJIwnAl4rIYP0LRg9W4f00JiXKKmw1tnyi8u3)XVdmVltcwncijYUt2ByWov9P)o8PNYYeD9rREuZK(q5ZElXZIl)IjOOHT3S)aOH379FF1NAu(cKrY70TasBZHi1T)ILX(mXYkSAri71ay0E1vJGxhChXRdhIVoCZ(3UCU1h4(qtyx6V5WbfVUN9U2FVnhElOPhKgtGv)(zP04QM6Jpn(6UIxfKRLrzx1MwuiDz2P7iOct26b7hHIHO89CIFu2CVWmsm(53LR3qs8hhrMCWBaIBCPxz)yzPjGYqamxeAOV8R7Tiawj3D1i1rZlBoLWMNgnrmDEc9mTjmdeWDmHHjhfolLc6xjZ8WhcFDrQOXltcyBheGF0mFA4v5uNDW(XHzHZ42qkz(Y5NTGefbYO(rQKNKJj7fLedcVEb5ugXOFMlSkkpifOS0Jt6fgapk8(EWW4hMaAdV(Qr3UF1WJn6Xs8xGd4TCoGJZNoLpyJ9P0qcTho6RgDDjxPGjDp4Zl8MbJw12C1dHtXooNc7deFoCp7AluzRQR1b959BJvJO(jGTyot3dmlhcgU(Gpy1OmF6msMxSLMMKMv)lvhMfZxYCnoQTvnqYV9MvmiWoftLdD7ZnhkoKstPEHOtNkweVPzucy1aAdu6yHJdJaBjEGtkscZSRLImLF9VlZ8uwYiZ7oNhM3ecFHpFjycyoHgh6BWs(giJvsSitD3ZdtTztqdgk0lVg6AJCuVbLD7B0CDBRlHFKPt9cIi(hrAYh(uoSnydAj0xpbvWWURSLbREr37nlYpi0pcOMWdj9ct8MgfoBEMGml6Zuj2rVXPrzo6uac0XJH4C6LfIR6WKaIqIyaS(uvYowa20laXAY3teiBPHleRHhoD1iadc8h4nlbW5s2jd5DegaIB0CGpiXTEJkGR5lEvzN3KDmkh6NaYtFNCso0D)kyTayEaf8OaaHi45F1O)ibNaHncSIxvdY8BaRBGyO6456vZpTctOZUPleqdHDlwpwgeVYQrapBhfbc19Osx0L7300Nss8sPJnMs3EzlMYLEhraDrdDLPuc5PiwikOO2lxXl(4OWN(uF6eBoOkXZmpCAMaj1XGRm9Tvexkeja1)P4g23omlh53VDkSzbrp8DYdxSGmb35Jwk2yagDX4TA0JXbeAmpJfoPq04Hbqh)tiCdkzPWZWvDwnkof31ait0iuc4y(8YYhZGjbJaq5b7zOxCTkkPNpqPmpkNo9MkituK3k)7MMw8KnRAYBxPXNY(PQ3y0tCQUgkmhb0Swhly8OzJg93j2qb2hQTLoTii0CdKzr(GMQnB817uJwvQO1jW2WCP(DjXcRCXkeLp0SbWL4hArAb2Txn6nXrtrfxmjKjGoQFelvkQ8q0CZ74ZT6adEkQ5VuAlqkeaXkY1XycbidZhCn69CzyvZmObXE)OJ9xYKKsnth(W)ZW4Z0Pg(xfbc24dLKhpMlHxNUKeDplBaafpOVdsoWhCXi(GhgHIwCkXfXdl8Ta4pVC8T0SJfd2M0ymNrKoD6Ms(tH1zDJYcL8yF8DHqNyZ9Z4DdZcW4uohvqt9Sf0zfn60puRcPcelQog19jwJx1qSNsUPfBKvM92FoyXLvj0xkIvW5ecsORPJL6laykrFqUfaZa9)XzWpGdTceortGCoWLjtPq3V0daJt5AQ)8jGhT5uKi8aZ1twI2JSe3PfJpAmQ3nfweX5jazG8P3wyLtO(W1)azeM0vqy8IuAMFcxn0pr9bFyHR3Uy3uyNsD1QlMljFP33w9r7oopx(ODUp06oGDykn6)OnNHQo8esZ9cMJAGmEYsg2rxIc4YDJ2nay0GxlDyt6cppGRFyADjuG2evXsuSUGMAeouQzwwQ3XrwonncSLJsjcLZ6IuwG5jbeinPiEsUIrr8fU2WVPnNvMYWgG5uft4bfboii06CzvOE18U0UEId8fdC6xrAi1moGeDmEcKHKJKa31D6l2iSziipjlmQyVve3a6qgC3HnIzhIdXWM32YLABiBm0xly1Bu0G2JvS7F3szFND5EseJxRjFofIcdCMKvf4BLRhhIvoay4o8L2Sp4Yo2f3Urt2egygIKu8sZ67aZqKoh4MGyYHwWbNTWp2g4Pw55k(q3G)VM9e3malEGiOq1gDi(9Q9hn7sV(9WtrchOBAdpJBCvofQC455YpQ41YxAxcc7cki6oi8wcfYQb0wGlyfXI5ESiDlwh(7utPrjChnnhx(CxdfhiGdO9g1xUOisBluK1r0(IslByxv7UCia6r6BftPmbdNJqpAff66R5CfGcD9txvtm9bvZd1FzPgrZkr))c4UMO1)gfCx3NcXALtZZdm42qA3DuWUXt3Q)ZMHt)78OYg2juzUYxYA4CHJk7Icg7IadRloxm6Hnvw9S8S9RuMUcrYDMLd7Va1rkvF5P0GNShtTD4zF8sA64i(aBvbVhwejystePvnM4J7Q8JoHpULuZCsIYjNulBNfPAvLA5hcdMq(a)fl4pfQtgPB04IUL4WhBbC2U5KTzyPTQGA4uZTN1oc)Z05vREjxheZ3UtOdC5W53FupT5O)6x6h1tl()6Uti3EZAve3IZSofZGZS)Sg21l)KPP9X6030OucZI2rrlIGGSyswtgwmGSEYj9vU3w(jl9aqbjh(QHtVN877nbixKH867CvGbxcvCrKy)qvSOz00QCKK0J8nMYBB2NIKeP2jGNJhNqA8y)kMU8z8bR5jepKSa8tbMB4AE71ksh9(zAUnfeAzefxOh5dmcOv8Dr5Wlaqc8llerYatbbZj00CMxg4pKfhIUc9kjCp0aJyXuutU2Gg4wCSAVqR8)k3dARWhR2JY57GyLFyJh0bELBXeSkAoIS4OfG(kbn(lsBiG4fOqwgnmiJFsDDtRRQIfT40PtdrWe2bngTvHCTr2PkT3vaX6icWNjXHiicUJCRlgAEItcbWc6N2sHHvz79kNCymj542y(6tlcudRjPuvprn6r4CXCoxeu1HqN1yCsTtoB0gqpLevefgCOhy)ZwJvhwPTwDEAaLTtw4vGmx1tENyggzw2Mh0oYrw79br4tzwotHUlvS2tQiHGCR0OTJougcAER3Nxj1rCeqRgLZqHqvqJfvuap2iaFtgp2izen4LqG3Y(V3wpGlbcykf3tcZaTglIfcFcH3fmtiq3UF(SCCOU)yWk)eJdpkmMWJHUFVHw1wUR55kB3BVPdLsKNT4rv2Fz5TRX4ECTAE3a0RwnBUJSQhdlo3RugJ)MPyyVEL9fwSBVJnpwsAXHxBv6WYqoKhilw4O)bkO3zL30dVJjJfuiwsPaq4PEZcMuTykpBKMqVFxS2uf9SLUn0iPi6XePpI95A(nczXMZwRqsbfean6KupxyFY8zCmQASW7oy3p4d2GV7gqxcdzaGDd0sZlgvz3(d5DHI3jIz8ibsipbg)G0eimRzeaKO3Kq5BnEkcfvu8I9t85Hr5bs4mgm8Y(DZ7UHyvyYSipHeKNr8qLLxPqnqn8x4djhwYb13YBwQbfxSemN2UZEs3g1F8b93r55vMykbRQeT0mmugD4gUNof1Osbhh7JAp0o918DyWbSG1sWPQhARkc(ATzbNubhhegGqmGTdWsPh)YiTuHAS1QfqoL9ppzCuA6epySZMVuhMDtCU(D3a0W(L0ETzZcIhjPffgTuUqiafLa8MJ5OsUkjr3ZQnSqLUcZtMdYmqSBKeBb8E5rF6ZKn0isAkMqjrt8b5YSuEffCztud2rsugtLnelsQsq8adoapPLRaQQIvzmvzwYPDbpnYNssMKY8wegLM5vl1X2AotwEd11qtZH4WZ42uP5Jv1onBjRHQFa8QgC4XiOyi8(jreg4O4WRugM9zePrx1zEy8ccDkjiZZNfa8i)eGCyeAE8vkH2W0IuRRuLoohaYHcehMKEm02SRwtjwMoK6CzkM6Nn1hemYsFsysDyRCYqo069fhvxwrti5umSRLj(lyiu35y2L0W35afCj6ne52a1SHkARPLURzfroRLQsudvKLgDOZdxRGokUl1fraK(wfh0HYjIugqX6hpaNCChawRdsr(jkxavPEehytlsARRVnpMzMIem37508ItYQZvmGnHz7g0lNjaqdHEiyPIpt61rlWs5uI5MMwQmXDCavligGjOsVRzLjGPXdhuj6FyO43nwZ0lOiHwXznq1v1GgJyBDGCaUAH3IIRAxt1XNinUwoPqEHq(UqRGCWmCMGVBNxrCmBpfhQvvxHk(5Naa(ZrbiEyV1oPFXbTbJ1ciquCrpEjw)4Y7KLOsYlJAgIfaAwCYIXP8lzpVBH8lSvoLNjrZJFrHYuQiICqFIYdkGMonmiecXyPTAGXuqFNYw4xgTkoQ(TrtEUmT1ryx6onfjnN4jw3jEmE)fEBE7IJkvuVQfvAHTcXOCdZ1MvzTzW52mcq2tmhgn2RYaDD16TOXR7xRhoA34B7wCwvNVZ(SlNZBZlMAMSTeu9LoT0X6XYfCMoucauYmanjGnI54kcTE32drwaSFvmmRdq7NyvRPVUEL1OPPRxuoYbsXJtxQ9gdbwFgdpEh95ZYz4QA8v7CZApPZYmZjO8Lnve4TvPAQqW0pM)2Z075OYX6sbI))XxXMQ6wOB3YgN1k03iQgUAHbQOZA9(u8M50InKQ8Ixqog3acCbVhMS7P8n3Cg)5aBq5r4VWmvx7I)x4wsC72VLe3MpoD6ws0sf009sOOwSPT6uX1a1Yf4TP6078ufE7AyE3Ev45kUU1OAnko51MoRDvOV6YQV1tY4jbJD(XLxlYXR5SAC4ACLzU1icLAbIFtP4MDK(8b76ThhqXVlnTwGqGtPgclWku073eKYIFiPcraQAOv5bVQejHg2ZAOwXoR)7HGteODd2yTnqnR4n5jTBW1AkXcTu4FxZ4aLMwWXUUghEnxPTbk)QD9wpUYgbT3ah4crKNF88TIqTLRld5jG7lMhMuHAapSQt60vGBd4x6qHDLepZsVBT87BefbE4NhdFe2DpKqeLR7Buqdvz46Pyra)TWCEKMOWWUYHdSx7Wb2ZgCaR3aoRxI22Wf)MPj3qImE1O3IlgX)HoKuHyc0vycqt8GXgAASuj7jMPvru6QbKEa7LxFSuse5ioYAEEgnGQH)AsAwVbDHVV2I)ChBwdsYwWu6SS)y(ktNbWxm4EUuMtKydwrl6SfT1Nc5PyMvZLP553B0t5kP94SAiCVMS71qnC3qr14kqbxb20uiqDiNckPmOukMd61PTsjK4MI(43xy4ndoxAKRvCFDSWW1NuPZcTr6286LbDBh7)KofguPftsmFBKxOZfgOVMfliQ(gn8f1CSsRBuxU91UMrDvpmiNvU(fpwiOjqseRdMIFTF3D7(hS)X(uKEHqCE5p5hD6F3h)B)Q)Xt)3)Qt)l(H3iyc7gN(r)Gx(PF2V55p7L)O)0tEXZo5l)NE5F5p(0p(Zo5x(tp77)F9RE2F2Qh9R)8pFNx(PFx45E5x)5N99(3UrgyO6qsMZ6jPumPq64gN8IV8gDTkuUXzF(NYN2t(f)WtEXF9zFYhD2)8Zp9)8)40N)zN9Xp7L)5FTGIp5f)Kt(6F5V(7)z)2V67EYx)HN9d(xp7N9jyF(B(7p5x8Zp7t(IZ(E)0t)Y)bOBN9x9FF6h9fa1V6r8FbHTvvsfn5SUIkAVJvRe(Bq8zF0F7PF8)IGrFYx(HdgEYl(XQ0pFjI19E60qSOZXsTHeaWjVfFJ8G)N]] )

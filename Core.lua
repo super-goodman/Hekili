@@ -23,7 +23,8 @@ local trim = string.trim
 
 local LSR = LibStub("SpellRange-1.0")
 local tcopy = ns.tableCopy
-local tinsert, tremove, twipe = table.insert, table.remove, table.wipe
+--self
+local tinsert, tremove, twipe, ceil = table.insert, table.remove, table.wipe, math.ceil
 
 
 -- checkImports()
@@ -1201,8 +1202,29 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                             aScriptPass = false
                                                             self:Debug( "ability.target is none")
                                                         else
-                                                            local name, _, _, _, _, _, caster = FindUnitBuffByID( ability.target, ability.hot_id )
-                                                            if name and caster == "player" then if debug then self:Debug( "target already has " .. state.this_action ) end aScriptPass = false end
+                                                            if not scripts:CheckFinding( scriptID, "find.ignore_hot" ) then
+                                                                local aura_name, _, _, _, _, _, caster = FindUnitBuffByID( ability.target, ability.hot_id )
+
+                                                                if aura_name and caster == "player" then 
+                                                                    aScriptPass = false 
+                                                                    if debug then self:Debug( "target already has " .. state.this_action .. ", starting recheck") end 
+                                                                    if scripts:CheckFinding( scriptID, "find.random_unit" ) then
+                                                                        local groupFriends = Hekili:getRandomGroupFriends()
+                                                                        for _, unit in ipairs(groupFriends) do
+                                                                            aura_name, _, _, _, _, _, caster = FindUnitBuffByID( unit, ability.hot_id )
+                                                                            if not aura_name or not caster then
+                                                                                aScriptPass = true
+                                                                                ability.target = unit
+                                                                                break
+                                                                            end
+                                                                        end
+                                                                        
+                                                                    end
+                                                                    
+                                                                    
+                                                                end
+                                                            end
+                            
                                                         end
                                                     end
 
