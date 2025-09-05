@@ -1815,60 +1815,6 @@ local function CLEU_HANDLER( event, timestamp, subtype, hideCaster, sourceGUID, 
             ns.storeDamage( time, damage, bit.band( damageType, 0x1 ) == 1 )
         end
     end
-  
-    if dmg_events[ subtype ] and not ( amSource or petSource )  and (UnitInParty(destName) or UnitInRaid(destName))  then
-       
-        if IsPlayerInCurrentGroup(destName) then
-            local damages, damagesType
-
-            if subtype:sub( 1, 13 ) == "ENVIRONMENTAL" then
-                damagesType = 1
-
-                if subtype:sub(-7) == "_DAMAGE" then
-                    damages = spellName
-
-                elseif spellName == "ABSORB" then
-                    damages = amount
-
-                end
-
-            elseif subtype:sub( 1, 5 ) == "SWING" then
-                damagesType = 1
-
-                if subtype == "SWING_DAMAGE" then
-                    damages = spellID
-
-                else
-                    if spellID == "ABSORB" then
-                        damages = interrupt
-                    end
-
-                end
-
-            else -- SPELL_x
-                if subtype:find( "_MISSED" ) then
-                    if amount == "ABSORB" then
-                        damages = a
-                        damagesType = school or 1
-                    end
-
-                else
-                    damages = amount
-                    damagesType = school
-
-                end
-
-            end
-
-            if damages and damages > 0 then
-                ns.storeDamages( time, damages, bit.band( damagesType, 0x1 ) == 1, destName )
-            end
-
-        
-        end
-        
-        
-    end
 
     local minion = ns.isMinion( sourceGUID )
 

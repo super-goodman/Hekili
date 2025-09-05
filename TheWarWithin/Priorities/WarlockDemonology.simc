@@ -33,7 +33,7 @@ actions+=/call_action_list,name=items,use_off_gcd=1
 # [Hekili] This essentially unpacks imp_despawn.
 actions+=/variable,name=vf_ds_condition,value=(!talent.summon_vilefiend|buff.vilefiend.remains>action.summon_demonic_tyrant.cast_time)&buff.dreadstalkers.remains>action.summon_demonic_tyrant.cast_time
 actions+=/variable,name=hog_after_ds,value=action.call_dreadstalkers.time_since>(action.ruination.time_since>?action.hand_of_guldan.time_since)
-actions+=/summon_demonic_tyrant,if=buff.grimoire_felguard.remains<=4
+actions+=/summon_demonic_tyrant,if=buff.grimoire_felguard.remains<=4&buff.grimoire_felguard.remains>0
 ## VF + DS + HoG and Felguard will expire.  Bypassed because there's a lighter Felguard condition below.
 ## actions+=/summon_demonic_tyrant,if=variable.vf_ds_condition&variable.hog_after_ds&buff.grimoire_felguard.remains>cast_time&buff.grimoire_felguard.remains<action.hand_of_guldan.cast_time+cast_time+gcd.max
 # VF + DS + HoG and Vilefiend will expire.

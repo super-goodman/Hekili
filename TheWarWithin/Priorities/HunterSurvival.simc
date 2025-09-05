@@ -35,7 +35,8 @@ actions.cds+=/berserking,if=buff.coordinated_assault.up|!talent.coordinated_assa
 actions.cds+=/potion,if=boss&fight_remains<25|buff.coordinated_assault.up|!talent.coordinated_assault&cooldown.spearhead.remains|!talent.spearhead&!talent.coordinated_assault
 actions.cds+=/use_item,name=imperfect_ascendancy_serum,use_off_gcd=1,if=gcd.remains>gcd.max-0.1
 actions.cds+=/use_items,if=cooldown.coordinated_assault.remains|cooldown.spearhead.remains
-actions.cds+=/aspect_of_the_eagle,if=target.distance>=6
+#self
+actions.cds+=/aspect_of_the_eagle,if=target.distance>=6&time>5
 actions.cds+=/use_item,name=spellstrike_warplance
 
 
@@ -81,11 +82,12 @@ actions.plst+=/explosive_shot
 actions.sentcleave+=/wildfire_bomb,if=!buff.lunar_storm_cooldown.remains
 actions.sentcleave+=/kill_command,if=buff.relentless_primal_ferocity.up&buff.tip_of_the_spear.stack<1
 actions.sentcleave+=/wildfire_bomb,if=buff.tip_of_the_spear.stack>0|cooldown.wildfire_bomb.charges_fractional>1.9|(talent.bombardier&cooldown.coordinated_assault.remains<2*gcd)|talent.butchery&cooldown.butchery.remains<gcd
-actions.sentcleave+=/fury_of_the_eagle,if=buff.tip_of_the_spear.stack>0
+actions.sentcleave+=/fury_of_the_eagle,if=buff.tip_of_the_spear.stack>0&fight_remains>20
 actions.sentcleave+=/raptor_bite,cycle_targets=1,if=buff.strike_it_rich.up&buff.strike_it_rich.remains<gcd
 actions.sentcleave+=/butchery
 actions.sentcleave+=/explosive_shot,if=buff.tip_of_the_spear.stack>0
-actions.sentcleave+=/coordinated_assault
+#self
+actions.sentcleave+=/coordinated_assault,if=fight_remains>20
 actions.sentcleave+=/flanking_strike,if=(buff.tip_of_the_spear.stack=2|buff.tip_of_the_spear.stack=1)
 actions.sentcleave+=/kill_command,if=focus+cast_regen<focus.max
 actions.sentcleave+=/wildfire_bomb,if=buff.tip_of_the_spear.stack>0
@@ -103,8 +105,9 @@ actions.sentst+=/kill_command,if=buff.strike_it_rich.remains&buff.tip_of_the_spe
 actions.sentst+=/mongoose_bite,if=buff.strike_it_rich.remains&buff.coordinated_assault.up
 actions.sentst+=/wildfire_bomb,if=cooldown.wildfire_bomb.charges_fractional>1.7
 actions.sentst+=/butchery
-actions.sentst+=/coordinated_assault,if=!talent.bombardier|talent.bombardier&cooldown.wildfire_bomb.charges_fractional<2
-actions.sentst+=/fury_of_the_eagle,if=buff.tip_of_the_spear.stack>0
+#self
+actions.sentst+=/coordinated_assault,if=(!talent.bombardier|talent.bombardier&cooldown.wildfire_bomb.charges_fractional<2)&fight_remains>20
+actions.sentst+=/fury_of_the_eagle,if=buff.tip_of_the_spear.stack>0&fight_remains>20
 actions.sentst+=/kill_command,if=buff.tip_of_the_spear.stack<1&cooldown.flanking_strike.remains<gcd
 actions.sentst+=/kill_command,if=focus+cast_regen<focus.max&(!buff.relentless_primal_ferocity.up|(buff.relentless_primal_ferocity.up&(buff.tip_of_the_spear.stack<1|focus<30)))
 actions.sentst+=/mongoose_bite,if=buff.mongoose_fury.remains<gcd&buff.mongoose_fury.stack>0
@@ -124,8 +127,9 @@ actions.sentst+=/kill_command,if=buff.strike_it_rich.remains&buff.tip_of_the_spe
 actions.sentst+=/mongoose_bite,if=buff.strike_it_rich.remains&buff.coordinated_assault.up
 actions.sentst+=/wildfire_bomb,if=(buff.lunar_storm_cooldown.remains>full_recharge_time-gcd)&(buff.tip_of_the_spear.stack>0&cooldown.wildfire_bomb.charges_fractional>1.7|cooldown.wildfire_bomb.charges_fractional>1.9)|(talent.bombardier&cooldown.coordinated_assault.remains<2*gcd)
 actions.sentst+=/butchery
-actions.sentst+=/coordinated_assault,if=!talent.bombardier|talent.bombardier&cooldown.wildfire_bomb.charges_fractional<1
-actions.sentst+=/fury_of_the_eagle,if=buff.tip_of_the_spear.stack>0
+#self
+actions.sentst+=/coordinated_assault,if=(!talent.bombardier|talent.bombardier&cooldown.wildfire_bomb.charges_fractional<1)&fight_remains>20
+actions.sentst+=/fury_of_the_eagle,if=buff.tip_of_the_spear.stack>0&fight_remains>20
 actions.sentst+=/kill_command,cycle_targets=1,if=buff.tip_of_the_spear.stack<1&cooldown.flanking_strike.remains<gcd
 actions.sentst+=/kill_command,cycle_targets=1,if=focus+cast_regen<focus.max&(!buff.relentless_primal_ferocity.up|(buff.relentless_primal_ferocity.up&(buff.tip_of_the_spear.stack<2|focus<30)))
 actions.sentst+=/mongoose_bite,if=buff.mongoose_fury.remains<gcd&buff.mongoose_fury.stack>0

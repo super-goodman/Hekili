@@ -1209,8 +1209,13 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                                     aScriptPass = false 
                                                                     if debug then self:Debug( "target already has " .. state.this_action .. ", starting recheck") end 
                                                                     if scripts:CheckFinding( scriptID, "find.random_unit" ) then
-                                                                        local groupFriends = Hekili:getRandomGroupFriends()
+                                                                        local target_count= 0
+                                                                        local groupFriends = Hekili:findRandomGroupUnits()
                                                                         for _, unit in ipairs(groupFriends) do
+                                                                            target_count = target_count + 1
+                                                                            if target_count > (#groupFriends/2 or 5) and state.raid then
+                                                                                break
+                                                                            end
                                                                             aura_name, _, _, _, _, _, caster = FindUnitBuffByID( unit, ability.hot_id )
                                                                             if not aura_name or not caster then
                                                                                 aScriptPass = true

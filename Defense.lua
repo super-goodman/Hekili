@@ -460,7 +460,7 @@ function Hekili.resurrectionCount(spellId)
 end
 
 function Hekili:isMouseOverMemberDead()
-    if not UnitExists("mouseover") and not UnitIsDead("mouseover") or not Hekili.DB.profile.toggles.autoRevive.value then return false end
+    if not UnitExists("mouseover") or not UnitIsDead("mouseover") or not Hekili.DB.profile.toggles.autoRevive.value then return false end
     local i = 1
     local s = false
     local name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitDebuff( "mouseover" , i )
@@ -605,7 +605,6 @@ do
                 table.insert(units, unit)
             end
         end
-    
         friendGuids = {}
     
         -- 随机返回一个
@@ -617,7 +616,7 @@ do
         return "none"
     end
 
-    function Hekili:getRandomGroupFriends()
+    function Hekili:findRandomGroupUnits()
         local group = Hekili:getGroupFriendUnits()
         if not group then return "none" end
     
@@ -636,6 +635,25 @@ do
         end
     
         return units
+    end
+
+    function Hekili:getGroupHealthPct()
+        local group = Hekili:getGroupFriendUnits()
+        if not group then return "none" end
+        
+        local units = {}
+        local units_pct = 0
+        for unit, _ in pairs(group) do
+            if UnitExists(unit)  then
+                local unit_pct = Hekili:getHealthPct(unit)
+                table.insert(units, unit)
+                units_pct = units_pct + unit_pct
+            end
+        end
+
+        units_pct = units_pct/#units
+        friendGuids = {}
+        return units_pct
     end
 
     function Hekili.findDeaduUnit() 

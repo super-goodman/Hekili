@@ -714,7 +714,7 @@ do
                     essences = {
                         key = "ALT-T",
                         value = true,
-                        override = true,
+                        override = false,
                     },
                     funnel = {
                         key = "",

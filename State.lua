@@ -2453,23 +2453,7 @@ do
                 return t[ k ]
 
             elseif type(k) == "string" and k:sub(1, 21) == "incoming_party_damage" then
-             
-                local remains = k:sub(23)
-              
-                local time = remains:match("^(%d+)[m]?s")
-           
-                if not time then
-                    return 0
-                    -- Error("ERR: " .. remains )
-                end
-
-                time = tonumber( time )
-
-                if time > 100 then
-                    t[k] = ns.damagesInLast( time / 1000 )
-                else
-                    t[k] = ns.damagesInLast( min( 15, time ) )
-                end
+                t[ k ] = 0
 
                 return t[ k ]
 
@@ -2579,39 +2563,40 @@ do
     
 
             elseif k == "health_party_pct" then
-                local totalHealth = 0
-                local totalMaxHealth = 0
+                return Hekili:getGroupHealthPct()
+                -- local totalHealth = 0
+                -- local totalMaxHealth = 0
         
-                if IsInRaid() then
-                    for i = 1, GetNumGroupMembers() do
-                        local unit = "raid" .. i
-                        if UnitExists(unit) and not UnitIsDeadOrGhost(unit) and UnitIsFriend("player",unit) then
-                            totalHealth = totalHealth + UnitHealth(unit) -- + UnitGetTotalAbsorbs(unit)
-                            totalMaxHealth = totalMaxHealth + UnitHealthMax(unit)
-                        end
-                    end
-                    totalHealth = totalHealth + UnitHealth("player") -- + UnitGetTotalAbsorbs("player")
-                    totalMaxHealth = totalMaxHealth + UnitHealthMax("player")
-                elseif IsInGroup() then
-                    for i = 1, GetNumGroupMembers() - 1 do
-                        local unit = "party" .. i
-                        if UnitExists(unit) and not UnitIsDeadOrGhost(unit) and UnitIsFriend("player",unit) then
-                            totalHealth = totalHealth + UnitHealth(unit) -- + UnitGetTotalAbsorbs(unit)
-                            totalMaxHealth = totalMaxHealth + UnitHealthMax(unit)
-                        end
-                    end
-                    totalHealth = totalHealth + UnitHealth("player") -- + UnitGetTotalAbsorbs("player")
-                    totalMaxHealth = totalMaxHealth + UnitHealthMax("player")
-                else
-                    totalHealth = UnitHealth("player") -- + UnitGetTotalAbsorbs("player")
-                    totalMaxHealth = UnitHealthMax("player")
+                -- if IsInRaid() then
+                --     for i = 1, GetNumGroupMembers() do
+                --         local unit = "raid" .. i
+                --         if UnitExists(unit) and not UnitIsDeadOrGhost(unit) and UnitIsFriend("player",unit) then
+                --             totalHealth = totalHealth + UnitHealth(unit) -- + UnitGetTotalAbsorbs(unit)
+                --             totalMaxHealth = totalMaxHealth + UnitHealthMax(unit)
+                --         end
+                --     end
+                --     totalHealth = totalHealth + UnitHealth("player") -- + UnitGetTotalAbsorbs("player")
+                --     totalMaxHealth = totalMaxHealth + UnitHealthMax("player")
+                -- elseif IsInGroup() then
+                --     for i = 1, GetNumGroupMembers() - 1 do
+                --         local unit = "party" .. i
+                --         if UnitExists(unit) and not UnitIsDeadOrGhost(unit) and UnitIsFriend("player",unit) then
+                --             totalHealth = totalHealth + UnitHealth(unit) -- + UnitGetTotalAbsorbs(unit)
+                --             totalMaxHealth = totalMaxHealth + UnitHealthMax(unit)
+                --         end
+                --     end
+                --     totalHealth = totalHealth + UnitHealth("player") -- + UnitGetTotalAbsorbs("player")
+                --     totalMaxHealth = totalMaxHealth + UnitHealthMax("player")
+                -- else
+                --     totalHealth = UnitHealth("player") -- + UnitGetTotalAbsorbs("player")
+                --     totalMaxHealth = UnitHealthMax("player")
     
-                end
+                -- end
             
-                if totalMaxHealth > 0 and totalHealth > 0 then
-                    return (totalHealth / totalMaxHealth) * 100
+                -- if totalMaxHealth > 0 and totalHealth > 0 then
+                --     return (totalHealth / totalMaxHealth) * 100
  
-                end
+                -- end
             end
 
             -- If we successfully calculated during the above, return it.
@@ -4813,9 +4798,9 @@ do
                 elseif k == "role" then return UnitGroupRolesAssigned("player") end
             end
 
-            if t.key == "group_hurt_num" then
-                if k == "count" then local damages, count = ns.damagesInLast( min( 15, 1 ) ) return count end
-            end
+            -- if t.key == "group_hurt_num" then
+            --     if k == "count" then local damages, count = ns.damagesInLast( min( 15, 1 ) ) return count end
+            -- end
 
             if t.key == "hurt_num_big"  then
                 if k == "count" then return Hekili:findInjuredGroupNumber(Hekili.DB.profile.toggles.autoHealing.hurt_num_big_gap) end

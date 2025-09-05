@@ -17,12 +17,14 @@ actions.precombat+=/variable,name=trinket_2_manual,value=trinket.2.is.algethar_p
 actions.precombat+=/variable,name=treacherous_transmitter_precombat_cast,value=2
 actions.precombat+=/use_item,name=treacherous_transmitter
 actions.precombat+=/recklessness,if=!equipped.fyralath_the_dreamrender
-actions.precombat+=/avatar
+actions.precombat+=/avatar,if=!equipped.cursed_stone_idol
 
-actions+=/potion,if=boss&(fight_remains>300|boss&fight_remains<35&buff.recklessness.up|boss&fight_remains<25)
+# Executed every time the actor is available.
+actions+=/charge,if=time<=0.5|movement.distance>5
+actions+=/heroic_leap,if=movement.distance>25
+actions+=/potion,if=fight_remains>300|fight_remains<300&target.health.pct<35&buff.recklessness.up|boss&fight_remains<25
 actions+=/use_item,name=treacherous_transmitter
 actions+=/pummel
-actions+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check&!raid
 # Trinkets
 ## actions+=/do_treacherous_transmitter_task
 actions+=/use_item,name=cursed_stone_idol,if=cooldown.avatar.remains<2
@@ -114,9 +116,3 @@ actions.thane+=/execute
 actions.thane+=/wrecking_throw
 actions.thane+=/thunder_clap
 actions.thane+=/whirlwind
-
-actions.mitigation=/spell_reflection
-actions.mitigation=/impending_victory,if=health.pct<=40
-actions.mitigation=/spell_reflection,if=health.pct<=hp_gap&buff.spell_reflection_defense.down&buff.enraged_regeneration.down&buff.rallying_cry.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic)
-actions.mitigation+=/enraged_regeneration,if=health.pct<=hp_gap&buff.spell_reflection_defense.down&buff.enraged_regeneration.down&buff.rallying_cry.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)
-actions.mitigation+=/rallying_cry,if=health.pct<=hp_gap&buff.spell_reflection_defense.down&buff.enraged_regeneration.down&buff.rallying_cry.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)

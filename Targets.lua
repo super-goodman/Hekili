@@ -1083,29 +1083,29 @@ do
         return count
     end
 
-    ns.damagesInLast = function( seconds, isPhysical )
-        local db
-        if isPhysical == nil then db = damages
-        elseif isPhysical == true then db = physical
-        else db = magical end
+    -- ns.damagesInLast = function( seconds, isPhysical )
+    --     local db
+    --     if isPhysical == nil then db = damages
+    --     elseif isPhysical == true then db = physical
+    --     else db = magical end
 
 
-        if db[ seconds ] then return db[ seconds ], ns.getTableSize(damages_unit[seconds]) end
+    --     if db[ seconds ] then return db[ seconds ], ns.getTableSize(damages_unit[seconds]) end
    
-        if seconds < 1 then
-            return db[ 1 ] * ( seconds / 1 ), ns.getTableSize(damages_unit[1])
-        end
+    --     if seconds < 1 then
+    --         return db[ 1 ] * ( seconds / 1 ), ns.getTableSize(damages_unit[1])
+    --     end
 
-        if seconds < 5 then
-            return db[ 1 ] + ( db[ 5 ] - db[ 1 ] ) * ( seconds - 1 ) / 5, ns.getTableSize(damages_unit[5])
-        end
+    --     if seconds < 5 then
+    --         return db[ 1 ] + ( db[ 5 ] - db[ 1 ] ) * ( seconds - 1 ) / 5, ns.getTableSize(damages_unit[5])
+    --     end
 
-        if seconds < 10 then
-            return db[ 5 ] + ( db[ 10 ] - db[ 5 ] ) * ( seconds - 5 ) / 10, ns.getTableSize(damages_unit[10])
-        end
+    --     if seconds < 10 then
+    --         return db[ 5 ] + ( db[ 10 ] - db[ 5 ] ) * ( seconds - 5 ) / 10, ns.getTableSize(damages_unit[10])
+    --     end
 
-        return db[ 10 ] * seconds / 10, ns.getTableSize(damages_unit[10])
-    end
+    --     return db[ 10 ] * seconds / 10, ns.getTableSize(damages_unit[10])
+    -- end
 
     ns.storeHealing = function( _, amount )
         if amount and amount > 0 then
