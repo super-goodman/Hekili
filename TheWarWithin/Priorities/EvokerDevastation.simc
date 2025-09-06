@@ -132,10 +132,10 @@ actions.st+=/fire_breath,empower_to=1,if=variable.can_use_empower|empowering.fir
 ## [Hekili] Original, fully insane Engulfs.
 ## Gulf :garf:
 ## actions.st+=/engulf,if=(dot.fire_breath_damage.remains>travel_time)&(dot.living_flame_damage.remains>travel_time|!talent.ruby_embers)&(dot.enkindle.remains>travel_time|!talent.enkindle)&(!talent.iridescence|buff.iridescence_red.up)&(!talent.scorching_embers|dot.fire_breath_damage.duration<=6|fight_remains<=30)&(debuff.shattering_star_debuff.remains>travel_time|full_recharge_time<action.shattering_star.usable_in|talent.scorching_embers)&(cooldown.dragonrage.remains>=cooldown.engulf.duration+full_recharge_time|!talent.dragonrage|buff.tip_the_scales.up&cooldown.fire_breath.up|buff.dragonrage.up|full_recharge_time<=cooldown.fire_breath.duration_expected)
-# self
-actions.st+=/engulf,if=(dot.fire_breath_damage.remains>travel_time)&(dot.living_flame_damage.remains>travel_time|dot.fire_breath_damage.remains<action.living_flame.cast_time+travel_time+0.5|!talent.ruby_embers)&(dot.enkindle.remains>travel_time|!talent.enkindle)&(!talent.iridescence|buff.iridescence_red.up)&(!talent.scorching_embers|dot.fire_breath_damage.duration<=6|boss&fight_remains<=30)&(debuff.shattering_star_debuff.remains>travel_time|full_recharge_time<action.shattering_star.usable_in|talent.scorching_embers)
-# self
-actions.st+=/engulf,if=settings.simplify_engulf&active_enemies<3&(dot.fire_breath_damage.remains>travel_time)&(!talent.scorching_embers|dot.fire_breath_damage.duration<=6|fight_remains<=30)&(variable.next_dragonrage>=cooldown*1.2|!talent.dragonrage)
+# [Hekili] Modified to ignore Ruby Embers if applying it is going to waste the Fire Breath dot.
+actions.st+=/engulf,if=(dot.fire_breath_damage.remains>travel_time)&(dot.living_flame_damage.remains>travel_time|dot.fire_breath_damage.remains<action.living_flame.cast_time+travel_time+0.5|!talent.ruby_embers)&(dot.enkindle.remains>travel_time|!talent.enkindle)&(!talent.iridescence|buff.iridescence_red.up)&(!talent.scorching_embers|dot.fire_breath_damage.rank=max_empower|boss&fight_remains<=30)&(debuff.shattering_star_debuff.remains>travel_time|full_recharge_time<action.shattering_star.usable_in|talent.scorching_embers)
+# [Hekili] Simplified Engulf such that you don't waste charges waiting for perfect multipliers.
+actions.st+=/engulf,if=settings.simplify_engulf&active_enemies<3&(dot.fire_breath_damage.remains>travel_time)&(!talent.scorching_embers|dot.fire_breath_damage.rank=max_empower|fight_remains<=30)&(variable.next_dragonrage>=cooldown*1.2|!talent.dragonrage)
 # Burnout LF for EB if DR expire soon
 actions.st+=/living_flame,if=buff.dragonrage.up&buff.dragonrage.remains<(buff.essence_burst.max_stack-buff.essence_burst.stack)*gcd.max&buff.burnout.up
 # AS for EB if DR expire soon

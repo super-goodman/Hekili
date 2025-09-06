@@ -1599,7 +1599,7 @@ spec:RegisterAbilities( {
         cooldown = function () return 9 - ( talent.honed_reflexes.enabled and 1 or 0 ) end,
         hasteCD = true,
         gcd = "spell",
-
+        
         spend = function ()
             local reduction = 0
             -- The Wall Legendary overtakes the new Impenetrable Wall talent, they do not stack in 10.0
@@ -1732,7 +1732,7 @@ spec:RegisterAbilities( {
         talent = "spell_reflection",
         startsCombat = false,
         toggle = "defensives",
-        debuff = "casting",
+        --debuff = "casting",
         --readyTime = state.timeToInterrupt,
 
         usable = function()
@@ -1786,7 +1786,7 @@ spec:RegisterAbilities( {
             * ( buff.violent_outburst.up and 1.5 or 1 )
             * ( buff.unnerving_focus.up and 1.5 or 1 ) end,
         spendType = "rage",
-        usable = function () return target.distance <= 10, "target must be nearby" end,
+        usable = function () return target.distance <= 8 and target.exist, "target must be nearby" end,
         talent = "thunder_clap",
         nobuff = "thunder_blast",
         startsCombat = true,

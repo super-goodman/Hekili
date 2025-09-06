@@ -8,27 +8,28 @@ actions.default+=/call_action_list,name=bear,strict=1,if=buff.bear_form.up
 actions.default+=/skull_bash,if=target.distance<=5&!moving
 actions.default+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check&!raid
 #actions.default+=/moonkin_form,if=buff.moonkin_form.up&find.none_target_lowest_hp.pct<70
-
-actions.default+=/overgrowth,if=find.lowest_hp.pct<35
-actions.default+=/ironbark,if=find.lowest_hp.pct<65
-actions.default+=/renewal,if=health.pct<60
-actions.default+=/barkskin,if=health.pct<30
-actions.default+=/lifebloom,if=find.health.pct<=100&find.health.pct>40&active_hot.lifebloom<2
+actions.default+=/rejuvenation,if=(!rejuvenation_forbidden&find.random_unit.unit&(active_hot.rejuvenation<=5&!raid|active_hot.rejuvenation<=settings.raid_rejuvenation_num&raid)&find.none_target_lowest_hp.pct>40)
+actions.default+=/call_action_list,name=cds,if=find.lowest_hp.pct<100&((!raid&find.hurt_num_big.count>1)|(raid&find.hurt_num_big.count>3))
+actions.default+=/overgrowth,if=find.lowest_hp.pct<45
+actions.default+=/ironbark,if=find.lowest_hp.pct<30
 actions.default+=/use_items,enabled=0
 actions.default+=/berserking
 actions.default+=/adaptive_swarm,if=talent.adaptive_swarm.enabled
-actions.default+=/lifebloom,if=talent.undergrowth.enabled&buff.cat_form.down&find.lowest_hp.role!=find.tank.token&active_hot.lifebloom<2
-actions.default+=/efflorescence,if=buff.efflorescence.down&buff.cat_form.down&buff.moonkin_form.down&find.none_target_lowest_hp.pct>70
+actions.default+=/call_action_list,name=raid,if=raid
+actions.default+=/lifebloom,if=!raid&find.health.pct<=100&find.health.pct>30&active_hot.lifebloom<2
+actions.default+=/lifebloom,if=!raid&talent.undergrowth.enabled&buff.cat_form.down&find.lowest_hp.role!=find.tank.token&active_hot.lifebloom<2&find.lowest_hp.pct>30
+actions.default+=/efflorescence,if=buff.efflorescence.down&buff.cat_form.down&buff.moonkin_form.down&find.none_target_lowest_hp.pct>70&!moving
 actions.default+=/innervate,if=mana.pct<30&find.health.pct<100
 actions.default+=/wild_growth,enable_moving=true,moving=0,if=(healer_spell_magic|find.none_target_lowest_hp<=95)&buff.wild_growth.remains<2
-actions.default+=/rejuvenation,if=(!rejuvenation_forbidden&find.random_unit.unit&(active_hot.rejuvenation<=5&!raid|active_hot.rejuvenation<=settings.raid_rejuvenation_num&raid)&find.none_target_lowest_hp.pct>40)
-actions.default+=/call_action_list,name=cds,if=find.lowest_hp.pct<100&((!raid&find.hurt_num_big.count>1)|(raid&find.hurt_num_big.count>3))
 actions.default+=/call_action_list,name=health_aoe,if=((!raid&find.hurt_num.count>2)|(raid&find.hurt_num.count>3))
 actions.default+=/call_action_list,name=health_st
 actions.default+=/call_action_list,name=cat,if=target_is_enemie&target.distance<=5&!combat_forbidden&hero_tree.wildstalker
 actions.default+=/call_action_list,name=cat_out,if=target_is_enemie&target.distance>=10&!combat_forbidden&hero_tree.wildstalker
 actions.default+=/call_action_list,name=st,if=target_is_enemie&health_party_pct>95&!combat_forbidden&!hero_tree.wildstalker
 actions.default+=/wrath,if=target_is_enemie&health_party_pct>95&!combat_forbidden&!hero_tree.wildstalker
+
+actions.raid+=/lifebloom,if=find.tank.exist&active_hot.lifebloom<2
+actions.raid+=/lifebloom,if=find.lowest_hp.pct<=100&active_hot.lifebloom<2
 
 actions.health_aoe+=/wild_growth,enable_moving=true,moving=0,if=buff.wild_growth.remains<2
 actions.health_aoe+=/swiftmend,if=find.lowest_hp.pct<=60
@@ -46,7 +47,6 @@ actions.health_st+=/regrowth,enable_moving=true,moving=0,if=find.lowest_hp.pct<7
 actions.cds+=/chromebustible_bomb_suit,if=health.pct<=50
 actions.cds+=/ringing_ritual_mud,if=health.pct<50
 actions.cds+=/grove_guardians,if=find.lowest_hp.pct<60&charges=1|charges=2&find.lowest_hp.pct<70|charges=3
-actions.cds+=/heart_of_the_wild,if=health_party_pct<85|find.none_target_lowest_hp.pct<70&buff.moonkin_form.up
 actions.cds+=/natures_swiftness,line_cd=5,if=health_party_pct<=convoke_the_spirit_health&buff.incarnation_tree_of_life.down&cooldown.convoke_the_spirits.ready&!prev.1.natures_swiftness&!prev.1.convoke_the_spirits
 actions.cds+=/convoke_the_spirits,if=health_party_pct<=convoke_the_spirit_health&buff.incarnation_tree_of_life.down&prev.1.natures_swiftness
 actions.cds+=/flourish,if=active_hot.rejuvenatio>2&active_hot.wild_growth>2&health_party_pct<flourish_health&buff.incarnation_tree_of_life.down
@@ -64,6 +64,7 @@ actions.st+=/starsurge,if=buff.cat_form.down&mana.pct>20
 actions.st+=/starfire,enable_moving=true,moving=0,if=active_enemies>2&buff.cat_form.down&mana.pct>20
 actions.st+=/wrath,enable_moving=true,moving=0,if=buff.cat_form.down&mana.pct>20
 
+actions.cat+=/heart_of_the_wild
 #actions.cat+=/cat_form,if=buff.cat_form.down&!talent.fluid_form.enabled
 actions.cat+=/rip,if=target.debuff.rip.down&combo_points=5
 actions.cat+=/ferocious_bite,max_energy=0,if=combo_points=5
@@ -83,6 +84,7 @@ actions.mitigation+=/natures_vigil,if=health.pct<90
 actions.mitigation+=/renewal,if=health.pct<=40
 actions.mitigation+=/natures_swiftness,line_cd=5,if=cooldown.natures_swiftness.charges>1&find.health.pct<=40&!prev.1.natures_swiftness
 actions.mitigation+=/regrowth,if=buff.natures_swiftness.up&find.health.pct<=40
+actions.mitigation+=/barkskin,if=health.pct<30
 actions.mitigation+=/barkskin,if=health.pct<=hp_gap&buff.barkskin.down&buff.ironbark.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)
 actions.mitigation+=/ironbark,if=health.pct<=hp_gap&buff.barkskin.down&buff.ironbark.down&(range_spell_magic|target_me_spell_magic|dot_spell_magic|range_spell_physic|target_me_spell_physic|dot_spell_physic)
 

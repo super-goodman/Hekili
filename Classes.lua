@@ -1260,14 +1260,14 @@ function Hekili:RestoreDefaults()
                 if specID then
                     local spec = rawget( p.specs, specID )
                     if spec then
-                        
                         if spec.package then
-                            
+                            local currPack = p.packs[ spec.package ]
+                            if not currPack or currPack.spec ~= specID then
                             --self
                             --local currPack = p.packs[ spec.package ]
-                            local currPack = Hekili.Class.specs[specID].options.package
-                            --if not currPack or currPack.spec ~= specID then
-                            if not currPack then
+                            -- local currPack = Hekili.Class.specs[specID].options.package
+                            -- --if not currPack or currPack.spec ~= specID then
+                            -- if not currPack then
                                 spec.package = k
                             end
                         else
@@ -2991,17 +2991,17 @@ do
             items = { 191907, 191906, 191905, 191389, 191388, 191387 }
         },
         {
-            name = "invigorating_healing_potion",
-            items = { 244835, 244838, 244839 }
-        },
-        {
             name = "algari_healing_potion",
             items = { 211878, 211879, 211880 }
         },
         {
             name = "cavedwellers_delight",
             items = { 212242, 212243, 212244 }
-        }
+        },
+        {
+            name = "invigorating_healing_potion",
+            items = { 244835, 244838, 244839 }
+        }        
     }
 
 ---@diagnostic disable-next-line: need-check-nil

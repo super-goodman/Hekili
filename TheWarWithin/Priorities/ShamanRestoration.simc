@@ -105,7 +105,7 @@ actions.ghost_wolf+=/wind_rush_totem,if=moving
 actions.ghost_wolf+=/ghost_wolf_wait,if=moving
 
 actions.mitigation=/cleanse_spirit
-actions.mitigation+=/poison_cleansing_totem,if=!moving
+actions.mitigation+=/poison_cleansing_totem,line_cd=10,if=!moving
 actions.mitigation+=/purge,line_cd=settings.purge_icd,if=buff.dispellable_magic.up
 actions.mitigation+=/greater_purge,if=buff.dispellable_magic.up
 actions.mitigation+=/riptide,if=find.health.pct<=40&find.ignore_hot.up

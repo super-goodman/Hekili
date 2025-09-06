@@ -804,7 +804,7 @@ hekili_autocast:SetScript("OnUpdate", function()
                         return
                     end
                     -- print(name)
-                    -- print(action.target)
+                    --print(action.target)
                     if Hekili.forceStealth == true  then
                         Hekili.forceStealth = false
                     end

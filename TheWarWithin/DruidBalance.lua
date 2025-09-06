@@ -1889,7 +1889,9 @@ spec:RegisterAbilities( {
         charges = 5,
         recharge = 600,
         cast = 1.5,
-        target = "mouseover",
+        target = function ()
+            return "mouseover"
+        end,
         cooldown = 600,
         gcd = "spell",
 

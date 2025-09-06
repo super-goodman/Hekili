@@ -1896,7 +1896,9 @@ spec:RegisterAbilities( {
         usable = function ()
             return Hekili:isMouseOverMemberDead() and Hekili.resurrectionCount(61999) >= 1
         end,
-        target = "mouseover",
+        target = function ()
+            return "mouseover"
+        end,
         startsCombat = true,
         texture = 136143,
 

@@ -1183,7 +1183,7 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                 end
 
                                                 Timer:Track("Post Recheck")
-
+                                                --print(ability.target)
                                                 if aScriptPass then
                                                     if scripts:CheckFinding( scriptID, "find.lowest_hp" ) then
                                                         ability.target = state.find.lowest_hp.unit or ability.target

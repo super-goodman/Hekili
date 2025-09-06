@@ -1143,7 +1143,9 @@ spec:RegisterAbilities( {
             end
             
         end,
-        target = "mouseover",
+        target = function ()
+            return "mouseover"
+        end,
         startsCombat = false,
         texture = 4726195,
 
