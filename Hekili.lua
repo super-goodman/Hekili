@@ -1105,29 +1105,29 @@ function isInVehicle()
 end
 
 function autoHPPotion()
-    -- if UnitHealth("player")/UnitHealthMax("player")*100 <= Hekili.DB.profile.toggles.autoHPPotion.autoHPPotion_threshold and Hekili.DB.profile.toggles.autoHPPotion.value then
-    --     if Hekili.State.action.invigorating_healing_potion.known and Hekili.State.cooldown.invigorating_healing_potion.up then
-    --         C_Item.UseItemByName("焕生治疗药水")
-    --         C_Item.UseItemByName(244839)
-    --         C_Item.UseItemByName(244825)
-    --         C_Item.UseItemByName(244838)
-    --         return
-    --     end
+    if UnitHealth("player")/UnitHealthMax("player")*100 <= Hekili.DB.profile.toggles.autoHPPotion.autoHPPotion_threshold and Hekili.DB.profile.toggles.autoHPPotion.value then
+        if Hekili.State.action.invigorating_healing_potion.known and Hekili.State.cooldown.invigorating_healing_potion.up then
+            C_Item.UseItemByName("焕生治疗药水")
+            C_Item.UseItemByName(244839)
+            C_Item.UseItemByName(244825)
+            C_Item.UseItemByName(244838)
+            return
+        end
 
-    --     if Hekili.State.action.algari_healing_potion.known and Hekili.State.cooldown.algari_healing_potion.up then
-    --         C_Item.UseItemByName("阿加治疗药水")
-    --         C_Item.UseItemByName(211880)
-    --         C_Item.UseItemByName(211879)
-    --         C_Item.UseItemByName(211878)
-    --         return
-    --     end
+        if Hekili.State.action.algari_healing_potion.known and Hekili.State.cooldown.algari_healing_potion.up then
+            C_Item.UseItemByName("阿加治疗药水")
+            C_Item.UseItemByName(211880)
+            C_Item.UseItemByName(211879)
+            C_Item.UseItemByName(211878)
+            return
+        end
 
-    --     local item = Hekili.State.talent.pact_of_gluttony.enabled and 224464 or 5512
-    --     if  C_Item.GetItemCount( item ) ~= 0  and C_Item.IsUsableItem( item ) then
-    --         C_Item.UseItemByName(item)
-    --         return
-    --     end
-    -- end
+        local item = Hekili.State.talent.pact_of_gluttony.enabled and 224464 or 5512
+        if  C_Item.GetItemCount( item ) ~= 0  and C_Item.IsUsableItem( item ) then
+            C_Item.UseItemByName(item)
+            return
+        end
+    end
 end
 
 

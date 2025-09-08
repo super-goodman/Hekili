@@ -16,8 +16,8 @@ actions.default+=/use_items,enabled=0
 actions.default+=/berserking
 actions.default+=/adaptive_swarm,if=talent.adaptive_swarm.enabled
 actions.default+=/call_action_list,name=raid,if=raid
-actions.default+=/lifebloom,if=!raid&find.health.pct<=100&find.health.pct>30&active_hot.lifebloom<2
-actions.default+=/lifebloom,if=!raid&talent.undergrowth.enabled&buff.cat_form.down&find.lowest_hp.role!=find.tank.token&active_hot.lifebloom<2&find.lowest_hp.pct>30
+actions.default+=/lifebloom,if=!raid&find.health.pct<=100&find.health.pct>30&(active_hot.lifebloom<2&talent.undergrowth|!talent.undergrowth&active_hot.lifebloom<1)
+actions.default+=/lifebloom,if=!raid&talent.undergrowth.enabled&buff.cat_form.down&find.lowest_hp.role!=find.tank.token&(active_hot.lifebloom<2&talent.undergrowth|!talent.undergrowth&active_hot.lifebloom<1)&find.lowest_hp.pct>30
 actions.default+=/efflorescence,if=buff.efflorescence.down&buff.cat_form.down&buff.moonkin_form.down&find.none_target_lowest_hp.pct>70&!moving
 actions.default+=/innervate,if=mana.pct<30&find.health.pct<100
 actions.default+=/wild_growth,enable_moving=true,moving=0,if=(healer_spell_magic|find.none_target_lowest_hp<=95)&buff.wild_growth.remains<2
@@ -28,8 +28,8 @@ actions.default+=/call_action_list,name=cat_out,if=target_is_enemie&target.dista
 actions.default+=/call_action_list,name=st,if=target_is_enemie&health_party_pct>95&!combat_forbidden&!hero_tree.wildstalker
 actions.default+=/wrath,if=target_is_enemie&health_party_pct>95&!combat_forbidden&!hero_tree.wildstalker
 
-actions.raid+=/lifebloom,if=find.tank.exist&active_hot.lifebloom<2
-actions.raid+=/lifebloom,if=find.lowest_hp.pct<=100&active_hot.lifebloom<2
+actions.raid+=/lifebloom,if=find.tank.exist&(active_hot.lifebloom<2&talent.undergrowth|!talent.undergrowth&active_hot.lifebloom<1)
+actions.raid+=/lifebloom,if=find.lowest_hp.pct<=100&(active_hot.lifebloom<2&talent.undergrowth|!talent.undergrowth&active_hot.lifebloom<1)
 
 actions.health_aoe+=/wild_growth,enable_moving=true,moving=0,if=buff.wild_growth.remains<2
 actions.health_aoe+=/swiftmend,if=find.lowest_hp.pct<=60
@@ -44,6 +44,8 @@ actions.health_st+=/gallagio_bottle_service,if=find.none_target_lowest_hp.pct<50
 actions.health_st+=/cenarion_ward,if=find.lowest_hp.pct<80
 actions.health_st+=/regrowth,enable_moving=true,moving=0,if=find.lowest_hp.pct<70
 
+
+actions.cds+=/innervate,if=mana.pct<40
 actions.cds+=/chromebustible_bomb_suit,if=health.pct<=50
 actions.cds+=/ringing_ritual_mud,if=health.pct<50
 actions.cds+=/grove_guardians,if=find.lowest_hp.pct<60&charges=1|charges=2&find.lowest_hp.pct<70|charges=3
@@ -51,8 +53,8 @@ actions.cds+=/natures_swiftness,line_cd=5,if=health_party_pct<=convoke_the_spiri
 actions.cds+=/convoke_the_spirits,if=health_party_pct<=convoke_the_spirit_health&buff.incarnation_tree_of_life.down&prev.1.natures_swiftness
 actions.cds+=/flourish,if=active_hot.rejuvenatio>2&active_hot.wild_growth>2&health_party_pct<flourish_health&buff.incarnation_tree_of_life.down
 actions.cds+=/gallagio_bottle_service,if=find.none_target_lowest_hp.pct<70
-actions.cds+=/incarnation_tree_of_life,if=buff.incarnation_tree_of_life.down&health_party_pct<80
-actions.cds+=/tranquility,enable_moving=true,moving=0,if=health_party_pct<tranquility_health&((!raid&find.hurt_num_big.count>3)|(raid&find.hurt_num_big.count>8))&buff.incarnation_tree_of_life.down
+actions.cds+=/incarnation_tree_of_life,if=buff.incarnation_tree_of_life.down&health_party_pct<=incarnation_tree_of_life_health&!prev.1.convoke_the_spirits
+actions.cds+=/tranquility,enable_moving=true,moving=0,if=health_party_pct<tranquility_health&((!raid&find.hurt_num_big.count>3)|(raid&find.hurt_num_big.count>8))&buff.incarnation_tree_of_life.down&!prev.1.convoke_the_spirits
 
 actions.st+=/cat_form,if=buff.cat_form.up
 actions.st+=/moonkin_form,enabled=0,if=buff.moonkin_form.down&health_party_pct>=100

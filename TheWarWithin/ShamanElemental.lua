@@ -1680,7 +1680,7 @@ spec:RegisterAbilities( {
         talent = "ancestral_swiftness",
         startsCombat = true,
 
-        toggle = "cooldowns",
+        toggle = "essences",
         nobuff = "ancestral_swiftness",
 
         handler = function ()
