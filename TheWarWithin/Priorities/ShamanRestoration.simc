@@ -6,7 +6,8 @@ actions.precombat+=/earth_shield,line_cd=5,if=find.tank.exist&!raid
 actions.precombat+=/earth_shield,line_cd=5,if=buff.earth_shield.down&talent.elemental_orbit.enabled&find.health.pct<=100&group_members>1
 actions.precombat+=/tidecallers_guard
 actions.precombat=/cleanse_spirit
-actions.precombat+=/riptide,if=find.lowest_hp.pct<85
+actions.precombat+=/riptide,if=find.lowest_hp.pct<=85
+actions.precombat+=/chain_heal,if=find.health.pct<=85
 actions.precombat+=/wind_rush_totem,if=buff.ghost_wolf.up&moving
 actions.precombat+=/ghost_wolf,if=prev_gcd.1.wind_rush_totem
 actions.precombat+=/guise_of_the_phase_diver,if=!raid
@@ -88,13 +89,13 @@ actions.health_aoe+=/healing_rain,if=find.none_target_lowest_hp.pct>50&find.none
 actions.health_aoe+=/chain_heal,if=find.lowest_hp.pct<=chain_heal_health&mana.pct>5
 
 # actions.health_st+=/healing_wave,if=find.lowest_hp.pct<90&find.lowest_hp.pct>70&mana.pct>70&buff.tidal_waves.up&(!moving|buff.spiritwalkers_grace.up)
-
+actions.health_st+=/riptide,if=find.lowest_hp.pct<=50&find.ignore_hot
 actions.health_st+=/healing_surge,if=find.health.pct<30
 actions.health_st+=/riptide,if=find.lowest_hp.pct<100|buff.tidal_waves.down
 actions.health_st+=/healing_stream_totem,if=find.none_target_lowest_hp.pct>80&talent.ancestral_swiftness.enabled
 actions.health_st+=/primordial_wave,if=find.none_target_lowest_hp.pct<60&find.none_target_lowest_hp.pct<100
 actions.health_st+=/healing_wave,enabled=1,if=find.lowest_hp.pct<75&raid
-actions.health_st+=/healing_surge,line_cd=1,if=find.lowest_hp.pct<=healing_surge_health&!raid|raid&find.lowest_hp.pct<=(healing_surge_health-10)
+actions.health_st+=/healing_surge,line_cd=1,if=find.lowest_hp.pct<=healing_surge_health
 
 actions.racial+=/blood_fury
 actions.racial+=/bag_of_tricks

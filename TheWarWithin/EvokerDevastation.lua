@@ -1138,7 +1138,7 @@ spec:RegisterAbilities( {
 
         damage = function () return 2.30 * stat.spell_power end,
 
-        usable = function() return settings.use_deep_breath, "settings.use_deep_breath is disabled" end,
+        usable = function() return settings.use_deep_breath and not moving, "settings.use_deep_breath is disabled" end,
 
         handler = function ()
             if buff.recall.up then

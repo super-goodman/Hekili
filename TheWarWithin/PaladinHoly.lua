@@ -1219,12 +1219,12 @@ spec:RegisterAbilities( {
                 return debuff.dispellable_poison.caster 
             elseif  debuff.dispellable_disease.up then
                 return debuff.dispellable_disease.caster 
-            elseif  Hekili:isMouseOverMemberDispelable("Magic") then
+            elseif  Hekili:isMouseOverMemberDispelable("Magic") or Hekili:isMouseOverMemberDispelable("Poison") then
                 return "mouseover"
             end
         end,
         usable = function ()
-            return debuff.dispellable_magic.up or ((debuff.dispellable_disease.up or debuff.dispellable_poison.up) and talent.improved_cleanse.enabled) or Hekili:isMouseOverMemberDispelable("Magic"), "requires magic, dispellable curse, potion"
+            return debuff.dispellable_magic.up or ((debuff.dispellable_disease.up or debuff.dispellable_poison.up) and talent.improved_cleanse.enabled) or Hekili:isMouseOverMemberDispelable("Magic") or Hekili:isMouseOverMemberDispelable("Poison"), "requires magic, dispellable curse, potion"
         end,
 
         handler = function ()

@@ -766,10 +766,9 @@ hekili_autocast:SetScript("OnUpdate", function()
            -- and action.delay < 0.5 
           
             if action.actionName ~= nil and isInBattle(action) and not IsMounted() and not IsInTravelForm() and not isInVehicle() and not UnitIsDead( "player" ) then
-
+                --print(action.actionName)
                 local cast_ID, type = GetSpellIDByName(action)
                 local _, _, _, _, _, _, _, ChannellingID = UnitChannelInfo("player")
-
                 quickStopSpelling(action)
                 restartAttack()
                 swapTarget()
@@ -803,7 +802,7 @@ hekili_autocast:SetScript("OnUpdate", function()
                         UseToyByName(name)
                         return
                     end
-                    -- print(name)
+                    --print(name)
                     --print(action.target)
                     if Hekili.forceStealth == true  then
                         Hekili.forceStealth = false
@@ -1135,7 +1134,7 @@ end
 function quickStopSpelling(action)
     local spec = GetCurrentSpec()
     local name = action.actionName
-    if Hekili.State.boss and not Hekili:isMeleeSpec() then
+    if Hekili.State.boss and not Hekili:isMeleeSpec() and Hekili.State.raid then
         Hekili.DB.profile.specs[ Hekili.State.spec.id ].nameplates = false
     else
         Hekili.DB.profile.specs[ Hekili.State.spec.id ].nameplates = true
@@ -1687,7 +1686,6 @@ end
 
 --1法术 2物品 3打断
 function GetSpellIDByName(ability)
-
 
     if ability.actionID and ability.actionID > 10 and not ability.item then
         return ability.actionID, 1

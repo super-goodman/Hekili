@@ -18,7 +18,7 @@ local lowHealthRangeSpell_magic_dps = {465827,473070,468813,460156,448791,428169
 
 local lowHealthRangeSpell_physic_dps = {448492,326409,346742,357508,438476}
 
-local dot_magic_dps = {473713,468815,446368,446403,1236512,1236513,1236514,335338,344874,1236615,347481,1240097,1253638,350804,433740,461507,438618,448248,431365,426735,451119,434441,431350,431349,431352,1217439,1236126,1239487,1219704,1226444,1225218,1225221,1225308,239691}
+local dot_magic_dps = {473713,468815,446368,446403,1236512,1236513,1236514,335338,344874,319603,328206,1236615,347481,1240097,1253638,350804,433740,461507,438618,448248,431365,451119,434441,431350,431349,431352,1217439,1236126,1239487,1219704,1226444,1225218,1225221,1225308,239691}
 
 local dot_physic_dps = {453461,427621,427635,350101}
 
@@ -26,7 +26,10 @@ local targetMeSpell_magic_dps = {446649,448787,319941}
 
 local targetMeSpell_physic_dps = {427629,446776,353312,352345}
 
+--Shaman
 local healerRangeSpells = {465827,473070,468813,460156,448791,428169,427894,424431,323393,1241693,1241693,426787,426793,448888,426734,1221532,448492,326409,346742,357508,438476}
+--Durid
+local healerDots = {468815,446368,446403,448787,335338,344874,319603,328206,350101,1240097,1253638,350804,433740,451119,434441,1217439,1236126,1239487,1219704,1226444}
 
 local lowHealthRangeSpell_magic = lowHealthRangeSpell_magic_dps
 
@@ -691,18 +694,10 @@ do
     function Hekili:findActiveHotNumber(id)
         if not Hekili:getGroupFriendUnits() then return 0 end
         local count_ = 0
-        for unit, guid in pairs(friendGuids) do
-            local i = 1
-            local name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitBuff( unit , i )
-
-            while( name ) do
-                if spellId == id then 
-                    count_ = count_ + 1
-                    break
-
-                end
-                i = i + 1
-                name, _, count, debuffType, duration, expirationTime, _, canDispel, _, spellId = UnitBuff( unit , i )
+        for unit, _ in pairs(friendGuids) do
+            local aura_name, _, _, _, _, _, caster = Hekili.FindUnitBuffByID(unit, id)
+            if aura_name and caster == "player" then 
+                count_ = count_ + 1
             end
         end
         friendGuids ={}

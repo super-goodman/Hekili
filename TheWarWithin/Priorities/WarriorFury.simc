@@ -19,7 +19,8 @@ actions.precombat+=/use_item,name=treacherous_transmitter
 actions.precombat+=/recklessness,if=!equipped.fyralath_the_dreamrender
 actions.precombat+=/avatar,if=!equipped.cursed_stone_idol
 
-actions+=/potion,if=boss&(fight_remains>300|boss&fight_remains<35&buff.recklessness.up|boss&fight_remains<25)
+#self
+actions+=/potion,if=fight_remains>60&(buff.recklessness.remains>15|buff.avatar.remains>15)
 actions+=/use_item,name=treacherous_transmitter
 actions+=/pummel
 actions+=/call_action_list,name=mitigation,strict=1,if=!Pvepvp_check&!raid

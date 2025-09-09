@@ -9797,10 +9797,10 @@ do
                     },
                     disable_items = {
                         type = "toggle",
-                        name = "Disable Gear and Items",
+                        name = "禁用所有物品",
                         desc = function()
-                            return format( "If checked, no equipped trinkets, weapons, or armor with |cFF00FF00Use:|r effects will be recommended for |cFFFFD100%s|r, " 
-                            .. "regardless of any other options selected below.", ( GetCurrentSpec() and GetCurrentSpecList()[ GetCurrentSpec() ] or "this specialization" ) )
+                            return format( "如果勾选此项，装备的饰品、武器或护甲中带有 |cFF00FF00使用：|r 效果的物品，在 |cFFFFD100%s|r 中将不会被推荐，"
+                            .. "无论下面选择了什么其他选项。", ( GetCurrentSpec() and GetCurrentSpecList()[ GetCurrentSpec() ] or "该专精" ) )
                         end,
                         order = 0.2,
                         width = 1.49,

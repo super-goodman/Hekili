@@ -221,7 +221,7 @@ spec:RegisterAuras( {
     -- https://wowhead.com/beta/spell=216331
     avenging_crusader = {
         id = 216331,
-        duration = 20,
+        duration = 15,
         max_stack = 1
     },
     -- Talent: $?$w2>0&$w4>0[Damage, healing and critical strike chance increased by $w2%.]?$w4==0&$w2>0[Damage and healing increased by $w2%.]?$w2==0&$w4>0[Critical strike chance increased by $w4%.][]$?a53376[ ][]$?a53376&a137029[Holy Shock's cooldown reduced by $w6%.]?a53376&a137028[Judgment generates $53376s3 additional Holy Power.]?a53376[Each Holy Power spent deals $326731s1 Holy damage to nearby enemies.][]
@@ -421,7 +421,7 @@ spec:RegisterAuras( {
     },
     divine_hammer = {
         id = 198034,
-        duration = 8,
+        duration = 10,
         tick_time = 2,
         max_stack = 1
     },
@@ -506,7 +506,7 @@ spec:RegisterAuras( {
     },
     endless_wrath = {
         id = 452244,
-        dutaion = 12,
+        duration = 15,
         max_stack = 1
     },
     -- Healing $w1 health every $t1 sec.
@@ -543,7 +543,7 @@ spec:RegisterAuras( {
     expurgation = {
         id = 383346,
         duration = function () return set_bonus.tier31_2pc > 0 and 9 or 6 end,
-        tick_time = 2,
+        tick_time = 3,
         type = "Magic",
         max_stack = 1,
         copy = 344067
@@ -585,7 +585,7 @@ spec:RegisterAuras( {
     for_whom_the_bell_tolls = {
         id = 433618,
         duration = 20.0,
-        max_stack = 1,
+        max_stack = 3,
     },
     forbearance = {
         id = 25771,
@@ -637,11 +637,6 @@ spec:RegisterAuras( {
         mechanic = "taunt",
         max_stack = 1
     },
-    inquisition = {
-        id = 84963,
-        duration = 45,
-        max_stack = 1,
-    },
     inquisitors_ire = {
         id = 403976,
         duration = 3600,
@@ -679,14 +674,6 @@ spec:RegisterAuras( {
         duration = 30,
         max_stack = 5
     },
-    -- Healing for $w1 every $t1 sec.
-    -- https://wowhead.com/beta/spell=378412
-    light_of_the_titans = {
-        id = 378412,
-        duration = 15,
-        type = "Magic",
-        max_stack = 1
-    },
     lights_deliverance = {
         id = 433674,
         duration = 3600,
@@ -696,7 +683,7 @@ spec:RegisterAuras( {
     morning_star = {
         id = 431539,
         duration = 15.0,
-        max_stack = 1,
+        max_stack = 10,
     },
     -- $s1% of all effective healing done will be added onto your next Holy Shock.
     power_of_the_silver_hand = {
@@ -765,7 +752,7 @@ spec:RegisterAuras( {
     sanctification = {
         id = 433671,
         duration = 10.0,
-        max_stack = 1,
+        max_stack = 20,
     },
     sanctified_ground = {
         id = 387480,
@@ -774,7 +761,7 @@ spec:RegisterAuras( {
     },
     sanctify = {
         id = 382538,
-        duration = 8,
+        duration = 12,
         max_stack = 1,
     },
     sealed_verdict = {
@@ -799,7 +786,7 @@ spec:RegisterAuras( {
     -- https://wowhead.com/beta/spell=184662
     shield_of_vengeance = {
         id = 184662,
-        duration = 15,
+        duration = 10,
         mechanic = "shield",
         type = "Magic",
         max_stack = 1
@@ -808,7 +795,7 @@ spec:RegisterAuras( {
     solar_grace = {
         id = 439841,
         duration = 12.0,
-        max_stack = 1,
+        max_stack = 10,
     },
     -- $?$w2>1[Absorbs the next ${$w2-1} damage.][Absorption exhausted.]  Refreshed to $w1 absorption every $t1 sec.
     -- https://wowhead.com/beta/spell=337824
@@ -829,7 +816,7 @@ spec:RegisterAuras( {
     truths_wake = {
         id = 403695,
         duration = 9.0,
-        tick_time = 3.0,
+        tick_time = function() return 3 * haste end,
         pandemic = true,
         max_stack = 1,
         copy = { 339376, 383351 }
@@ -844,6 +831,7 @@ spec:RegisterAuras( {
         max_stack = 1
     },
     -- Haste increased by $w1%
+    -- Note: Ret version is 8s (Prot version is 6s)
     undisputed_ruling = {
         id = 432629,
         duration = 8,
@@ -882,13 +870,6 @@ spec:RegisterAuras( {
         duration = 5.0,
         max_stack = 1,
     },
-    -- Talent: Auto attack speed increased and deals additional Holy damage.
-    -- https://wowhead.com/beta/spell=269571
-    zeal = {
-        id = 269571,
-        duration = 20,
-        max_stack = 1
-    },
 
     paladin_aura = {
         alias = { "concentration_aura", "crusader_aura", "devotion_aura", "retribution_aura" },
@@ -899,7 +880,7 @@ spec:RegisterAuras( {
 
     empyreal_ward = {
         id = 387792,
-        duration = 60,
+        duration = 8,
         max_stack = 1,
         copy = 287731
     },
@@ -1730,7 +1711,7 @@ spec:RegisterAbilities( {
         spend = function ()
             if buff.divine_purpose.up then return 0 end
             if buff.empyrean_power.up then return 0 end
-            return ( talent.vanguard_of_justice.enabled and 4 or 3 )
+            return 3
         end,
         spendType = "holy_power",
         usable = function () return target.distance <= 12, "target must be nearby" end,
@@ -1806,6 +1787,9 @@ spec:RegisterAbilities( {
             end
 
             if talent.rising_sunlight.enabled then addStack( "rising_sunlight", nil, 2 ) end
+            if talent.for_whom_the_bell_tolls.enabled and state.spec.retribution then 
+                addStack( "for_whom_the_bell_tolls", nil, 3 ) 
+            end
         end,
 
         copy = { 375576, 304971 }
@@ -2134,7 +2118,7 @@ spec:RegisterAbilities( {
             end
             if talent.judgment_of_light.enabled then applyDebuff( "target", "judgment_of_light", nil, 5 ) end
             if talent.virtuous_command.enabled or conduit.virtuous_command.enabled then applyBuff( "virtuous_command" ) end
-            if talent.zeal.enabled then applyBuff( "zeal", 20, 2 ) end
+            removeStack( "for_whom_the_bell_tolls" )
         end,
 
         impact = function()
@@ -2154,7 +2138,7 @@ spec:RegisterAbilities( {
 
         spend = function ()
             if buff.divine_purpose.up then return 0 end
-            return ( talent.vanguard_of_justice.enabled and 4 or 3 )
+            return 3
         end,
         spendType = "holy_power",
 
@@ -2270,7 +2254,7 @@ spec:RegisterAbilities( {
 
         spend = function ()
             if buff.divine_purpose.up then return 0 end
-            return ( talent.vanguard_of_justice.enabled and 4 or 3 )
+            return 3
         end,
         spendType = "holy_power",
 

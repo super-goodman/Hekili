@@ -1122,7 +1122,7 @@ spec:RegisterAbilities( {
         cooldown = function () return 90 * ( legendary.call_of_the_wild.enabled and 0.75 or 1 ) * ( 30 * talent.born_to_be_wild.rank ) end,
         gcd = "off",
         school = "physical",
-
+        usable = function () return target.exists end,
         startsCombat = false,
 
         toggle = "interrupts",
@@ -1222,7 +1222,10 @@ spec:RegisterAbilities( {
 
         talent = "coordinated_assault",
         startsCombat = true,
-        usable = function () return target.distance <= 5 and not moving, "target must be nearby" end,
+        usable = function () 
+            if target.distance > 5 and moving then return false, "unable while moving" end
+            return target.distance <= 5, "target must be nearby" 
+        end,
         toggle = "cooldowns",
 
         handler = function ()

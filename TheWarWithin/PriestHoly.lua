@@ -1265,17 +1265,22 @@ spec:RegisterAbilities( {
 
         spend = function() return 0.013 * ( talent.mental_agility.enabled and 0.5 or 1 ) end,
         spendType = "mana",
-
+        toggle = "defensives",
         startsCombat = false,
         texture = 135894,
 
-        toggle = "interrupts",
 
         target = function ()
-            return debuff.dispellable_magic.caster 
+            if debuff.dispellable_magic.up then
+                return debuff.dispellable_magic.caster
+            elseif  debuff.dispellable_disease.up then
+                return debuff.dispellable_disease.caster 
+            elseif  Hekili:isMouseOverMemberDispelable("Magic") then
+                return "mouseover"
+            end
         end,
         usable = function ()
-            return debuff.dispellable_magic.up , "requires dispellable curse"
+            return debuff.dispellable_magic.up or debuff.dispellable_disease.up and talent.improved_purify.enabled or Hekili:isMouseOverMemberDispelable("Magic"), "requires magic, dispellable curse"
         end,
         handler = function ()
             removeDebuff( "player", "dispellable_magic" )
