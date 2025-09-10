@@ -1302,6 +1302,7 @@ function Hekili:RestoreDefaults()
 
         if msg then
             C_Timer.After( 5, function()
+                Hekili:ReviewPacks()
                 if Hekili.DB.profile.notifications.enabled then Hekili:Notify( msg, 6 ) end
                 Hekili:Print( msg )
             end )
@@ -1327,6 +1328,7 @@ function Hekili:RestoreDefaults()
 
         if msg then
             C_Timer.After( 6, function()
+                Hekili:ReviewPacks()
                 if Hekili.DB.profile.notifications.enabled then Hekili:Notify( msg, 6 ) end
                 Hekili:Print( msg )
             end )
@@ -1348,6 +1350,8 @@ function Hekili:RestoreDefault( name )
             data.payload.version = default.version
             data.payload.date = default.version
             data.payload.builtIn = true
+
+            Hekili:ReviewPacks()
         end
     end
 end

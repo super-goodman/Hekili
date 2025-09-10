@@ -1364,7 +1364,7 @@ spec:RegisterStateExpr( "self_riptide", function ()
     return settings.self_riptide or false
 end )
 
-spec:RegisterSetting( "ascendance_health", 65, {
+spec:RegisterSetting( "ascendance_health", 70, {
     name = strformat( "%s团队血量设置", Hekili:GetSpellLinkWithTexture( spec.abilities.ascendance.id ) ),
     desc = strformat( "当团队血量低于该设定值时，插件会推荐使用%s",Hekili:GetSpellLinkWithTexture( spec.abilities.ascendance.id ) ),
     type = "range",
@@ -1375,11 +1375,11 @@ spec:RegisterSetting( "ascendance_health", 65, {
 } )
 
 spec:RegisterStateExpr( "ascendance_health", function ()
-    return settings.ascendance_health or 65
+    return settings.ascendance_health or 70
 end )
 
 
-spec:RegisterSetting( "healing_tide_totem_health", 60, {
+spec:RegisterSetting( "healing_tide_totem_health", 65, {
     name = strformat( "%s团队血量设置", Hekili:GetSpellLinkWithTexture( spec.abilities.healing_tide_totem.id ) ),
     desc = strformat( "当团队血量低于该设定值时，插件会推荐使用%s",Hekili:GetSpellLinkWithTexture( spec.abilities.healing_tide_totem.id ) ),
     type = "range",
@@ -1390,7 +1390,7 @@ spec:RegisterSetting( "healing_tide_totem_health", 60, {
 } )
 
 spec:RegisterStateExpr( "healing_tide_totem_health", function ()
-    return settings.healing_tide_totem_health or 60
+    return settings.healing_tide_totem_health or 65
 end )
 
 spec:RegisterSetting( "chain_heal_health", 85, {

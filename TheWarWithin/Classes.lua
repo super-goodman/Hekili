@@ -102,6 +102,10 @@ local spellFilters = {
                 name = "Choking Waters",
                 interrupt = true,
             },
+            [ 272581 ] = {
+                name = "Water Bolt",
+                spell_reflection = true,
+            },
         },
         [ 128969 ] = {
             name = "Ashvane Commander",
@@ -110,13 +114,7 @@ local spellFilters = {
                 interrupt = true,
             },
         },
-        [ 129367 ] = {
-            name = "Bilge Rat Tempest",
-            [ 272581 ] = {
-                name = "Water Bolt",
-                spell_reflection = true,
-            },
-        },
+        
         [ 129370 ] = {
             name = "Irontide Waveshaper",
             [ 256957 ] = {
@@ -651,6 +649,10 @@ local spellFilters = {
 				name = "Inner Fire",
 				blessing_of_spellwarding = true,
 			},
+            [ 423665 ] = {
+                name = "Embrace the Light",
+                interrupt = true,
+            },
         },
         [ 207946 ] = {
             name = "Captain Dailcry",
@@ -1223,6 +1225,24 @@ local spellFilters = {
         },
     },
 
+    [ 2449 ] = {
+        name = "Eco-Dome Aldani",
+        [ 242209 ] = {
+            name = "Overgorged Mite",
+            [ 1229474 ] = {
+                name = "Gorge",
+                interrupt = true,
+            },
+        },
+        [ 234962 ] = {
+            name = "Wastelander Farstalker",
+            [ 1229510 ] = {
+                name = "Arcing Zap",
+                interrupt = true,
+            },
+        },
+    },
+
     [ 2669 ] = {
         name = "City of Threads",
         [ 216658 ] = {
@@ -1376,14 +1396,6 @@ local spellFilters = {
                 spell_reflection = true,
             },
         },
-        [ 231223 ] = {
-            name = "被惊扰的海藻",
-            [ 471733 ] = {
-                name = "回春水藻",
-                interrupt = true,
-                spell_reflection = true,
-            },
-        },
         [ 231380 ] = {
             name = "幽暗爬行者",
             [ 465813 ] = {
@@ -1396,8 +1408,8 @@ local spellFilters = {
             name = "Venture Co. Surveyor",
             [ 462771 ] = {
                 name = "Surveying Beam",
-                interrupt = true,
                 spell_reflection = true,
+                interrupt = true,
             },
         },
         [ 230740 ] = {
@@ -1432,6 +1444,20 @@ local spellFilters = {
                 name = "Lightning Bolt",
                 interrupt = true,
                 spell_reflection = true,
+            },
+        },
+        [ 231223 ] = {
+            name = "Disturbed Kelp",
+            [ 471733 ] = {
+                name = "Restorative Algae",
+                interrupt = true,
+            },
+        },
+        [ 228424 ] = {
+            name = "Darkfuse Mechadrone",
+            [ 1214780 ] = {
+                name = "Maximum Distortion",
+                interrupt = true,
             },
         },
 		[ 226398 ] = {
@@ -1687,7 +1713,7 @@ do
 
     for zoneID, zoneData in pairs( spellFilters ) do
         for npcID, npcData in pairs( zoneData ) do
-            if npcID ~= "name" then
+            if npcID ~= "name" and type( npcData ) == "table" then
                 for spellID, spellData in pairs( npcData ) do
                     if spellID ~= "name" and spellData.interrupt then
                         interruptibleFilters[ spellID ] = true

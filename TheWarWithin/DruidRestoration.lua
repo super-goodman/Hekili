@@ -1302,12 +1302,12 @@ spec:RegisterAbilities( {
         start = function()
             TranquilityTickHandler()
 
-            local tickTime = query_time or 0 --self
+            local tickTime = query_time
             -- Schedule the next 4 ticks of Tranquility.
             for i = 1, 4 do
-                tickTime = (tickTime + spec.auras.tranquility.tick_time) or 0
-                if tickTime <= query_time + spec.auras.tranquility.duration or 0 then
-                    state:QueueAuraEvent( "tranquility_tick", TranquilityTickHandler, tickTime, "AURA_TICK" )
+                tickTime = tickTime + spec.auras.tranquility.tick_time
+                if tickTime <= query_time + spec.auras.tranquility.duration then
+                    state:QueueAuraEvent( "tranquility_tick", TranquilityTickHandler, tickTime, "AURA_PERIODIC" )
                 end
             end
         end,
