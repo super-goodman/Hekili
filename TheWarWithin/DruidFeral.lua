@@ -1392,6 +1392,7 @@ local SinfulHysteriaHandler = setfenv( function ()
 end, state )
 
 local ComboPointPeriodic = setfenv( function()
+    if Hekili.ActiveDebug then Hekili:Debug( "Running local spec function - ComboPointPeriodic" ) end
     gain( 1, "combo_points" )
 end, state )
 
@@ -1469,7 +1470,7 @@ spec:RegisterHook( "reset_precast", function ()
         for i = 1.5, expires - query_time, 1.5 do
             tick = query_time + i
             if tick < expires then
-                state:QueueAuraEvent( "incarnation_combo_point_periodic", ComboPointPeriodic, tick, "AURA_TICK" )
+                state:QueueAuraEvent( "incarnation_combo_point_periodic", ComboPointPeriodic, tick, "AURA_PERIODIC" )
             end
         end
     end
@@ -1693,7 +1694,7 @@ spec:RegisterAbilities( {
             if buff.cat_form.down then shift( "cat_form" ) end
             applyBuff( "berserk" )
             for i = 1.5, spec.auras.berserk.duration, 1.5 do
-                state:QueueAuraEvent( "incarnation_combo_point_periodic", ComboPointPeriodic, query_time + i, "AURA_TICK" )
+                state:QueueAuraEvent( "incarnation_combo_point_periodic", ComboPointPeriodic, query_time + i, "AURA_PERIODIC" )
             end
         end,
 
@@ -2073,7 +2074,7 @@ spec:RegisterAbilities( {
             setCooldown( "prowl", 0 )
 
             for i = 1.5, spec.auras.incarnation.duration, 1.5 do
-                state:QueueAuraEvent( "incarnation_combo_point_periodic", ComboPointPeriodic, query_time + i, "AURA_TICK" )
+                state:QueueAuraEvent( "incarnation_combo_point_periodic", ComboPointPeriodic, query_time + i, "AURA_PERIODIC" )
             end
 
         end,
